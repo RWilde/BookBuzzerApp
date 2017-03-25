@@ -1,0 +1,6 @@
+<!--http://fontawesome.io/cheatsheet/-->
+<resources>
+    <string name="fa_icon_download">&#xf019;</string>
+    <string name="fa_icon_star">&#xf005;</string>
+    <string name="fa_icon_empty_star">&#xf006;</string>
+</resources>
