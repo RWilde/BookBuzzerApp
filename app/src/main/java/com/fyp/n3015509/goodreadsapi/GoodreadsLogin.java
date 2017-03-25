@@ -62,6 +62,7 @@ public class GoodreadsLogin {
             // Redirect to Authenticate URL in order to get Verifier Code
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
             ctx.startActivity(browserIntent);
+            Thread.sleep(2000);
 
             // Get Access Token using Temporary token and Verifier Code
             OAuthGetAccessToken getAccessToken = new OAuthGetAccessToken(ACCESS_TOKEN_URL);
@@ -99,6 +100,8 @@ public class GoodreadsLogin {
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
