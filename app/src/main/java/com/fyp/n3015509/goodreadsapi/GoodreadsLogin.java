@@ -2,6 +2,7 @@ package com.fyp.n3015509.goodreadsapi;
 
 /**
  * Created by tomha on 23-Mar-17.
+ * TODO CREATE DUMMY XML SO I CAN USE WITHOUT LAPTOP
  */
 
 import android.content.Context;
@@ -63,6 +64,8 @@ public class GoodreadsLogin {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
             ctx.startActivity(browserIntent);
 
+            Thread.sleep(2000);
+
             // Get Access Token using Temporary token and Verifier Code
             OAuthGetAccessToken getAccessToken = new OAuthGetAccessToken(ACCESS_TOKEN_URL);
             getAccessToken.signer = signer;
@@ -98,7 +101,10 @@ public class GoodreadsLogin {
                     goodreads_id = Integer.parseInt(eElement.getAttribute("id"));
                 }
             }
+
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
