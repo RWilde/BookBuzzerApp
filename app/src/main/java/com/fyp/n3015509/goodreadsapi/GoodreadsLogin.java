@@ -84,6 +84,7 @@ public class GoodreadsLogin extends LoginActivity {
             //Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(authUrl));
             //ctx.startActivity(browserIntent);
 
+
 //            // Get Access Token using Temporary token and Verifier Code
 //            getAccessToken = new OAuthGetAccessToken(ACCESS_TOKEN_URL);
 //            getAccessToken.signer = signer;

@@ -29,7 +29,7 @@ import java.net.URL;
  */
 
 public class LoginUtil {
-    private static final String IP = "192.168.0.39";
+    private static final String IP = "152.105.98.58";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";
@@ -188,7 +188,7 @@ public class LoginUtil {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
 
-            //conn.connect();
+            conn.connect();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             out.write(login.toString());
             out.close();
