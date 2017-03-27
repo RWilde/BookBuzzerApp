@@ -51,6 +51,7 @@ import com.facebook.login.widget.LoginButton;
 import com.fyp.n3015509.Util.LoginUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.goodreadsapi.GoodreadsLogin;
+import com.google.api.client.json.JsonPolymorphicTypeMap;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -93,6 +94,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
+
+        if(SaveSharedPreference.getToken(this).length() != 0)
+        {
+            // Stay at the current activity.
+            Intent mainIntent = new Intent(this,MainActivity.class);
+            startActivity(mainIntent);
+            finish();
+        }
+
         mFacebookCallbackManager = CallbackManager.Factory.create();
 
         AppEventsLogger.activateApp(this);
@@ -622,20 +632,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                int user_id = GoodreadsLogin.GetGoodreadsAuthentication(getApplicationContext());
-                if (user_id != 0)
-                {
-                    login.put("goodreads_id", user_id);
-                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(user_id));
-                    LoginUtil.RegisterGoodreadsUser(getApplication(), login);
-                }
+                JSONObject login = null;
+                 GoodreadsLogin.GetGoodreadsAuthentication(LoginActivity.this);
+//                if (goodreads_id != 0) {
+//                    login.put("goodreads_id", goodreads_id);
+//                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
+//                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+//                }
 
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                return false;
-            } catch (JSONException e) {
                 e.printStackTrace();
             }
+//            catch (JSONException e) {
+//                e.printStackTrace();
+//            }
             return false;
         }
 

@@ -179,7 +179,7 @@ public class LoginUtil {
         return null;
     }
 
-    public static String RegisterGoodreadsUser(Context cxt, JSONObject login) {
+    public static void RegisterGoodreadsUser(Context cxt, JSONObject login) {
         try {
             URL authURL = new URL(GoodreadsLoginURL);
             HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
@@ -205,13 +205,12 @@ public class LoginUtil {
 
             while ((text = br.readLine()) != null) {
                 json_response += text;
+                jsonObj = new JSONObject(json_response);
             }
 
             if (status == 200) {
                 String token = jsonObj.getString("token");
                 SaveSharedPreference.setToken(cxt, token);
-                return token;
-
             }
         } catch (ProtocolException e) {
             e.printStackTrace();
@@ -222,6 +221,5 @@ public class LoginUtil {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return null;
     }
 }
