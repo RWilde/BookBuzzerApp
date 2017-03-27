@@ -67,14 +67,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
@@ -205,46 +197,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
 
-//        // Reset errors.
-//        mEmailView.setError(null);
-//        mPasswordView.setError(null);
-//
-//        // Store values at the time of the login attempt.
-//        String email = mEmailView.getText().toString();
-//        String password = mPasswordView.getText().toString();
-//
-//        boolean cancel = false;
-//        View focusView = null;
-//
-//        // Check for a valid password, if the user entered one.
-//        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-//            mPasswordView.setError(getString(R.string.error_invalid_password));
-//            focusView = mPasswordView;
-//            cancel = true;
-//        }
-//
-//        // Check for a valid email address.
-//        if (TextUtils.isEmpty(email)) {
-//            mEmailView.setError(getString(R.string.error_field_required));
-//            focusView = mEmailView;
-//            cancel = true;
-//        }
-////        else if (!isEmailValid(email)) {
-////            mEmailView.setError(getString(R.string.error_invalid_email));
-////            focusView = mEmailView;
-////            cancel = true;
-////        }
-//
-//        if (cancel) {
-//            // There was an error; don't attempt login and focus the first
-//            // form field with an error.
-//            focusView.requestFocus();
-//        } else {
-//            // Show a progress spinner, and kick off a background task to
-//            // perform the user login attempt.
+
+           // Show a progress spinner, and kick off a background task to
+           // perform the user login attempt.
             showProgress(true);
             mGoodreadsAuthTask = new UserGoodreadsLoginTask();
             mGoodreadsAuthTask.execute((Void) null);
+
 //        }
     }
 
@@ -632,23 +591,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                JSONObject login = null;
-                 GoodreadsLogin.GetGoodreadsAuthentication(LoginActivity.this);
-//                if (goodreads_id != 0) {
-//                    login.put("goodreads_id", goodreads_id);
-//                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
-//                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
-//                }
+                JSONObject login = new JSONObject();
+                 int goodreads_id = GoodreadsLogin.GetGoodreadsAuthentication(LoginActivity.this);
+                if (goodreads_id != 0) {
+                    login.put("goodreads_id", goodreads_id);
+                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
+                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+                    return true;
+                }
 
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-//            catch (JSONException e) {
-//                e.printStackTrace();
-//            }
             return false;
-        }
+       }
 
 
         @Override
