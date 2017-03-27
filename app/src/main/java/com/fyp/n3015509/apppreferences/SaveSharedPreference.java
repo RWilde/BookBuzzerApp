@@ -41,9 +41,16 @@ public class SaveSharedPreference
 
     public static void setGoodreadsId(Context ctx, String userId)
     {
-        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
-        editor.putString(PREF_GOODREADS, userId);
-        editor.apply();
+        try {
+            SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
+            editor.putString(PREF_GOODREADS, userId);
+            editor.apply();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
     public static String getGoodreadsId(Context ctx)

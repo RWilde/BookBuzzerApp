@@ -10,14 +10,18 @@ import android.util.Log;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.LoginActivity;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.google.api.client.util.IOUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -29,7 +33,7 @@ import java.net.URL;
  */
 
 public class LoginUtil {
-    private static final String IP = "152.105.98.58";
+    private static final String IP = "152.105.99.36";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";
@@ -188,30 +192,40 @@ public class LoginUtil {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
 
-            conn.connect();
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-            out.write(login.toString());
-            out.close();
+            OutputStream os = conn.getOutputStream();
+            os.write(login.toString().getBytes("UTF-8"));
+            os.flush();
 
             int status = conn.getResponseCode();
 
-            Log.d("response", Integer.toString(status));
-
-            String json_response = "";
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(in);
-            String text = "";
-            JSONObject jsonObj = null;
-
-            while ((text = br.readLine()) != null) {
-                json_response += text;
-                jsonObj = new JSONObject(json_response);
-            }
-
             if (status == 200) {
-                String token = jsonObj.getString("token");
+                // read the response
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String result = convertStreamToString(in);
+                JSONObject jsonObject = new JSONObject(result);
+
+
+                in.close();
+                conn.disconnect();
+
+
+                Log.d("response", Integer.toString(status));
+
+//                String json_response = "";
+//                InputStreamReader in = new InputStreamReader(conn.getInputStream());
+//                BufferedReader br = new BufferedReader(in);
+//                String text = "";
+//                JSONObject jsonObj = null;
+//
+//                while ((text = br.readLine()) != null) {
+//                    json_response += text;
+//                    jsonObj = new JSONObject(json_response);
+//                }
+
+                String token = jsonObject.getString("token");
                 SaveSharedPreference.setToken(cxt, token);
             }
+
         } catch (ProtocolException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -221,5 +235,9 @@ public class LoginUtil {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+    static String convertStreamToString(java.io.InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 }

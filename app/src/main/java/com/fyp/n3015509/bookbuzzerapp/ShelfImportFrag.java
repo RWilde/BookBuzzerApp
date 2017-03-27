@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -24,7 +27,7 @@ import java.util.List;
 
 public class ShelfImportFrag extends DialogFragment {
 
-
+    GoodreadsUtil util = new GoodreadsUtil();
     private OnFragmentInteractionListener mListener;
 
     public ShelfImportFrag() {
@@ -61,72 +64,99 @@ public class ShelfImportFrag extends DialogFragment {
         void onFragmentInteraction(Uri uri);
     }
 
+    private Handler handler_ = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+
+        }
+
+    };
+
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final ArrayList<GoodreadsShelf> shelves = GoodreadsUtil.getShelves(getContext());
-        List<String> listOfShelves = null;
-        final ArrayList mSelectedItems = new ArrayList();  // Where we track the selected items
-
-        // Set the dialog title
-        for (GoodreadsShelf shelf : shelves) {
-            String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
-            listOfShelves.add(shelfInfo);
-        }
-        boolean[] itemChecked = new boolean[listOfShelves.size()];
-
-        CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
-        itemChecked.equals(true);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        // Set the dialog title
-
-        builder.setTitle("Select shelves to import")
-                // Specify the list array, the items to be selected by default (null for none),
-                // and the listener through which to receive callbacks when items are selected
-                .setMultiChoiceItems(cs, itemChecked,
-                        new OnMultiChoiceClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which,
-                                                boolean isChecked) {
-                                if (isChecked) {
-                                    // If the user checked the item, add it to the selected items
-                                    mSelectedItems.add(which);
-                                } else if (mSelectedItems.contains(which)) {
-                                    // Else, if the item is already in the array, remove it
-                                    mSelectedItems.remove(Integer.valueOf(which));
-                                }
-                            }
-                        })
-                // Set the action buttons
-                .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked OK, so save the mSelectedItems results somewhere
-                        // or return them to the component that opened the dialog
-                        ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
-                        for (Object shelfName : mSelectedItems )
-                        {
-                            for (GoodreadsShelf shelf : shelves)
-                            {
-                                if (shelfName.toString().contentEquals(shelf.getShelfName()))
-                                {
-                                    options.add(shelf);
-                                }
-                            }
-                        }
-                        Boolean result = GoodreadsUtil.RetrieveSelectedShelves(getActivity(), options);
-                        SaveSharedPreference.setImported(getActivity(), result);
-                    }
-                })
-                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-
-                    }
-                });
-
-        return builder.create();
+        new UserShelves().execute();
+        return null;
     }
 
 
+    private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
+
+        UserShelves() {
+
+        }
+
+        @Override
+        protected ArrayList<GoodreadsShelf> doInBackground(Void... params) {
+            return util.getShelves(getContext());
+        }
+
+        protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
+            //showProgress(false);
+            List<String> listOfShelves = null;
+            final ArrayList mSelectedItems = new ArrayList();  // Where we track the selected items
+
+            // Set the dialog title
+            for (GoodreadsShelf shelf : shelves) {
+                String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
+                listOfShelves.add(shelfInfo);
+            }
+            boolean[] itemChecked = new boolean[listOfShelves.size()];
+
+            CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
+            itemChecked.equals(true);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            // Set the dialog title
+
+            builder.setTitle("Select shelves to import")
+                    // Specify the list array, the items to be selected by default (null for none),
+                    // and the listener through which to receive callbacks when items are selected
+                    .setMultiChoiceItems(cs, itemChecked,
+                            new OnMultiChoiceClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which,
+                                                    boolean isChecked) {
+                                    if (isChecked) {
+                                        // If the user checked the item, add it to the selected items
+                                        mSelectedItems.add(which);
+                                    } else if (mSelectedItems.contains(which)) {
+                                        // Else, if the item is already in the array, remove it
+                                        mSelectedItems.remove(Integer.valueOf(which));
+                                    }
+                                }
+                            })
+                    // Set the action buttons
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked OK, so save the mSelectedItems results somewhere
+                            // or return them to the component that opened the dialog
+                            ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
+                            for (Object shelfName : mSelectedItems )
+                            {
+                                for (GoodreadsShelf shelf : shelves)
+                                {
+                                    if (shelfName.toString().contentEquals(shelf.getShelfName()))
+                                    {
+                                        options.add(shelf);
+                                    }
+                                }
+                            }
+                            Boolean result = GoodreadsUtil.RetrieveSelectedShelves(getActivity(), options);
+                            SaveSharedPreference.setImported(getActivity(), result);
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+
+                        }
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+    }
 }
+

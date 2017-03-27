@@ -28,6 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
  * Created by tomha on 23-Mar-17.
  */
@@ -49,10 +51,12 @@ public class GoodreadsShelves {
     public ArrayList<GoodreadsShelf> getShelves(Context ctx) {
         try {
             URL authURL = new URL(getShelvesURL(ctx));
-            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            //conn.setDoOutput(true);
+            //conn.setDoInput(true);
             conn.setRequestMethod("GET");
+            conn.setReadTimeout(15*1000);
+           // conn.connect();
 
             int status = conn.getResponseCode();
 

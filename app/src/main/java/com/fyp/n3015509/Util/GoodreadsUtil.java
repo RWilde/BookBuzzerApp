@@ -25,7 +25,7 @@ public class GoodreadsUtil {
         return author.createGoodreadsAuthor(authorId, authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
     }
 
-    public static ArrayList<GoodreadsShelf> getShelves(Context ctx)
+    public ArrayList<GoodreadsShelf> getShelves(Context ctx)
     {
         GoodreadsShelves shelves = new GoodreadsShelves();
         return shelves.getShelves(ctx);

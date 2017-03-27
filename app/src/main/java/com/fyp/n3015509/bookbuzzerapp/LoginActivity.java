@@ -596,7 +596,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if (goodreads_id != 0) {
                     login.put("goodreads_id", goodreads_id);
                     SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
-                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+                    try{
+                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);}
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
                     return true;
                 }
 
@@ -606,7 +611,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return false;
+            return true;
        }
 
 
