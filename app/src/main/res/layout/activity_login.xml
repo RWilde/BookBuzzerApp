@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.fyp.n3015509.bookbuzzerapp.LoginActivity">
+    tools:context="com.fyp.n3015509.bookbuzzerapp.activity.LoginActivity">
 
     <!-- Login progress -->
     <ProgressBar

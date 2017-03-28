@@ -1,37 +1,16 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.Activity;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
-import com.fyp.n3015509.Util.XMLUtil;
-import com.google.api.client.auth.oauth.OAuthAuthorizeTemporaryTokenUrl;
-import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
-import com.google.api.client.auth.oauth.OAuthGetAccessToken;
-import com.google.api.client.auth.oauth.OAuthGetTemporaryToken;
-import com.google.api.client.auth.oauth.OAuthHmacSigner;
-import com.google.api.client.auth.oauth.OAuthParameters;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.StringUtils;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import java.io.IOException;
+import com.fyp.n3015509.bookbuzzerapp.R;
 
 public class GoodreadsLoginActivity extends Activity {
     private WebView web;

@@ -42,6 +42,7 @@ public class GoodreadsShelves {
     private static final String BookShelvesURL = BASE_URL + "/review/list/";
 
     StringBuffer response = new StringBuffer();
+    XMLUtil xmlUtil = new XMLUtil();
 
     public String getShelvesURL(Context ctx) {
         String userId = SaveSharedPreference.getGoodreadsId(ctx);
@@ -55,8 +56,8 @@ public class GoodreadsShelves {
             //conn.setDoOutput(true);
             //conn.setDoInput(true);
             conn.setRequestMethod("GET");
-            conn.setReadTimeout(15*1000);
-           // conn.connect();
+            conn.setReadTimeout(15 * 1000);
+            // conn.connect();
 
             int status = conn.getResponseCode();
 
@@ -66,27 +67,10 @@ public class GoodreadsShelves {
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine.toString());
             }
-
             //close input stream
             in.close();
-
+            ArrayList<GoodreadsShelf> shelves = xmlUtil.xmlToGoodreadsShelves(response.toString());
             //parse response to get user Id
-            Document doc = XMLUtil.getXMLDocument(response.toString());
-            NodeList nodeList = doc.getElementsByTagName("*");
-            ArrayList<GoodreadsShelf> shelves = new ArrayList<GoodreadsShelf>();
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    Element el = (Element) nodeList.item(i);
-                    if (el.getNodeName().contains("user_shelf")) {
-                        int id = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
-                        String name = el.getElementsByTagName("name").item(0).getTextContent();
-                        int count = Integer.parseInt(el.getElementsByTagName("book_count").item(0).getTextContent());
-                        GoodreadsShelf shelf = GoodreadsUtil.createGoodreadsShelf(id, name, count);
-                        shelves.add(shelf);
-                    }
-                }
-            }
             return shelves;
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,62 +78,34 @@ public class GoodreadsShelves {
         return null;
     }
 
-    public String createBookShelvesUrl(Context ctx, String shelf, int page)
-    {
-        return BookShelvesURL + SaveSharedPreference.getGoodreadsId(ctx) + ".xml?key=" + GOODREADS_KEY  + "&v=2&shelf=" + shelf + "&per_page=200&page=" + page;
+    public String createBookShelvesUrl(Context ctx, String shelf, int page) {
+        return BookShelvesURL + SaveSharedPreference.getGoodreadsId(ctx) + ".xml?key=" + GOODREADS_KEY + "&v=2&shelf=" + shelf + "&per_page=200&page=" + page;
     }
 
-    public ArrayList<GoodreadsBook> getBookShelf(Context ctx, GoodreadsShelf shelf)
-    {
+    public ArrayList<GoodreadsBook> getBookShelf(Context ctx, GoodreadsShelf shelf) {
         ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
 
         try {
-                URL authURL = new URL(createBookShelvesUrl(ctx, shelf.getShelfName(), 1));
-                HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
-                conn.setDoOutput(true);
-                conn.setDoInput(true);
-                conn.setRequestMethod("GET");
+            URL authURL = new URL(createBookShelvesUrl(ctx, shelf.getShelfName(), 1));
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("GET");
 
-                int status = conn.getResponseCode();
+            int status = conn.getResponseCode();
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                String inputLine;
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine.toString());
-                }
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
 
-                //close input stream
-                in.close();
-
-                //parse response to get user Id
-                Document doc = XMLUtil.getXMLDocument(response.toString());
-                JSONObject xmlJSONObj = XML.toJSONObject(doc.toString());
-
-//                NodeList nodeList = doc.getElementsByTagName("*");
-//                ArrayList<GoodreadsShelf> shelves = new ArrayList<GoodreadsShelf>();
-//                for (int i = 0; i < nodeList.getLength(); i++) {
-//                    Node node = nodeList.item(i);
-//                    if (node.getNodeType() == Node.ELEMENT_NODE) {
-//                        Element el = (Element) nodeList.item(i);
-//                        if (el.getNodeName().contains("reviews")) {
-//                            if (el.getElementsByTagName("book"))
-//                            String name = el.getElementsByTagName("name").item(0).getTextContent();
-//                            String phone = el.getElementsByTagName("phone").item(0).getTextContent();
-//                            String email = el.getElementsByTagName("email").item(0).getTextContent();
-//                            String area = el.getElementsByTagName("area").item(0).getTextContent();
-//                            String city = el.getElementsByTagName("city").item(0).getTextContent();
-//
-//
-//                            GoodreadsBook book = GoodreadsUtil.createGoodreadsBook(id, name, count);
-//                            books.add(book);
-//                        }
-//                    }
-//                }
-
+            //parse response to get list of books
+            books = xmlUtil.xmlToGoodreadsBooks(response.toString());
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
             e.printStackTrace();
         }
 

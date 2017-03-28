@@ -30,6 +30,8 @@ public class GoodreadsBook {
     GoodreadsAuthor author;
     int yearPublished;
 
+    GoodreadsUtil util = new GoodreadsUtil();
+
     public GoodreadsBook createGoodreadsBook(int id,
                                              String isbn,
                                              String isbn13,
@@ -82,7 +84,7 @@ public class GoodreadsBook {
         this.description = description;
         this.yearPublished = yearPublished;
 
-        this.author = GoodreadsUtil.createGoodreadsAuthor(authorId,
+        this.author = util.createGoodreadsAuthor(authorId,
                 authorName,
                 authorImageURL,
                 authorSmallImageURL,

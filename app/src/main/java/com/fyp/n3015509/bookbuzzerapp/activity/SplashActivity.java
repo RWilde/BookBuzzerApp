@@ -1,13 +1,13 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.activity;
 
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.Window;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.bookbuzzerapp.R;
 
 public class SplashActivity extends AppCompatActivity {
     private final int SPLASH_DISPLAY_LENGTH = 1000;

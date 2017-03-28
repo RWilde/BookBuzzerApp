@@ -5,17 +5,11 @@ package com.fyp.n3015509.goodreadsapi;
  */
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
-import com.fyp.n3015509.Util.LoginUtil;
 import com.fyp.n3015509.Util.XMLUtil;
-import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.bookbuzzerapp.GoodreadsLoginActivity;
-import com.fyp.n3015509.bookbuzzerapp.LoginActivity;
-import com.fyp.n3015509.bookbuzzerapp.MainActivity;
+import com.fyp.n3015509.bookbuzzerapp.activity.LoginActivity;
 import com.google.api.client.auth.oauth.OAuthAuthorizeTemporaryTokenUrl;
 import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
 import com.google.api.client.auth.oauth.OAuthGetAccessToken;
@@ -28,17 +22,13 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.XML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.IOException;
-
-import static android.app.Activity.RESULT_OK;
 
 public class GoodreadsLogin extends LoginActivity {
 

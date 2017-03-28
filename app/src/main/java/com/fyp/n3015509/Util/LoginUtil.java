@@ -2,15 +2,12 @@ package com.fyp.n3015509.Util;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.bookbuzzerapp.LoginActivity;
-import com.fyp.n3015509.bookbuzzerapp.R;
-import com.google.api.client.util.IOUtils;
+import com.fyp.n3015509.bookbuzzerapp.activity.LoginActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +30,7 @@ import java.net.URL;
  */
 
 public class LoginUtil {
-    private static final String IP = "152.105.99.36";
+    private static final String IP = "192.168.0.10";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";

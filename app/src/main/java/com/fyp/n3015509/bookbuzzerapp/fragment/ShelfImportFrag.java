@@ -1,107 +1,112 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.app.AlertDialog;
-import android.content.Context;
+import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.Button;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.DialogFragment;
 
 import com.fyp.n3015509.Util.GoodreadsUtil;
-import com.fyp.n3015509.Util.LoginUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.goodreads.GoodreadsShelf;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class ShelfImportFrag extends DialogFragment {
+
+    GoodreadsUtil util = new GoodreadsUtil();
+    private OnFragmentInteractionListener mListener;
+
+    public ShelfImportFrag() {
+        // Required empty public constructor
+    }
+
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     *
+     * @return A new instance of fragment ShelfImportFrag.
+     */
+    public static ShelfImportFrag newInstance() {
+        ShelfImportFrag frag = new ShelfImportFrag();
+        Bundle args = new Bundle();
+        return frag;
+    }
+
+
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
+    }
+
+    private Handler handler_ = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+
+        }
+
+    };
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Button mLogoutButton = (Button) findViewById(R.id.logout_button);
-        String token = SaveSharedPreference.getToken(getApplicationContext());
-        mLogoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LoginUtil.signout(getApplicationContext());
-                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                startActivity(i);
-                setContentView(R.layout.activity_login);
-            }
-        });
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
-        if (imported == false)
-        {
-            new UserShelves(getApplicationContext()).execute();
-        }
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        new UserShelves().execute();
+        return null;
     }
 
-    private void ShowAlertDialog() {
-        FragmentManager fm = getSupportFragmentManager();
-        ShelfImportFrag alertDialog = ShelfImportFrag.newInstance();
-        alertDialog.show(fm, "import");
-    }
 
     private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
-        GoodreadsUtil util = new GoodreadsUtil();
-        private final Context mContext;
 
-        UserShelves(Context context) {
-            this.mContext = context;
+        UserShelves() {
+
         }
 
         @Override
         protected ArrayList<GoodreadsShelf> doInBackground(Void... params) {
-            ArrayList<GoodreadsShelf> shelves = util.getShelves(getApplicationContext());
-            return shelves;
+            return util.getShelves(getContext());
         }
 
         protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
             //showProgress(false);
-            ArrayList<String> listOfShelves = new ArrayList<String>();
+            List<String> listOfShelves = null;
             final ArrayList mSelectedItems = new ArrayList();  // Where we track the selected items
 
             // Set the dialog title
             for (GoodreadsShelf shelf : shelves) {
-                if(shelf.getBookNum() != 0) {
-                    String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
-                    listOfShelves.add(shelfInfo);
-                }
+                String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
+                listOfShelves.add(shelfInfo);
             }
             boolean[] itemChecked = new boolean[listOfShelves.size()];
 
             CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
             itemChecked.equals(true);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             // Set the dialog title
 
             builder.setTitle("Select shelves to import")
                     // Specify the list array, the items to be selected by default (null for none),
                     // and the listener through which to receive callbacks when items are selected
                     .setMultiChoiceItems(cs, itemChecked,
-                            new DialogInterface.OnMultiChoiceClickListener() {
+                            new OnMultiChoiceClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which,
                                                     boolean isChecked) {
@@ -131,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             }
-                            Boolean result = GoodreadsUtil.RetrieveSelectedShelves(mContext, options);
-                            SaveSharedPreference.setImported(mContext, result);
+                            Boolean result = util.RetrieveSelectedShelves(getActivity(), options);
+                            SaveSharedPreference.setImported(getActivity(), result);
                         }
                     })
                     .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -146,6 +151,5 @@ public class MainActivity extends AppCompatActivity {
             alert.show();
         }
     }
-
-
 }
+

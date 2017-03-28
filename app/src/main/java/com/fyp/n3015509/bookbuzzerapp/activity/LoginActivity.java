@@ -1,4 +1,4 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -50,8 +50,8 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.fyp.n3015509.Util.LoginUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.goodreadsapi.GoodreadsLogin;
-import com.google.api.client.json.JsonPolymorphicTypeMap;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
