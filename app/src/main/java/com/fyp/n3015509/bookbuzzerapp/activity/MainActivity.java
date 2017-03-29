@@ -40,14 +40,12 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
-import com.fyp.n3015509.goodreads.GoodreadsBook;
-import com.fyp.n3015509.goodreads.GoodreadsShelf;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -567,7 +565,8 @@ public class MainActivity extends AppCompatActivity {
            // showProgress(false);
 
             if (aBoolean)
-            {SaveSharedPreference.setImported(mContext, true);}
+            {//SaveSharedPreference.setImported(mContext, true);
+                 }
 
         }
 

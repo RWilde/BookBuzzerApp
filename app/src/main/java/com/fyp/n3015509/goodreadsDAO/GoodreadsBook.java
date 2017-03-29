@@ -1,6 +1,8 @@
-package com.fyp.n3015509.goodreads;
+package com.fyp.n3015509.goodreadsDAO;
 
 import com.fyp.n3015509.Util.GoodreadsUtil;
+
+import java.util.ArrayList;
 
 /**
  * Created by tomha on 24-Mar-17.
@@ -27,7 +29,7 @@ public class GoodreadsBook {
     double average_rating;
     int ratings_count;
     String description;
-    GoodreadsAuthor author;
+    ArrayList<GoodreadsAuthor> author;
     int yearPublished;
 
     GoodreadsUtil util = new GoodreadsUtil();
@@ -54,14 +56,7 @@ public class GoodreadsBook {
                                              String description,
                                              int yearPublished,
 
-                                             int authorId,
-                                             String authorName,
-                                             String authorImageURL,
-                                             String authorSmallImageURL,
-                                             String authorLink,
-                                             double authorAverageRating,
-                                             int authorRatingsCount,
-                                             int authorTextReviewsCount) {
+                                             ArrayList<GoodreadsAuthor> author) {
         this.id = id;
         this.isbn = isbn;
         this.isbn13 = isbn13;
@@ -84,14 +79,7 @@ public class GoodreadsBook {
         this.description = description;
         this.yearPublished = yearPublished;
 
-        this.author = util.createGoodreadsAuthor(authorId,
-                authorName,
-                authorImageURL,
-                authorSmallImageURL,
-                authorLink,
-                authorAverageRating,
-                authorRatingsCount,
-                authorTextReviewsCount);
+        this.author = author;
 
         return this;
     }
@@ -256,11 +244,11 @@ public class GoodreadsBook {
         this.description = description;
     }
 
-    public GoodreadsAuthor getAuthors() {
+    public ArrayList<GoodreadsAuthor> getAuthors() {
         return author;
     }
 
-    public void setAuthors(GoodreadsAuthor author) {
+    public void setAuthors(ArrayList<GoodreadsAuthor> author) {
         this.author = author;
     }
 

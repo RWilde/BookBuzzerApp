@@ -13,7 +13,7 @@ import android.support.v4.app.DialogFragment;
 
 import com.fyp.n3015509.Util.GoodreadsUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.goodreads.GoodreadsShelf;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
 import java.util.List;

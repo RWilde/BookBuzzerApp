@@ -2,10 +2,10 @@ package com.fyp.n3015509.Util;
 
 import android.content.Context;
 
-import com.fyp.n3015509.db.dao.Book;
-import com.fyp.n3015509.goodreads.GoodreadsAuthor;
-import com.fyp.n3015509.goodreads.GoodreadsBook;
-import com.fyp.n3015509.goodreads.GoodreadsShelf;
+import com.fyp.n3015509.apiDAO.APIBookList;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.goodreadsapi.GoodreadsShelves;
 
 import java.util.ArrayList;
@@ -33,12 +33,15 @@ public class GoodreadsUtil {
     }
 
     public Boolean RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
-        ArrayList<ArrayList<GoodreadsBook>> allBooks = new ArrayList<ArrayList<GoodreadsBook>>();
+        APIUtil util = new APIUtil();
+        ArrayList<APIBookList> allBooks = new ArrayList<APIBookList>();
         for (GoodreadsShelf shelf : options) {
             ArrayList<GoodreadsBook> booklist = shelves.getBookShelf(ctx, shelf);
-            DBUtil.SaveShelf(booklist);
-            APIUtil.SaveShelf(booklist);
+            APIBookList apiParam = util.convertToApi(booklist);
+            allBooks.add(apiParam);
         }
+        DBUtil.SaveShelf(allBooks);
+        APIUtil.SaveShelf(allBooks, ctx);
         return true;
     }
 
@@ -69,18 +72,10 @@ public class GoodreadsUtil {
                                                     String description,
                                                     int yearPublished,
 
-                                                    int authorId,
-                                                    String authorName,
-                                                    String authorImageURL,
-                                                    String authorSmallImageURL,
-                                                    String authorLink,
-                                                    double authorAverageRating,
-                                                    int authorRatingsCount,
-                                                    int authorTextReviewsCount) {
+                                                    ArrayList<GoodreadsAuthor> author) {
         GoodreadsBook book = new GoodreadsBook();
 
         return book.createGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
-                format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, authorId,
-                authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
+                format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, author);
     }
 }

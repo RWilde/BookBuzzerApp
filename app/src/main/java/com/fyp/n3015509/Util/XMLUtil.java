@@ -1,18 +1,13 @@
 package com.fyp.n3015509.Util;
 
-import android.provider.DocumentsContract;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
-import com.fyp.n3015509.goodreads.GoodreadsAuthor;
-import com.fyp.n3015509.goodreads.GoodreadsBook;
-import com.fyp.n3015509.goodreads.GoodreadsShelf;
-
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.json.JSONObject;
-import org.json.XML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,6 +18,8 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by tomha on 23-Mar-17.
@@ -70,7 +67,7 @@ public class XMLUtil {
     public ArrayList<GoodreadsBook> xmlToGoodreadsBooks(String response)
     {
         Document doc = XMLUtil.getXMLDocument(response);
-        NodeList nodeList = doc.getElementsByTagName("reviews");
+        NodeList nodeList = doc.getElementsByTagName("*");
         ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
@@ -88,60 +85,70 @@ public class XMLUtil {
 
     public GoodreadsBook xmlToGoodreadsBook(Element el)
     {
-        int id =Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
-        String isbn =el.getElementsByTagName("isbn").item(0).getTextContent();
-        String isbn13 = el.getElementsByTagName("isbn13").item(0).getTextContent();
-        int text_reviews_count =Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
-        String title =el.getElementsByTagName("title").item(0).getTextContent();
-        String title_without_series = el.getElementsByTagName("title_without_series").item(0).getTextContent();
-        String image_url = el.getElementsByTagName("image_url").item(0).getTextContent();
-        String small_image_url = el.getElementsByTagName("small_image_url").item(0).getTextContent();
-        String large_image_url = el.getElementsByTagName("large_image_url").item(0).getTextContent();
-        String link = el.getElementsByTagName("link").item(0).getTextContent();
-        int num_pages = Integer.parseInt(el.getElementsByTagName("num_pages").item(0).getTextContent());
-        String format = el.getElementsByTagName("format").item(0).getTextContent();
-        String edition_information = el.getElementsByTagName("edition_information").item(0).getTextContent();
-        String publisher = el.getElementsByTagName("publisher").item(0).getTextContent();
-        int publication_day =Integer.parseInt(el.getElementsByTagName("publication_day").item(0).getTextContent());
-        int publication_year=Integer.parseInt(el.getElementsByTagName("publication_year").item(0).getTextContent());
-        int publication_month=Integer.parseInt(el.getElementsByTagName("publication_month").item(0).getTextContent());
-        double average_rating=Integer.parseInt(el.getElementsByTagName("average_rating").item(0).getTextContent());
-        int ratings_count=Integer.parseInt(el.getElementsByTagName("ratings_count").item(0).getTextContent());
-        String description  = el.getElementsByTagName("description").item(0).getTextContent();
-        int yearPublished=Integer.parseInt(el.getElementsByTagName("year_published").item(0).getTextContent());
+        try {
+            int id = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
+            String isbn = el.getElementsByTagName("isbn").item(0).getTextContent();
+            String isbn13 = el.getElementsByTagName("isbn13").item(0).getTextContent();
+            int text_reviews_count = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
+            String title = el.getElementsByTagName("title").item(0).getTextContent();
+            String title_without_series = el.getElementsByTagName("title_without_series").item(0).getTextContent();
+            String image_url = el.getElementsByTagName("image_url").item(0).getTextContent();
+            String small_image_url = el.getElementsByTagName("small_image_url").item(0).getTextContent();
+            String large_image_url = el.getElementsByTagName("large_image_url").item(0).getTextContent();
+            String link = el.getElementsByTagName("link").item(0).getTextContent();
+            int num_pages = Integer.parseInt(el.getElementsByTagName("num_pages").item(0).getTextContent());
+            String format = el.getElementsByTagName("format").item(0).getTextContent();
+            String edition_information = el.getElementsByTagName("edition_information").item(0).getTextContent();
+            String publisher = el.getElementsByTagName("publisher").item(0).getTextContent();
+            int publication_day = Integer.parseInt(el.getElementsByTagName("publication_day").item(0).getTextContent());
+            int publication_year = Integer.parseInt(el.getElementsByTagName("publication_year").item(0).getTextContent());
+            int publication_month = Integer.parseInt(el.getElementsByTagName("publication_month").item(0).getTextContent());
+            double average_rating = getDoubleFromElement(el.getElementsByTagName("average_rating").item(0).getTextContent());
+            int ratings_count = Integer.parseInt(el.getElementsByTagName("ratings_count").item(0).getTextContent());
+            String description = el.getElementsByTagName("description").item(0).getTextContent();
+            int yearPublished = Integer.parseInt(el.getElementsByTagName("published").item(0).getTextContent());
 
-        NodeList valueList = el.getElementsByTagName("authors");
+            NodeList valueList = el.getElementsByTagName("authors");
+            ArrayList<GoodreadsAuthor> authors= new ArrayList<GoodreadsAuthor>();
 
-        int authorId = 0;
-        String authorName = null;
-        String authorImageURL  = null;
-        String authorSmallImageURL  = null;
-        String authorLink  = null;
-        double authorAverageRating = 0;
-        int authorRatingsCount = 0;
-        int authorTextReviewsCount = 0;
+            for (int j = 0; j < valueList.getLength(); ++j) {
+                Element value = (Element) valueList.item(j);
 
-        for (int j = 0; j < valueList.getLength(); ++j)
-        {
-            Element value = (Element) valueList.item(j);
+                int authorId = Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
+                String authorName = value.getElementsByTagName("name").item(0).getTextContent();
+                String authorImageURL = value.getElementsByTagName("image_url").item(0).getTextContent();
+                String authorSmallImageURL = value.getElementsByTagName("small_image_url").item(0).getTextContent();
+                String authorLink = value.getElementsByTagName("link").item(0).getTextContent();
+                double authorAverageRating = getDoubleFromElement(value.getElementsByTagName("average_rating").item(0).getTextContent());
+                int authorRatingsCount = Integer.parseInt(value.getElementsByTagName("ratings_count").item(0).getTextContent());
+                int authorTextReviewsCount = Integer.parseInt(value.getElementsByTagName("text_reviews_count").item(0).getTextContent());
+                GoodreadsAuthor author = new GoodreadsAuthor();
+                author.createGoodreadsAuthor(authorId, authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
+                authors.add(author);
+            }
+            //author information
+            //needs to be in bested loop
 
-             authorId=Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
-             authorName  = value.getElementsByTagName("name").item(0).getTextContent();
-             authorImageURL = value.getElementsByTagName("image_url").item(0).getTextContent();
-             authorSmallImageURL = value.getElementsByTagName("small_image_url").item(0).getTextContent();
-             authorLink = value.getElementsByTagName("link").item(0).getTextContent();
-             authorAverageRating=Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
-             authorRatingsCount=Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
-             authorTextReviewsCount = Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
+
+            return GoodreadsUtil.CreateGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
+                    format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, authors);
         }
-        //author information
-        //needs to be in bested loop
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-
-
-        return GoodreadsUtil.CreateGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
-                format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, authorId,
-                authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
+    public double getDoubleFromElement(String el)
+    {
+        double d = 0;
+        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+))");
+        Matcher m = p.matcher(el);
+        while(m.find()) {
+            d = Double.parseDouble(m.group(1));
+        }
+        return d;
     }
 
     public GoodreadsAuthor xmlToGoodreadsAuthor(String response)

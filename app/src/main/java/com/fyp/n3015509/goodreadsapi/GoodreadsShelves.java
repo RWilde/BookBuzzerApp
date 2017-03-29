@@ -1,32 +1,17 @@
 package com.fyp.n3015509.goodreadsapi;
 
-import android.app.Fragment;
 import android.content.Context;
 
-import com.fyp.n3015509.Util.GoodreadsUtil;
 import com.fyp.n3015509.Util.XMLUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.goodreads.GoodreadsBook;
-import com.fyp.n3015509.goodreads.GoodreadsShelf;
-import com.google.api.client.http.HttpResponse;
-
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.XML;
 
 import javax.net.ssl.HttpsURLConnection;
 

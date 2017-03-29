@@ -1,4 +1,4 @@
-package com.fyp.n3015509.goodreads;
+package com.fyp.n3015509.goodreadsDAO;
 
 /**
  * Created by tomha on 24-Mar-17.
