@@ -1,10 +1,14 @@
 package com.fyp.n3015509.bookbuzzerapp.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -54,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView txtName, txtWebsite;
     private Toolbar toolbar;
     private FloatingActionButton fab;
+
+    private View mProgressView;
+    private View mLoginFormView;
 
     // urls to load navigation header background image
     // and profile image
@@ -448,7 +455,7 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
             //showProgress(false);
-            ArrayList<String> listOfShelves = new ArrayList<String>();
+            final ArrayList<String> listOfShelves = new ArrayList<String>();
             final ArrayList mSelectedItems = new ArrayList();  // Where we track the selected items
 
             // Set the dialog title
@@ -458,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
                     listOfShelves.add(shelfInfo);
                 }
             }
-            boolean[] itemChecked = new boolean[listOfShelves.size()];
+            final boolean[] itemChecked = new boolean[listOfShelves.size()];
 
             CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
             itemChecked.equals(true);
@@ -476,10 +483,12 @@ public class MainActivity extends AppCompatActivity {
                                                     boolean isChecked) {
                                     if (isChecked) {
                                         // If the user checked the item, add it to the selected items
-                                        mSelectedItems.add(which);
-                                    } else if (mSelectedItems.contains(which)) {
+                                       // itemChecked[which] = isChecked;
+                                        //String item = listOfShelves.get(which);
+                                        mSelectedItems.add(listOfShelves.get(which));
+                                    } else if (mSelectedItems.contains(listOfShelves.get(which))) {
                                         // Else, if the item is already in the array, remove it
-                                        mSelectedItems.remove(Integer.valueOf(which));
+                                        mSelectedItems.remove(listOfShelves.get(which));
                                     }
                                 }
                             })
@@ -491,14 +500,19 @@ public class MainActivity extends AppCompatActivity {
                             // or return them to the component that opened the dialog
                             ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
                             for (Object shelfName : mSelectedItems) {
+                                String selected = shelfName.toString();
+                                String[] parts = selected.split("\\(");
+                                String shelfPart = parts[0];
+                                shelfPart = shelfPart.replaceAll(" $", "");
                                 for (GoodreadsShelf shelf : shelves) {
-                                    if (shelfName.toString().contentEquals(shelf.getShelfName())) {
+                                    if (shelfPart.toString().contentEquals(shelf.getShelfName())) {
                                         options.add(shelf);
                                     }
                                 }
                             }
-                            Boolean result = util.RetrieveSelectedShelves(mContext, options);
-                            SaveSharedPreference.setImported(mContext, result);
+
+                            UserGoodreadsShelves mGoodreadsShelfTask = new UserGoodreadsShelves(getApplicationContext(), options);
+                            mGoodreadsShelfTask.execute((Void) null);
                         }
                     })
                     .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -525,6 +539,70 @@ public class MainActivity extends AppCompatActivity {
         protected ArrayList<GoodreadsBook> doInBackground(Void... params) {
             ArrayList<GoodreadsBook> shelves = util.getBooks(getApplicationContext());
             return shelves;
+        }
+    }
+
+    private class UserGoodreadsShelves extends AsyncTask<Void, Void, Boolean>
+    {
+        private Context mContext;
+        GoodreadsUtil util = new GoodreadsUtil();
+        ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
+
+        UserGoodreadsShelves(Context context, ArrayList<GoodreadsShelf> options)
+        {
+            this.mContext = context;
+            this.options = options;
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            Boolean result = util.RetrieveSelectedShelves(mContext, options);
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+           // showProgress(false);
+
+            if (aBoolean)
+            {SaveSharedPreference.setImported(mContext, true);}
+
+        }
+
+
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+        private void showProgress(final boolean show) {
+            // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+            // for very easy animations. If available, use these APIs to fade-in
+            // the progress spinner.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+                int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                        show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    }
+                });
+
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                mProgressView.animate().setDuration(shortAnimTime).alpha(
+                        show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                    }
+                });
+            } else {
+                // The ViewPropertyAnimator APIs are not available, so simply show
+                // and hide the relevant UI components.
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
         }
     }
 

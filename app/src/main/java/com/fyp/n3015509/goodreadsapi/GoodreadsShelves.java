@@ -87,10 +87,11 @@ public class GoodreadsShelves {
 
         try {
             URL authURL = new URL(createBookShelvesUrl(ctx, shelf.getShelfName(), 1));
-            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+           // conn.setDoOutput(true);
+          //  conn.setDoInput(true);
             conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
 
             int status = conn.getResponseCode();
 
