@@ -78,15 +78,21 @@ class APIUtil {
 
     public APIBookList convertToApi(ArrayList<GoodreadsBook> booklist) {
         APIBookList list = new APIBookList();
+        //booklist.remove(booklist.size() - 1);
         ArrayList<APIBook> books= new ArrayList<APIBook>();
-        for(GoodreadsBook book : booklist)
-        {
-            APIBook newBook = new APIBook();
-            books.add(newBook.createApiBook(book));
-        }
-        list.setBookList(books);
+            for (GoodreadsBook book : booklist) {
+                if(book != null) {
+                    try {
+                        APIBook newBook = new APIBook();
+                        books.add(newBook.createApiBook(book));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            list.setBookList(books);
 
-        return list;
+            return list;
 
     }
 }

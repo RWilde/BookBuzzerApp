@@ -53,9 +53,9 @@ public class XMLUtil {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element el = (Element) nodeList.item(i);
                 if (el.getNodeName().contains("user_shelf")) {
-                    int id = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
+                    int id = getInt(el.getElementsByTagName("id").item(0).getTextContent());
                     String name = el.getElementsByTagName("name").item(0).getTextContent();
-                    int count = Integer.parseInt(el.getElementsByTagName("book_count").item(0).getTextContent());
+                    int count = getInt(el.getElementsByTagName("book_count").item(0).getTextContent());
                     GoodreadsShelf shelf = GoodreadsUtil.createGoodreadsShelf(id, name, count);
                     shelves.add(shelf);
                 }
@@ -66,6 +66,7 @@ public class XMLUtil {
 
     public ArrayList<GoodreadsBook> xmlToGoodreadsBooks(String response)
     {
+        int count = 0;
         Document doc = XMLUtil.getXMLDocument(response);
         NodeList nodeList = doc.getElementsByTagName("*");
         ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
@@ -75,6 +76,7 @@ public class XMLUtil {
                 Element el = (Element) nodeList.item(i);
                 if (el.getNodeName().contains("book")) {
                     books.add(xmlToGoodreadsBook(el));
+                    count++;
                 }
             }
         }
@@ -86,10 +88,10 @@ public class XMLUtil {
     public GoodreadsBook xmlToGoodreadsBook(Element el)
     {
         try {
-            int id = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
+            int id = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
             String isbn = el.getElementsByTagName("isbn").item(0).getTextContent();
             String isbn13 = el.getElementsByTagName("isbn13").item(0).getTextContent();
-            int text_reviews_count = Integer.parseInt(el.getElementsByTagName("id").item(0).getTextContent());
+            int text_reviews_count = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
             String title = el.getElementsByTagName("title").item(0).getTextContent();
             String title_without_series = el.getElementsByTagName("title_without_series").item(0).getTextContent();
             String image_url = el.getElementsByTagName("image_url").item(0).getTextContent();
@@ -100,13 +102,13 @@ public class XMLUtil {
             String format = el.getElementsByTagName("format").item(0).getTextContent();
             String edition_information = el.getElementsByTagName("edition_information").item(0).getTextContent();
             String publisher = el.getElementsByTagName("publisher").item(0).getTextContent();
-            int publication_day = Integer.parseInt(el.getElementsByTagName("publication_day").item(0).getTextContent());
-            int publication_year = Integer.parseInt(el.getElementsByTagName("publication_year").item(0).getTextContent());
-            int publication_month = Integer.parseInt(el.getElementsByTagName("publication_month").item(0).getTextContent());
+            int publication_day = getIntFromElement(el.getElementsByTagName("publication_day").item(0).getTextContent());
+            int publication_year = getIntFromElement(el.getElementsByTagName("publication_year").item(0).getTextContent());
+            int publication_month = getIntFromElement(el.getElementsByTagName("publication_month").item(0).getTextContent());
             double average_rating = getDoubleFromElement(el.getElementsByTagName("average_rating").item(0).getTextContent());
-            int ratings_count = Integer.parseInt(el.getElementsByTagName("ratings_count").item(0).getTextContent());
+            int ratings_count =getIntFromElement(el.getElementsByTagName("ratings_count").item(0).getTextContent());
             String description = el.getElementsByTagName("description").item(0).getTextContent();
-            int yearPublished = Integer.parseInt(el.getElementsByTagName("published").item(0).getTextContent());
+            int yearPublished = getIntFromElement(el.getElementsByTagName("published").item(0).getTextContent());
 
             NodeList valueList = el.getElementsByTagName("authors");
             ArrayList<GoodreadsAuthor> authors= new ArrayList<GoodreadsAuthor>();
@@ -114,14 +116,14 @@ public class XMLUtil {
             for (int j = 0; j < valueList.getLength(); ++j) {
                 Element value = (Element) valueList.item(j);
 
-                int authorId = Integer.parseInt(value.getElementsByTagName("id").item(0).getTextContent());
+                int authorId = getIntFromElement(value.getElementsByTagName("id").item(0).getTextContent());
                 String authorName = value.getElementsByTagName("name").item(0).getTextContent();
                 String authorImageURL = value.getElementsByTagName("image_url").item(0).getTextContent();
                 String authorSmallImageURL = value.getElementsByTagName("small_image_url").item(0).getTextContent();
                 String authorLink = value.getElementsByTagName("link").item(0).getTextContent();
                 double authorAverageRating = getDoubleFromElement(value.getElementsByTagName("average_rating").item(0).getTextContent());
-                int authorRatingsCount = Integer.parseInt(value.getElementsByTagName("ratings_count").item(0).getTextContent());
-                int authorTextReviewsCount = Integer.parseInt(value.getElementsByTagName("text_reviews_count").item(0).getTextContent());
+                int authorRatingsCount = getIntFromElement(value.getElementsByTagName("ratings_count").item(0).getTextContent());
+                int authorTextReviewsCount = getIntFromElement(value.getElementsByTagName("text_reviews_count").item(0).getTextContent());
                 GoodreadsAuthor author = new GoodreadsAuthor();
                 author.createGoodreadsAuthor(authorId, authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
                 authors.add(author);
@@ -140,15 +142,36 @@ public class XMLUtil {
         return null;
     }
 
+    public int getIntFromElement(String el)
+    {
+        if (el != null)
+        {
+            return Integer.parseInt(el);
+        }
+        return 0;
+    }
+
+    public static int getInt(String el)
+    {
+        if (el != null)
+        {
+            return Integer.parseInt(el);
+        }
+        return 0;
+    }
+
     public double getDoubleFromElement(String el)
     {
-        double d = 0;
-        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+))");
-        Matcher m = p.matcher(el);
-        while(m.find()) {
-            d = Double.parseDouble(m.group(1));
+        if(el != null) {
+            double d = 0;
+            Pattern p = Pattern.compile("(\\d+(?:\\.\\d+))");
+            Matcher m = p.matcher(el);
+            while (m.find()) {
+                d = Double.parseDouble(m.group(1));
+            }
+            return d;
         }
-        return d;
+        return 0;
     }
 
     public GoodreadsAuthor xmlToGoodreadsAuthor(String response)
