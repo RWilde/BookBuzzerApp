@@ -8,7 +8,11 @@ import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.goodreadsapi.GoodreadsShelves;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by tomha on 24-Mar-17.
@@ -34,14 +38,18 @@ public class GoodreadsUtil {
 
     public Boolean RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
         APIUtil util = new APIUtil();
-        ArrayList<APIBookList> allBooks = new ArrayList<APIBookList>();
+        JSONObject shelvesJSON = new JSONObject();
         for (GoodreadsShelf shelf : options) {
-            ArrayList<GoodreadsBook> booklist = shelves.getBookShelf(ctx, shelf);
-            APIBookList apiParam = util.convertToApi(booklist);
-            allBooks.add(apiParam);
+            try {
+                ArrayList<GoodreadsBook> booklist = shelves.getBookShelf(ctx, shelf);
+                JSONObject apiParam = util.convertToApi(booklist);
+                shelvesJSON.put(shelf.getShelfName(), apiParam);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-        DBUtil.SaveShelf(allBooks);
-        APIUtil.SaveShelf(allBooks, ctx);
+        DBUtil.SaveShelf(shelvesJSON);
+        APIUtil.SaveShelf(shelvesJSON, ctx);
         return true;
     }
 

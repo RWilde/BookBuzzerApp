@@ -5,8 +5,10 @@ import android.content.Context;
 import com.fyp.n3015509.apiDAO.APIBook;
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by rwild on 24/03/2017.
@@ -32,7 +35,7 @@ class APIUtil {
 //    private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
 //    private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
 
-    public static void SaveShelf(ArrayList<APIBookList> booklist, Context ctx) {
+    public static void SaveShelf(JSONObject booklist, Context ctx) {
 
         try {
             URL authURL = new URL(NewBuzzlistURL);
@@ -45,7 +48,7 @@ class APIUtil {
 
             //conn.connect();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-            String json = new Gson().toJson(booklist);
+            String json = booklist.toString();
 
             out.write(json);
             out.close();
@@ -76,23 +79,92 @@ class APIUtil {
 
     }
 
-    public APIBookList convertToApi(ArrayList<GoodreadsBook> booklist) {
+    public JSONObject convertToApi(ArrayList<GoodreadsBook> booklist) {
+        JSONObject listJSON = new JSONObject();
+        JSONObject bookJSON = new JSONObject();
+        JSONObject authorJSON = new JSONObject();
+
         APIBookList list = new APIBookList();
         //booklist.remove(booklist.size() - 1);
-        ArrayList<APIBook> books= new ArrayList<APIBook>();
+        HashMap<String, String> books= new HashMap<String, String>();
+
             for (GoodreadsBook book : booklist) {
                 if(book != null) {
                     try {
-                        APIBook newBook = new APIBook();
-                        books.add(newBook.createApiBook(book));
+                        authorJSON = createJSONAuthor(book.getAuthors());
+                        bookJSON = createJSONbook(book, authorJSON);
+                        listJSON.put(book.getTitle(), bookJSON);
+                        //bookJSON.put("book", new Gson().toJson(book));
+                      //  APIBook newBook = new APIBook();
+                     //   books.put(book.getTitle(),new Gson().toJson();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-            list.setBookList(books);
+           // list.setBookList(books);
 
-            return list;
+            int num = listJSON.length();
+            return listJSON;
 
+    }
+
+    private JSONObject createJSONbook(GoodreadsBook book, JSONObject authorJSON) {
+        JSONObject jsonBook = new JSONObject();
+        try {
+            jsonBook.put("id", book.getId());
+            jsonBook.put("ratings_count", book.getRatings_count());
+            jsonBook.put("txt_reviews_count", book.getText_reviews_count());
+            jsonBook.put("img_url", book.getImage_url());
+            jsonBook.put("sml_img_url", book.getSmall_image_url());
+            jsonBook.put("lrg_img_url", book.getLarge_image_url());
+            jsonBook.put("link", book.getLink());
+            jsonBook.put("avg_rating", book.getAverage_rating());
+            jsonBook.put("description", book.getDescription());
+            jsonBook.put("isbn", book.getIsbn());
+            jsonBook.put("isbn13", book.getIsbn13());
+            jsonBook.put("title", book.getTitle());
+            jsonBook.put("title_without_series", book.getTitle_without_series());
+
+            jsonBook.put("format", book.getFormat());
+            jsonBook.put("edition_information", book.getEdition_information());
+            jsonBook.put("publisher", book.getPublisher());
+            jsonBook.put("date", book.getPublication_day() + "/" + book.getPublication_month() + "/" + book.getPublication_year());
+            jsonBook.put("average_rating", book.getAverage_rating());
+            jsonBook.put("yearPublished", book.getYearPublished());
+            jsonBook.put("authors", authorJSON);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonBook;
+    }
+
+    public JSONObject createApiBook(GoodreadsBook book, JSONObject author)
+    {
+    return null;
+    }
+
+    public JSONObject createJSONAuthor(ArrayList<GoodreadsAuthor> authors)
+    {
+        JSONObject authorListJson = new JSONObject();
+        for (GoodreadsAuthor author : authors)
+        {
+            JSONObject temp = new JSONObject();
+            try {
+                temp.put("name", author.getName());
+                temp.put("avg_rating", author.getAverage_rating());
+                temp.put("id", author.getId());
+                temp.put("img_url", author.getImage_url());
+                temp.put("link", author.getLink());
+                temp.put("ratings_count", author.getRatings_count());
+                temp.put("sml_img_url", author.getSmall_image_url());
+                temp.put("txt_reviews_count", author.getText_reviews_count());
+                authorListJson.put(String.valueOf(author.getId()),temp);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return authorListJson;
     }
 }

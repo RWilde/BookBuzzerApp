@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,6 +21,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Created by tomha on 23-Mar-17.
@@ -75,7 +77,7 @@ public class XMLUtil {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element el = (Element) nodeList.item(i);
                 if (el.getNodeName().contains("book")) {
-                    books.add(xmlToGoodreadsBook(el));
+                     books.add(xmlToGoodreadsBook(el));
                     count++;
                 }
             }
@@ -84,30 +86,29 @@ public class XMLUtil {
         return books;
     }
 
-
     public GoodreadsBook xmlToGoodreadsBook(Element el)
     {
         try {
             int id = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
-            String isbn = el.getElementsByTagName("isbn").item(0).getTextContent();
-            String isbn13 = el.getElementsByTagName("isbn13").item(0).getTextContent();
+            String isbn = unescapeXML(el.getElementsByTagName("isbn").item(0).getTextContent());
+            String isbn13 = unescapeXML(el.getElementsByTagName("isbn13").item(0).getTextContent());
             int text_reviews_count = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
-            String title = el.getElementsByTagName("title").item(0).getTextContent();
-            String title_without_series = el.getElementsByTagName("title_without_series").item(0).getTextContent();
-            String image_url = el.getElementsByTagName("image_url").item(0).getTextContent();
-            String small_image_url = el.getElementsByTagName("small_image_url").item(0).getTextContent();
-            String large_image_url = el.getElementsByTagName("large_image_url").item(0).getTextContent();
-            String link = el.getElementsByTagName("link").item(0).getTextContent();
-            int num_pages = Integer.parseInt(el.getElementsByTagName("num_pages").item(0).getTextContent());
-            String format = el.getElementsByTagName("format").item(0).getTextContent();
-            String edition_information = el.getElementsByTagName("edition_information").item(0).getTextContent();
-            String publisher = el.getElementsByTagName("publisher").item(0).getTextContent();
+            String title = unescapeXML(el.getElementsByTagName("title").item(0).getTextContent());
+            String title_without_series = unescapeXML(el.getElementsByTagName("title_without_series").item(0).getTextContent());
+            String image_url = unescapeXML(el.getElementsByTagName("image_url").item(0).getTextContent());
+            String small_image_url = unescapeXML(el.getElementsByTagName("small_image_url").item(0).getTextContent());
+            String large_image_url = unescapeXML(el.getElementsByTagName("large_image_url").item(0).getTextContent());
+            String link = unescapeXML(el.getElementsByTagName("link").item(0).getTextContent());
+            int num_pages = getIntFromElement(el.getElementsByTagName("num_pages").item(0).getTextContent());
+            String format = unescapeXML(el.getElementsByTagName("format").item(0).getTextContent());
+            String edition_information = unescapeXML(el.getElementsByTagName("edition_information").item(0).getTextContent());
+            String publisher = unescapeXML(el.getElementsByTagName("publisher").item(0).getTextContent());
             int publication_day = getIntFromElement(el.getElementsByTagName("publication_day").item(0).getTextContent());
             int publication_year = getIntFromElement(el.getElementsByTagName("publication_year").item(0).getTextContent());
             int publication_month = getIntFromElement(el.getElementsByTagName("publication_month").item(0).getTextContent());
             double average_rating = getDoubleFromElement(el.getElementsByTagName("average_rating").item(0).getTextContent());
             int ratings_count =getIntFromElement(el.getElementsByTagName("ratings_count").item(0).getTextContent());
-            String description = el.getElementsByTagName("description").item(0).getTextContent();
+            String description = unescapeXML(el.getElementsByTagName("description").item(0).getTextContent());
             int yearPublished = getIntFromElement(el.getElementsByTagName("published").item(0).getTextContent());
 
             NodeList valueList = el.getElementsByTagName("authors");
@@ -117,10 +118,10 @@ public class XMLUtil {
                 Element value = (Element) valueList.item(j);
 
                 int authorId = getIntFromElement(value.getElementsByTagName("id").item(0).getTextContent());
-                String authorName = value.getElementsByTagName("name").item(0).getTextContent();
-                String authorImageURL = value.getElementsByTagName("image_url").item(0).getTextContent();
-                String authorSmallImageURL = value.getElementsByTagName("small_image_url").item(0).getTextContent();
-                String authorLink = value.getElementsByTagName("link").item(0).getTextContent();
+                String authorName = unescapeXML(value.getElementsByTagName("name").item(0).getTextContent());
+                String authorImageURL = unescapeXML(value.getElementsByTagName("image_url").item(0).getTextContent());
+                String authorSmallImageURL = unescapeXML(value.getElementsByTagName("small_image_url").item(0).getTextContent());
+                String authorLink = unescapeXML(value.getElementsByTagName("link").item(0).getTextContent());
                 double authorAverageRating = getDoubleFromElement(value.getElementsByTagName("average_rating").item(0).getTextContent());
                 int authorRatingsCount = getIntFromElement(value.getElementsByTagName("ratings_count").item(0).getTextContent());
                 int authorTextReviewsCount = getIntFromElement(value.getElementsByTagName("text_reviews_count").item(0).getTextContent());
@@ -142,27 +143,47 @@ public class XMLUtil {
         return null;
     }
 
+    public String unescapeXML(String el)
+    {
+        if(el.contentEquals(""))
+        {
+            el = null;
+        }
+        if (el != null)
+        {return Jsoup.parse(StringEscapeUtils.unescapeJava(el)).text();}
+        return null;
+    }
+
     public int getIntFromElement(String el)
     {
-        if (el != null)
+        if(el.contentEquals(""))
         {
-            return Integer.parseInt(el);
+            el = null;
         }
+        if (el != null)
+        {return Integer.parseInt(el);}
         return 0;
     }
 
     public static int getInt(String el)
     {
-        if (el != null)
+        if(el.contentEquals(""))
         {
-            return Integer.parseInt(el);
+            el = null;
         }
+        if (el != null)
+        {return Integer.parseInt(el);}
         return 0;
     }
 
     public double getDoubleFromElement(String el)
     {
-        if(el != null) {
+        if(el.contentEquals(""))
+        {
+            el = null;
+        }
+        if (el != null)
+        {
             double d = 0;
             Pattern p = Pattern.compile("(\\d+(?:\\.\\d+))");
             Matcher m = p.matcher(el);
