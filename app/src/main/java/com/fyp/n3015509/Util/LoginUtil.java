@@ -29,8 +29,8 @@ import java.net.URL;
  * Created by tomha on 23-Mar-17.
  */
 
-public class LoginUtil {
-    private static final String IP = "192.168.0.10";
+public class LoginUtil{
+    private static final String IP = "152.105.96.224";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";

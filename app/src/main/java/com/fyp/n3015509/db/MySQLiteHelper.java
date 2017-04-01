@@ -3,6 +3,7 @@ package com.fyp.n3015509.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -106,15 +107,15 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + BUZZLIST_BOOK_NUM + "integer);";
 
     private static final String CREATE_BUZZLIST_INTERIM_TABLE = "create table "
-            + BUZZLIST_INTERIM + "( " + COLUMN_ID
-            + " integer primary key autoincrement, " + BOOK_ID
-            + " integer not null,"+ BUZZLIST_ID
-            + " integer not null);";
+            + BUZZLIST_INTERIM + "( "
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + BOOK_ID + " integer not null,"
+            + BUZZLIST_ID + " integer not null);";
 
     private static final String CREATE_BOOK_INTERIM_TABLE = "create table "
             + BOOK_INTERIM + "( " + COLUMN_ID
             + " integer primary key autoincrement, " + BOOK_ID
-            + " integer not null "+ AUTHOR_ID
+            + " integer not null, "+ AUTHOR_ID
             + " integer not null);";
 
     public MySQLiteHelper(Context context) {
@@ -123,7 +124,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL(CREATE_BOOK_TABLE+ CREATE_AUTHOR_TABLE + CREATE_BUZZLIST_TABLE + CREATE_BOOK_INTERIM_TABLE + CREATE_BUZZLIST_INTERIM_TABLE);
+        database.execSQL(CREATE_BOOK_TABLE);
+        database.execSQL(CREATE_AUTHOR_TABLE);
+        database.execSQL(CREATE_BUZZLIST_TABLE);
+        database.execSQL(CREATE_BOOK_INTERIM_TABLE);
+        database.execSQL(CREATE_BUZZLIST_INTERIM_TABLE);
     }
 
     @Override
@@ -154,7 +159,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // insert row
         long todo_id = db.insert(TABLE_AUTHORS, null, values);
-
+        db.close();
         return todo_id;
     }
 
@@ -182,8 +187,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // insert row
         long todo_id = db.insert(TABLE_BOOKS, null, values);
-
-        return todo_id;}
+            db.close();
+            return todo_id;}
         catch(Exception e)
         {
             e.printStackTrace();
@@ -213,7 +218,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         // insert row
         long todo_id = db.insert(BUZZLIST_INTERIM, null, values);
-
+        db.close();
         return todo_id;
     }
 
@@ -235,7 +240,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.close();
-
         return cursor.getCount();
     }
 
