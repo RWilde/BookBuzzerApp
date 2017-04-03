@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.db.MySQLiteHelper;
+import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
@@ -37,7 +38,6 @@ public class DBUtil {
                     db.insertBouzzlistInterim(shelfId, id);
                 }
             }
-            dbBooks = db.getBooksFromBuzzlist(1);
         }
         catch(Exception e)
         {
@@ -47,6 +47,19 @@ public class DBUtil {
        // int count = db.getBooksCount();
         int count = 0;
         return count;
+    }
+
+    public static ArrayList<Buzzlist> GetBuzzlist(Context ctx)
+    {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.getBuzzlists();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

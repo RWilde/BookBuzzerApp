@@ -5,6 +5,9 @@ package com.fyp.n3015509.db.dao;
  */
 
 public class Buzzlist {
+    String name;
+    int id;
+
     public String getName() {
         return name;
     }
@@ -13,5 +16,11 @@ public class Buzzlist {
         this.name = name;
     }
 
-    String name;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

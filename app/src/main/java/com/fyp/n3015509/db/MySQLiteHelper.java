@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
@@ -274,6 +275,22 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public long insertBouzzlistInterim(long buzzlistID, long bookId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+        String selectString = "SELECT " + COLUMN_ID + " FROM " + BUZZLIST_INTERIM + " WHERE " + BUZZLIST_ID + " = '" + buzzlistID + "' AND " + BOOK_ID + " = '" + bookId +"';";
+        final Cursor cursor = db.rawQuery(selectString, null);
+        long columnId = 0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    columnId = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        if (columnId != 0) {
+            return columnId;
+        }
 
         //check that the interim hasnt already been inserted into
         ContentValues values = new ContentValues();
@@ -307,12 +324,28 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return cursor.getCount();
     }
 
-    public int getBuzzlists() {
+    public ArrayList<Buzzlist> getBuzzlists() {
         String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
+
+        ArrayList<Buzzlist> list = new ArrayList<>();
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+
+                    Buzzlist newList = new Buzzlist();
+                    newList.setId(cursor.getInt(0));
+                    newList.setName(cursor.getString(1));
+                    list.add(newList);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
         cursor.close();
-        return cursor.getCount();
+        return list;
     }
 
     public ArrayList<GoodreadsBook> getBooksFromBuzzlist(int buzzlistId) {
