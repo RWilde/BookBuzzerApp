@@ -56,9 +56,6 @@
             android:name=".activity.GoodreadsLoginActivity"
             android:label="@string/title_activity_goodreads_login" />
         <activity
-            android:name=".activity.NavDrawerActivity"
-            android:label="@string/title_activity_nav_drawer" />
-        <activity
             android:name=".activity.AboutUsActivity"
             android:label="@string/title_activity_about_us"></activity>
     </application>

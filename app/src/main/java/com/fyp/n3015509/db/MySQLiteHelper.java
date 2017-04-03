@@ -3,21 +3,17 @@ package com.fyp.n3015509.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.fyp.n3015509.db.dao.Author;
-import com.fyp.n3015509.db.dao.Book;
-import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-
-import static android.R.attr.author;
 
 /**
  * Created by n3015509 on 24/03/2017.
@@ -54,6 +50,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public static final String AVG_RATING = "average_rating";
     public static final String RATINGS_COUNT = "ratings_count";
     public static final String DESCRIPTION = "description";
+    private static final String RELEASE_DATE = "release_date";
+    private static final String FORMAT = "format";
+    private static final String EDITION = "edition";
 
     //public static final String AUTHOR_ID = "id";
     public static final String AUTHOR_NAME = "name";
@@ -69,19 +68,19 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     // Database creation sql statement
     private static final String CREATE_AUTHOR_TABLE = "create table "
-            + TABLE_BOOKS + "( "
+            + TABLE_AUTHORS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + AUTHOR_ID + " integer not null,"
             + AUTHOR_NAME + " varchar(255),"
-            + AUTHOR_IMAGE + " varchar(255),"
-            + AUTHOR_SMALL_IMAGE + " varchar(255),"
+            + AUTHOR_IMAGE + " blob,"
+            + AUTHOR_SMALL_IMAGE + " blob,"
             + AUTHOR_LINK + " varchar(255),"
             + AUTHOR_AVG_RATING + " float,"
             + AUTHOR_RATINGS_COUNT + " integer,"
             + AUTHOR_TEXT_REVIEWS_COUNT + " integer);";
 
     private static final String CREATE_BOOK_TABLE = "create table "
-            + TABLE_AUTHORS + "( "
+            + TABLE_BOOKS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + GOODREADS_ID + " integer not null,"
             + ISBN + " varchar(255),"
@@ -89,22 +88,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + REVIEW_COUNT + " integer not null,"
             + TITLE + " varchar(255),"
             + TITLE_WITHOUT_SERIES + " varchar(255),"
-            + IMAGE + " varchar(255),"
-            + SMALL_IMAGE + " varchar(255),"
-            + LARGE_IMAGE + " varchar(255),"
+            + IMAGE + " blob,"
+            + SMALL_IMAGE + " blob,"
+            + LARGE_IMAGE + " blob,"
             + GOODREADS_LINK + " varchar(255),"
             + PAGE_NUM + " integer,"
             + YEAR + " float,"
             + AVG_RATING + " integer,"
             + PUBLISHSER + " varchar(255),"
+            + RELEASE_DATE + " varchar(255),"
             + RATINGS_COUNT + " integer,"
-            + DESCRIPTION + " varchar(255));";
+            + DESCRIPTION + " varchar(255),"
+            + FORMAT + " varchar(255),"
+            + EDITION + " varchar(255));";
 
     private static final String CREATE_BUZZLIST_TABLE = "create table "
             + TABLE_BUZZLISTS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + BUZZLIST_NAME + " varchar(255) not null,"
-            + BUZZLIST_BOOK_NUM + "integer);";
+            + BUZZLIST_BOOK_NUM + " integer);";
 
     private static final String CREATE_BUZZLIST_INTERIM_TABLE = "create table "
             + BUZZLIST_INTERIM + "( "
@@ -113,10 +115,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + BUZZLIST_ID + " integer not null);";
 
     private static final String CREATE_BOOK_INTERIM_TABLE = "create table "
-            + BOOK_INTERIM + "( " + COLUMN_ID
-            + " integer primary key autoincrement, " + BOOK_ID
-            + " integer not null, "+ AUTHOR_ID
-            + " integer not null);";
+            + BOOK_INTERIM + "( "
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + BOOK_ID + " integer not null, "
+            + AUTHOR_ID + " integer not null);";
 
     public MySQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -144,17 +146,34 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertAuthor(GoodreadsAuthor author) {
+    public long insertAuthor(GoodreadsAuthor author, Context context) {
         SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectString = "SELECT " + COLUMN_ID + " FROM " + TABLE_AUTHORS + " WHERE " + AUTHOR_ID + " = " + author.getId() + ";";
+        final Cursor cursor = db.rawQuery(selectString, null);
+        long columnId = 0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    columnId = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        if (columnId != 0) {
+            return columnId;
+        }
 
         ContentValues values = new ContentValues();
         values.put(AUTHOR_ID, author.getId());
         values.put(AUTHOR_AVG_RATING, author.getAverage_rating());
-        values.put(AUTHOR_IMAGE, author.getImage_url());
+        values.put(AUTHOR_IMAGE, toByteArray(author.getImage()));
         values.put(AUTHOR_LINK, author.getLink());
-        values.put(AUTHOR_RATINGS_COUNT, author.getRatings_count());
-        values.put(AUTHOR_SMALL_IMAGE, author.getSmall_image_url());
-        values.put(AUTHOR_TEXT_REVIEWS_COUNT,author.getText_reviews_count());
+        values.put(AUTHOR_RATINGS_COUNT, author.getRatingsCount());
+        values.put(AUTHOR_SMALL_IMAGE, toByteArray(author.getSmallImage()));
+        values.put(AUTHOR_TEXT_REVIEWS_COUNT, author.getTextReviewsCount());
         values.put(AUTHOR_NAME, author.getName());
 
         // insert row
@@ -163,34 +182,60 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return todo_id;
     }
 
+    private byte[] toByteArray(Bitmap image)
+    {
+        if (image != null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            return stream.toByteArray();
+        }
+        return null;
+    }
+
     public long insertBook(GoodreadsBook book) {
-        try{
-        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put(GOODREADS_ID, book.getId());
-        values.put(ISBN, book.getIsbn());
-        values.put(ISBN13, book.getIsbn13());
-        values.put(REVIEW_COUNT, book.getText_reviews_count());
-        values.put(TITLE, book.getTitle());
-        values.put(TITLE_WITHOUT_SERIES, book.getTitle_without_series());
-        values.put(IMAGE,book.getImage_url());
-        values.put(SMALL_IMAGE, book.getSmall_image_url());
-        values.put(LARGE_IMAGE,book.getLarge_image_url());
-        values.put(GOODREADS_LINK, book.getLink());
-        values.put(PAGE_NUM,book.getNum_pages());
-        values.put(YEAR, book.getYearPublished());
-        values.put(AVG_RATING,book.getAverage_rating());
-        values.put(PUBLISHSER, book.getPublisher());
-        values.put(RATINGS_COUNT,book.getRatings_count());
-        values.put(DESCRIPTION, book.getDescription());
+            String selectString = "SELECT " + COLUMN_ID + " FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + " = " + book.getId() + ";";
+            final Cursor cursor = db.rawQuery(selectString, null);
+            long columnId = 0;
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        columnId = cursor.getInt(0);
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
 
-        // insert row
-        long todo_id = db.insert(TABLE_BOOKS, null, values);
+            if (columnId != 0) {
+                return columnId;
+            }
+
+            ContentValues values = new ContentValues();
+            values.put(GOODREADS_ID, book.getId());
+            values.put(ISBN, book.getIsbn());
+            values.put(ISBN13, book.getIsbn13());
+            values.put(REVIEW_COUNT, book.getTextReviewsCount());
+            values.put(TITLE, book.getTitle());
+            values.put(TITLE_WITHOUT_SERIES, book.getTitleWithoutSeries());
+            values.put(IMAGE, toByteArray(book.getImage()));
+            values.put(SMALL_IMAGE, toByteArray(book.getSmallImage()));
+            values.put(LARGE_IMAGE, toByteArray(book.getLargeImage()));
+            values.put(GOODREADS_LINK, book.getLink());
+            values.put(PAGE_NUM, book.getNumPages());
+            values.put(YEAR, book.getYearPublished());
+            values.put(AVG_RATING, book.getAverage_rating());
+            values.put(PUBLISHSER, book.getPublisher());
+            values.put(RATINGS_COUNT, book.getRatingsCount());
+            values.put(DESCRIPTION, book.getDescription());
+
+            // insert row
+            long todo_id = db.insert(TABLE_BOOKS, null, values);
             db.close();
-            return todo_id;}
-        catch(Exception e)
-        {
+            return todo_id;
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
@@ -198,6 +243,23 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public long insertBouzzlist(GoodreadsShelf buzz) {
         SQLiteDatabase db = this.getWritableDatabase();
+
+        String selectString = "SELECT " + COLUMN_ID + " FROM " + TABLE_BUZZLISTS + " WHERE " + BUZZLIST_NAME + " = '" + buzz.getShelfName() + "';";
+        final Cursor cursor = db.rawQuery(selectString, null);
+        long columnId = 0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    columnId = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        if (columnId != 0) {
+            return columnId;
+        }
 
         ContentValues values = new ContentValues();
         values.put(BUZZLIST_NAME, buzz.getShelfName());
@@ -212,6 +274,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public long insertBouzzlistInterim(long buzzlistID, long bookId) {
         SQLiteDatabase db = this.getWritableDatabase();
 
+
+        //check that the interim hasnt already been inserted into
         ContentValues values = new ContentValues();
         values.put(BUZZLIST_ID, buzzlistID);
         values.put(BOOK_ID, bookId);
@@ -241,6 +305,67 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.close();
         return cursor.getCount();
+    }
+
+    public int getBuzzlists() {
+        String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        cursor.close();
+        return cursor.getCount();
+    }
+
+    public ArrayList<GoodreadsBook> getBooksFromBuzzlist(int buzzlistId) {
+        String countQuery = "SELECT * FROM " + TABLE_BOOKS + " INNER JOIN " + BUZZLIST_INTERIM +" ON " +  TABLE_BOOKS
+                + "." +  COLUMN_ID + " = " + BUZZLIST_INTERIM +"."+  BOOK_ID + " WHERE " + BUZZLIST_INTERIM+"."+ BUZZLIST_ID + "=" + buzzlistId;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        ArrayList<GoodreadsBook> book = new ArrayList<>();
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+
+                    book = createGoodreadsBook(cursor);
+
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return book;
+    }
+
+    private ArrayList<GoodreadsBook> createGoodreadsBook(Cursor cursor) {
+        ArrayList<GoodreadsBook> booklist = new ArrayList<>();
+        cursor.moveToFirst();
+        while(cursor.isAfterLast()==false)
+        {
+            GoodreadsBook b = new GoodreadsBook();
+            int id = cursor.getInt(0);
+            b.setId( cursor.getInt(1));
+            b.setIsbn(cursor.getString(2));
+            b.setIsbn13(cursor.getString(3));
+            b.setTextReviewsCount( cursor.getInt(4));
+            b.setTitle(cursor.getString(5));
+            b.setTitleWithoutSeries(cursor.getString(6));
+            b.setImage(cursor.getBlob(7));
+            b.setSmallImage(cursor.getBlob(8));
+            b.setLargeImage(cursor.getBlob(9));
+            b.setLink(cursor.getString(10));
+            b.setNumPages(cursor.getInt(11));
+            b.setYearPublished(cursor.getInt(12));
+            b.setAverage_rating(cursor.getDouble(13));
+            b.setPublisher( cursor.getString(14));
+            b.setReleaseDate(cursor.getString(15));
+            b.setRatingsCount(cursor.getInt(16));
+            b.setDescription(cursor.getString(17));
+            b.setFormat(cursor.getString(18));
+            b.setEditionInformation(cursor.getString(19));
+            booklist.add(b);
+            cursor.moveToNext();
+        }
+        return booklist;
     }
 
 

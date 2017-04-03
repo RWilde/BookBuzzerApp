@@ -20,26 +20,32 @@ import java.util.HashMap;
 public class DBUtil {
 
     public static int SaveShelf(ArrayList<GoodreadsShelf> booklist, Context ctx ) {
-        MySQLiteHelper db = new MySQLiteHelper(ctx);
+        ArrayList<GoodreadsBook> dbBooks = new ArrayList<>();
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
 
-        for (GoodreadsShelf shelf : booklist)
-        {
-            ArrayList<GoodreadsBook> books = shelf.getBooks();
-            long shelfId = db.insertBouzzlist(shelf);
-            for (GoodreadsBook book : books)
-            {
-                long id = db.insertBook(book);
-                ArrayList<GoodreadsAuthor> authors = book.getAuthors();
-                for (GoodreadsAuthor author : authors)
-                {
-                    long authorId = db.insertAuthor(author);
-                    if (authorId != 0) db.insertBookInterim(id, authorId);
+            for (GoodreadsShelf shelf : booklist) {
+                ArrayList<GoodreadsBook> books = shelf.getBooks();
+                long shelfId = db.insertBouzzlist(shelf);
+                for (GoodreadsBook book : books) {
+                    long id = db.insertBook(book);
+                    ArrayList<GoodreadsAuthor> authors = book.getAuthors();
+                    for (GoodreadsAuthor author : authors) {
+                        long authorId = db.insertAuthor(author, ctx);
+                        if (authorId != 0) db.insertBookInterim(id, authorId);
+                    }
+                    db.insertBouzzlistInterim(shelfId, id);
                 }
-                db.insertBouzzlistInterim(shelfId, id);
             }
+            dbBooks = db.getBooksFromBuzzlist(1);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
         }
 
-        int count = db.getBooksCount();
+       // int count = db.getBooksCount();
+        int count = 0;
         return count;
     }
 

@@ -1,5 +1,14 @@
 package com.fyp.n3015509.goodreadsDAO;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Created by tomha on 24-Mar-17.
  */
@@ -7,22 +16,25 @@ package com.fyp.n3015509.goodreadsDAO;
 public class GoodreadsAuthor {
     int id;
     String name;
-    String image_url;
-    String small_image_url;
+    Bitmap image;
+    Bitmap smallImage;
     String link;
     double average_rating;
-    int ratings_count;
-    int text_reviews_count;
+    int ratingsCount;
+    int textReviewsCount;
 
-    public GoodreadsAuthor createGoodreadsAuthor(int id, String name, String image, String smallImage, String link, double avg, int ratings, int reviews) {
+    public GoodreadsAuthor createGoodreadsAuthor(int id, String name, String imageURL, String smallImageURL, String link, double avg, int ratings, int reviews) {
+        setImage(imageURL);
+        setSmallImage(smallImageURL);
+
         this.id = id;
         this.name = name;
-        this.image_url = image;
-        this.small_image_url = smallImage;
+        this.image = getImage();
+        this.smallImage = getSmallImage();
         this.link = link;
         this.average_rating = avg;
-        this.ratings_count = ratings;
-        this.text_reviews_count = reviews;
+        this.ratingsCount = ratings;
+        this.textReviewsCount = reviews;
         return this;
     }
 
@@ -42,20 +54,46 @@ public class GoodreadsAuthor {
         this.name = name;
     }
 
-    public String getImage_url() {
-        return image_url;
+    public Bitmap getImage() {
+        return image;
     }
 
-    public void setImage_url(String image_url) {
-        this.image_url = image_url;
+    public void setImage(String image_url) {
+        if (image_url != null) {
+            try {
+                URL url = new URL(image_url);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                InputStream is = connection.getInputStream();
+                this.image = BitmapFactory.decodeStream(is);
+                ;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public String getSmall_image_url() {
-        return small_image_url;
+    public Bitmap getSmallImage() {
+        return smallImage;
     }
 
-    public void setSmall_image_url(String small_image_url) {
-        this.small_image_url = small_image_url;
+    public void setSmallImage(String small_image_url) {
+        if (small_image_url != null) {
+            try {
+                URL url = new URL(small_image_url);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                InputStream is = connection.getInputStream();
+                this.smallImage = BitmapFactory.decodeStream(is);
+                ;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public String getLink() {
@@ -74,20 +112,20 @@ public class GoodreadsAuthor {
         this.average_rating = average_rating;
     }
 
-    public int getRatings_count() {
-        return ratings_count;
+    public int getRatingsCount() {
+        return ratingsCount;
     }
 
-    public void setRatings_count(int ratings_count) {
-        this.ratings_count = ratings_count;
+    public void setRatingsCount(int ratingsCount) {
+        this.ratingsCount = ratingsCount;
     }
 
-    public int getText_reviews_count() {
-        return text_reviews_count;
+    public int getTextReviewsCount() {
+        return textReviewsCount;
     }
 
-    public void setText_reviews_count(int text_reviews_count) {
-        this.text_reviews_count = text_reviews_count;
+    public void setTextReviewsCount(int textReviewsCount) {
+        this.textReviewsCount = textReviewsCount;
     }
 
 

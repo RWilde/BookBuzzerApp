@@ -2,13 +2,10 @@ package com.fyp.n3015509.Util;
 
 import android.content.Context;
 
-import com.fyp.n3015509.apiDAO.APIBook;
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,23 +110,23 @@ class APIUtil {
         JSONObject jsonBook = new JSONObject();
         try {
             jsonBook.put("id", book.getId());
-            jsonBook.put("ratings_count", book.getRatings_count());
-            jsonBook.put("txt_reviews_count", book.getText_reviews_count());
-            jsonBook.put("img_url", book.getImage_url());
-            jsonBook.put("sml_img_url", book.getSmall_image_url());
-            jsonBook.put("lrg_img_url", book.getLarge_image_url());
+            jsonBook.put("ratings_count", book.getRatingsCount());
+            jsonBook.put("txt_reviews_count", book.getTextReviewsCount());
+            jsonBook.put("img_url", book.getImage());
+            jsonBook.put("sml_img_url", book.getSmallImage());
+            jsonBook.put("lrg_img_url", book.getLargeImage());
             jsonBook.put("link", book.getLink());
             jsonBook.put("avg_rating", book.getAverage_rating());
             jsonBook.put("description", book.getDescription());
             jsonBook.put("isbn", book.getIsbn());
             jsonBook.put("isbn13", book.getIsbn13());
             jsonBook.put("title", book.getTitle());
-            jsonBook.put("title_without_series", book.getTitle_without_series());
+            jsonBook.put("title_without_series", book.getTitleWithoutSeries());
 
             jsonBook.put("format", book.getFormat());
-            jsonBook.put("edition_information", book.getEdition_information());
+            jsonBook.put("edition_information", book.getEditionInformation());
             jsonBook.put("publisher", book.getPublisher());
-            jsonBook.put("date", book.getPublication_day() + "/" + book.getPublication_month() + "/" + book.getPublication_year());
+            jsonBook.put("date", book.getPublicationDay() + "/" + book.getPublicationMonth() + "/" + book.getPublicationYear());
             jsonBook.put("average_rating", book.getAverage_rating());
             jsonBook.put("yearPublished", book.getYearPublished());
             jsonBook.put("authors", authorJSON);
@@ -155,11 +152,11 @@ class APIUtil {
                 temp.put("name", author.getName());
                 temp.put("avg_rating", author.getAverage_rating());
                 temp.put("id", author.getId());
-                temp.put("img_url", author.getImage_url());
+                temp.put("img_url", author.getImage());
                 temp.put("link", author.getLink());
-                temp.put("ratings_count", author.getRatings_count());
-                temp.put("sml_img_url", author.getSmall_image_url());
-                temp.put("txt_reviews_count", author.getText_reviews_count());
+                temp.put("ratings_count", author.getRatingsCount());
+                temp.put("sml_img_url", author.getSmallImage());
+                temp.put("txt_reviews_count", author.getTextReviewsCount());
                 authorListJson.put(String.valueOf(author.getId()),temp);
             } catch (JSONException e) {
                 e.printStackTrace();

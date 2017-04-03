@@ -1,7 +1,6 @@
 package com.fyp.n3015509.apiDAO;
 
 
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.google.gson.Gson;
 
@@ -37,20 +36,20 @@ public class APIBook {
         this.id = book.getId();
         this.isbn = book.getIsbn();
         this.isbn13 = book.getIsbn13();
-        this.text_reviews_count = book.getText_reviews_count();
+        this.text_reviews_count = book.getTextReviewsCount();
         this.title = book.getTitle();
-        this.title_without_series = book.getTitle_without_series();
-        this.image_url = book.getImage_url();
-        this.small_image_url = book.getSmall_image_url();
-        this.large_image_url = book.getLarge_image_url();
+        this.title_without_series = book.getTitleWithoutSeries();
+       // this.image_url = book.getImage();
+       // this.small_image_url = book.getSmall_image_url();
+       // this.large_image_url = book.getLarge_image_url();
         this.link = book.getLink();
-        this.num_pages = book.getNum_pages();
+        this.num_pages = book.getNumPages();
         this.format = book.getFormat();
-        this.edition_information = book.getEdition_information();
+        this.edition_information = book.getEditionInformation();
         this.publisher = book.getPublisher();
-        this.date = book.getPublication_day() + "/" + book.getPublication_month() + "/" + book.getPublication_year();
+        this.date = book.getPublicationDay() + "/" + book.getPublicationMonth() + "/" + book.getPublicationYear();
         this.average_rating = book.getAverage_rating();
-        this.ratings_count = book.getRatings_count();
+        this.ratings_count = book.getRatingsCount();
         this.description = book.getDescription();
         this.yearPublished = book.getYearPublished();
         this.author = new Gson().toJson(book.getAuthors());

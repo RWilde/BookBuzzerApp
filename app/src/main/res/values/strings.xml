@@ -45,19 +45,19 @@
 
     <!-- Navigation Drawer menu labels -->
     <string name="nav_home">Home</string>
-    <string name="nav_photos">Photos</string>
-    <string name="nav_movies">Movies</string>
+    <string name="nav_photos">Buzzlist</string>
+    <string name="nav_movies">Beelist</string>
     <string name="nav_notifications">Notifications</string>
-    <string name="nav_settings">Settings</string>
+    <string name="nav_settings">Suggestions</string>
     <string name="nav_about_us">About Us</string>
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
         <item>Home</item>
-        <item>Photos</item>
-        <item>Movies</item>
+        <item>Buzzlist</item>
+        <item>Beelist</item>
         <item>Notifications</item>
-        <item>Settings</item>
+        <item>Suggestions</item>
     </string-array>
 
     <string name="title_activity_about_us">About Us</string>

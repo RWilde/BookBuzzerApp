@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.fyp.n3015509.Util.XMLUtil;
+import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.activity.LoginActivity;
 import com.google.api.client.auth.oauth.OAuthAuthorizeTemporaryTokenUrl;
 import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
@@ -50,6 +51,7 @@ public class GoodreadsLogin extends LoginActivity {
 
     public static int GetGoodreadsAuthentication(Activity ctx) {
         int goodreads_id = 0;
+        String goodreads_name = null;
         JSONObject login = null;
         try {
             OAuthHmacSigner signer = new OAuthHmacSigner();
@@ -112,9 +114,12 @@ public class GoodreadsLogin extends LoginActivity {
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     goodreads_id = Integer.parseInt(eElement.getAttribute("id"));
+                    goodreads_name = eElement.getElementsByTagName("name").item(0).getTextContent();
                 }
-                return goodreads_id;
             }
+            SaveSharedPreference.setUserName(ctx, goodreads_name);
+            return goodreads_id;
+
 
         } catch (IOException e) {
             e.printStackTrace();

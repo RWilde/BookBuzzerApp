@@ -14,6 +14,7 @@ public class SaveSharedPreference
     static final String PREF_TOKEN= "token";
     static final String PREF_GOODREADS= "goodreads_id";
     static final String PREF_IMPORTED = "imported";
+    static final String PREF_USERNAME = "username";
 
 
     static SharedPreferences getSharedPreferences(Context ctx) {
@@ -69,5 +70,15 @@ public class SaveSharedPreference
     {
         return getSharedPreferences(ctx).getBoolean(PREF_IMPORTED, false);
 
+    }
+
+    public static String getUserName(Context ctx) {
+        return getSharedPreferences(ctx).getString(PREF_USERNAME, "");
+    }
+
+    public static void setUserName(Context ctx, String username) {
+        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
+        editor.putString(PREF_USERNAME, username);
+        editor.apply();
     }
 }

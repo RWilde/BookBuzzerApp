@@ -1,8 +1,18 @@
 package com.fyp.n3015509.goodreadsDAO;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.fyp.n3015509.Util.GoodreadsUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by tomha on 24-Mar-17.
@@ -12,25 +22,35 @@ public class GoodreadsBook {
     int id;
     String isbn;
     String isbn13;
-    int text_reviews_count;
+    int textReviewsCount;
     String title;
-    String title_without_series;
-    String image_url;
-    String small_image_url;
-    String large_image_url;
+    String titleWithoutSeries;
+    Bitmap image;
+    Bitmap smallImage;
+    Bitmap largeImage;
     String link;
-    int num_pages;
+    int numPages;
     String format;
-    String edition_information;
+    String editionInformation;
     String publisher;
-    int publication_day;
-    int publication_year;
-    int publication_month;
+    int publicationDay;
+    int publicationYear;
+    int publicationMonth;
     double average_rating;
-    int ratings_count;
+    int ratingsCount;
     String description;
     ArrayList<GoodreadsAuthor> author;
     int yearPublished;
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    String releaseDate;
 
     GoodreadsUtil util = new GoodreadsUtil();
 
@@ -57,25 +77,29 @@ public class GoodreadsBook {
                                              int yearPublished,
 
                                              ArrayList<GoodreadsAuthor> author) {
+        setImage_url(image_url);
+        setSmall_image_url(small_image_url);
+        setLarge_image_url(large_image_url);
+
         this.id = id;
         this.isbn = isbn;
         this.isbn13 = isbn13;
-        this.text_reviews_count = text_reviews_count;
+        this.textReviewsCount = text_reviews_count;
         this.title = title;
-        this.title_without_series = title_without_series;
-        this.image_url = image_url;
-        this.small_image_url = small_image_url;
-        this.large_image_url = large_image_url;
+        this.titleWithoutSeries = title_without_series;
+        this.image = getImage();
+        this.smallImage = getSmallImage();
+        this.largeImage = getLargeImage();
         this.link = link;
-        this.num_pages = num_pages;
+        this.numPages = num_pages;
         this.format = format;
-        this.edition_information = edition_information;
+        this.editionInformation = edition_information;
         this.publisher = publisher;
-        this.publication_day = publication_day;
-        this.publication_year = publication_year;
-        this.publication_month = publication_month;
+        this.publicationDay = publication_day;
+        this.publicationYear = publication_year;
+        this.publicationMonth = publication_month;
         this.average_rating = average_rating;
-        this.ratings_count = ratings_count;
+        this.ratingsCount = ratings_count;
         this.description = description;
         this.yearPublished = yearPublished;
 
@@ -108,12 +132,12 @@ public class GoodreadsBook {
         this.isbn13 = isbn13;
     }
 
-    public int getText_reviews_count() {
-        return text_reviews_count;
+    public int getTextReviewsCount() {
+        return textReviewsCount;
     }
 
-    public void setText_reviews_count(int text_reviews_count) {
-        this.text_reviews_count = text_reviews_count;
+    public void setTextReviewsCount(int textReviewsCount) {
+        this.textReviewsCount = textReviewsCount;
     }
 
     public String getTitle() {
@@ -124,36 +148,96 @@ public class GoodreadsBook {
         this.title = title;
     }
 
-    public String getTitle_without_series() {
-        return title_without_series;
+    public String getTitleWithoutSeries() {
+        return titleWithoutSeries;
     }
 
-    public void setTitle_without_series(String title_without_series) {
-        this.title_without_series = title_without_series;
+    public void setTitleWithoutSeries(String titleWithoutSeries) {
+        this.titleWithoutSeries = titleWithoutSeries;
     }
 
-    public String getImage_url() {
-        return image_url;
+    public Bitmap getImage() {
+        return image;
     }
 
-    public void setImage_url(String image_url) {
-        this.image_url = image_url;
+    public void setImage_url(String image) {
+        if (image != null) {
+            try {
+                URL url = new URL(image);
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+                InputStream is = connection.getInputStream();
+                this.image = BitmapFactory.decodeStream(is);
+                ;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public String getSmall_image_url() {
-        return small_image_url;
+    public void setImage(byte[] image) {
+        if (image != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            this.image = bitmap;
+        }
     }
 
-    public void setSmall_image_url(String small_image_url) {
-        this.small_image_url = small_image_url;
+    public Bitmap getSmallImage() {
+        return smallImage;
     }
 
-    public String getLarge_image_url() {
-        return large_image_url;
+    public void setSmall_image_url(String image) {
+        if (image != null) {
+            try {
+                URL url = new URL(image);
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+                InputStream is = connection.getInputStream();
+                this.smallImage = BitmapFactory.decodeStream(is);
+                ;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setSmallImage(byte[] image) {
+        if (image != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            this.smallImage = bitmap;
+        }
+    }
+
+    public Bitmap getLargeImage() {
+        return largeImage;
     }
 
     public void setLarge_image_url(String large_image_url) {
-        this.large_image_url = large_image_url;
+        if (large_image_url != null) {
+            try {
+                URL url = new URL(large_image_url);
+                HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+                InputStream is = connection.getInputStream();
+                this.largeImage = BitmapFactory.decodeStream(is);
+                ;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setLargeImage(byte[] image) {
+        if (image != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            this.largeImage = bitmap;
+        }
     }
 
     public String getLink() {
@@ -164,12 +248,12 @@ public class GoodreadsBook {
         this.link = link;
     }
 
-    public int getNum_pages() {
-        return num_pages;
+    public int getNumPages() {
+        return numPages;
     }
 
-    public void setNum_pages(int num_pages) {
-        this.num_pages = num_pages;
+    public void setNumPages(int numPages) {
+        this.numPages = numPages;
     }
 
     public String getFormat() {
@@ -180,12 +264,12 @@ public class GoodreadsBook {
         this.format = format;
     }
 
-    public String getEdition_information() {
-        return edition_information;
+    public String getEditionInformation() {
+        return editionInformation;
     }
 
-    public void setEdition_information(String edition_information) {
-        this.edition_information = edition_information;
+    public void setEditionInformation(String editionInformation) {
+        this.editionInformation = editionInformation;
     }
 
     public String getPublisher() {
@@ -196,28 +280,28 @@ public class GoodreadsBook {
         this.publisher = publisher;
     }
 
-    public int getPublication_day() {
-        return publication_day;
+    public int getPublicationDay() {
+        return publicationDay;
     }
 
-    public void setPublication_day(int publication_day) {
-        this.publication_day = publication_day;
+    public void setPublicationDay(int publicationDay) {
+        this.publicationDay = publicationDay;
     }
 
-    public int getPublication_year() {
-        return publication_year;
+    public int getPublicationYear() {
+        return publicationYear;
     }
 
-    public void setPublication_year(int publication_year) {
-        this.publication_year = publication_year;
+    public void setPublicationYear(int publicationYear) {
+        this.publicationYear = publicationYear;
     }
 
-    public int getPublication_month() {
-        return publication_month;
+    public int getPublicationMonth() {
+        return publicationMonth;
     }
 
-    public void setPublication_month(int publication_month) {
-        this.publication_month = publication_month;
+    public void setPublicationMonth(int publicationMonth) {
+        this.publicationMonth = publicationMonth;
     }
 
     public double getAverage_rating() {
@@ -228,12 +312,12 @@ public class GoodreadsBook {
         this.average_rating = average_rating;
     }
 
-    public int getRatings_count() {
-        return ratings_count;
+    public int getRatingsCount() {
+        return ratingsCount;
     }
 
-    public void setRatings_count(int ratings_count) {
-        this.ratings_count = ratings_count;
+    public void setRatingsCount(int ratingsCount) {
+        this.ratingsCount = ratingsCount;
     }
 
     public String getDescription() {
@@ -259,8 +343,6 @@ public class GoodreadsBook {
     public void setYearPublished(int yearPublished) {
         this.yearPublished = yearPublished;
     }
-
-
 
 
 }
