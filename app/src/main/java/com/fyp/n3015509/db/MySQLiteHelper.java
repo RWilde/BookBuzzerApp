@@ -357,9 +357,23 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
+                    ArrayList<GoodreadsBook> booklist = new ArrayList<>();
+                    while(cursor.isAfterLast()==false) {
+                        GoodreadsBook b = createGoodreadsBook(cursor);
+                        String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM +" ON " +  TABLE_AUTHORS
+                                + "." +  COLUMN_ID + " = " + BOOK_INTERIM +"."+  AUTHOR_ID + " WHERE " + BOOK_INTERIM+"."+ BOOK_ID + "=" + b.getColumnId();
+                        Cursor c = db.rawQuery(authorQuery, null);
+                        ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
 
-                    book = createGoodreadsBook(cursor);
-
+                        if (c.moveToFirst()) {
+                            while (c.isAfterLast() == false) {
+                                authorList.add(createAuthor(c));
+                            }
+                        }
+                        b.setAuthors(authorList);
+                        book.add(b);
+                        cursor.moveToNext();
+                    }
                 }
             } finally {
                 cursor.close();
@@ -369,13 +383,27 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return book;
     }
 
-    private ArrayList<GoodreadsBook> createGoodreadsBook(Cursor cursor) {
-        ArrayList<GoodreadsBook> booklist = new ArrayList<>();
-        cursor.moveToFirst();
-        while(cursor.isAfterLast()==false)
-        {
+    public GoodreadsBook getBook(int id) {
+        String countQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + "=" + id + " LIMIT 1;";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        GoodreadsBook book = new GoodreadsBook();
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    book = createGoodreadsBook(cursor);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        return book;
+    }
+
+    private GoodreadsBook createGoodreadsBook(Cursor cursor) {
             GoodreadsBook b = new GoodreadsBook();
-            int id = cursor.getInt(0);
+            b.setColumnId(cursor.getInt(0));
             b.setId( cursor.getInt(1));
             b.setIsbn(cursor.getString(2));
             b.setIsbn13(cursor.getString(3));
@@ -395,10 +423,22 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             b.setDescription(cursor.getString(17));
             b.setFormat(cursor.getString(18));
             b.setEditionInformation(cursor.getString(19));
-            booklist.add(b);
-            cursor.moveToNext();
-        }
-        return booklist;
+
+        return b;
+    }
+
+    private GoodreadsAuthor createAuthor(Cursor c) {
+        GoodreadsAuthor b = new GoodreadsAuthor();
+        b.setColumnId(c.getInt(0));
+        b.setId( c.getInt(1));
+        b.setName(c.getString(2));
+        b.setImageDB(c.getBlob(3));
+        b.setSmallImageDB( c.getBlob(4));
+        b.setLink(c.getString(5));
+        b.setAverage_rating(c.getDouble(6));
+        b.setRatingsCount(c.getInt(7));
+        b.setTextReviewsCount(c.getInt(8));
+        return b;
     }
 
 

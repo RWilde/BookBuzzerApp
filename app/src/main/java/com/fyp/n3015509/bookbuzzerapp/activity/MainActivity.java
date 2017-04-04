@@ -10,9 +10,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -33,7 +32,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.fyp.n3015509.Util.GoodreadsUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragmentFragment;
+import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
@@ -44,8 +43,6 @@ import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,14 +52,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgNavHeaderBg, imgProfile;
     private TextView txtName, txtWebsite;
     private Toolbar toolbar;
-    private FloatingActionButton fab;
+    //private FloatingActionButton fab;
 
     private View mProgressView;
     private View mLoginFormView;
-
-    // urls to load navigation header background image
-    // and profile image
-    private static final String urlProfileImg = "https://lh3.googleusercontent.com/eCtE_G34M9ygdkmOpYvCag1vBARCmZwnVS6rS5t4JLzJ6QgQSBquM0nuTsCpLhYbKljoyS-txg";
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -91,26 +84,12 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mHandler = new Handler() {
-            @Override
-            public void publish(LogRecord record) {
+        mHandler = new Handler();
 
-            }
-
-            @Override
-            public void flush() {
-
-            }
-
-            @Override
-            public void close() throws SecurityException {
-
-            }
-        };
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        //fab = (FloatingActionButton) findViewById(R.id.fab);
 
         // Navigation view header
         navHeader = navigationView.getHeaderView(0);
@@ -122,13 +101,13 @@ public class MainActivity extends AppCompatActivity {
         // load toolbar titles from string resources
         activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         // load nav menu header data
         loadNavHeader();
@@ -162,12 +141,6 @@ public class MainActivity extends AppCompatActivity {
         txtName.setText("Hello " + SaveSharedPreference.getUserName(getApplicationContext()));
         txtWebsite.setText("Welcome to BookBuzzer");
 
-        // loading header background image
-//        Glide.with(this).load(urlNavHeaderBg)
-//                .crossFade()
-//                .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                .into(imgNavHeaderBg);
-
         // Loading profile image
         Glide.with(this).load(" ")
                 .crossFade()
@@ -197,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawers();
 
             // show or hide the fab button
-            toggleFab();
+            //toggleFab();
             return;
         }
 
@@ -220,11 +193,11 @@ public class MainActivity extends AppCompatActivity {
 
         // If mPendingRunnable is not null, then add to the message queue
         if (mPendingRunnable != null) {
-           // mHandler.post(mPendingRunnable);
+          mHandler.post(mPendingRunnable);
         }
 
         // show or hide the fab button
-        toggleFab();
+        //toggleFab();
 
         //Closing drawer on item click
         drawer.closeDrawers();
@@ -241,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                 return homeFragment;
             case 1:
                 // photos
-                BookListFragmentFragment bListFragment = new BookListFragmentFragment();
+                BookListFragment bListFragment = new BookListFragment();
                 return bListFragment;
             case 2:
                 // movies fragment
@@ -402,7 +375,6 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
             Toast.makeText(getApplicationContext(), "Logout user!", Toast.LENGTH_LONG).show();
-
         }
 
         // user is in notifications fragment
@@ -421,12 +393,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // show or hide the fab
-    private void toggleFab() {
-        if (navItemIndex == 0)
-            fab.show();
-        else
-            fab.hide();
-    }
+//    private void toggleFab() {
+//        if (navItemIndex == 0)
+//            fab.show();
+//        else
+//            fab.hide();
+//    }
 
 
     private void populateBookShelves() {

@@ -19,6 +19,15 @@ import javax.net.ssl.HttpsURLConnection;
  */
 
 public class GoodreadsBook {
+    public int getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(int columnId) {
+        this.columnId = columnId;
+    }
+
+    int columnId;
     int id;
     String isbn;
     String isbn13;

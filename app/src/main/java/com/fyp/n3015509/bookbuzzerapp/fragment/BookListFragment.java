@@ -4,40 +4,46 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.fragment.dummy.DummyContent;
+import com.fyp.n3015509.bookbuzzerapp.fragment.dummy.DummyContent.DummyItem;
 import com.fyp.n3015509.db.dao.Buzzlist;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ListFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A fragment representing a list of Items.
+ * <p/>
+ * interface.
  */
-public class ListFragment extends Fragment {
+public class BookListFragment extends ListFragment implements OnItemClickListener {
+View rootView;
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
-    private ListFragment.OnFragmentInteractionListener mListener;
-    View rootView;
+    private BookListFragment.OnFragmentInteractionListener mListener;
+    ArrayList<Buzzlist> buzzlist = new ArrayList<>();
 
-    public ListFragment() {
+    public BookListFragment() {
     }
-
-    public static ListFragment newInstance(String param1, String param2) {
+    public static BookListFragment newInstance(String param1, String param2) {
         BookListFragment fragment = new BookListFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -46,11 +52,10 @@ public class ListFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
         View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
         ListView listv = (ListView) rootView.findViewById(R.id.list);
 
-        ArrayList<Buzzlist> buzzlist = DBUtil.GetBuzzlist(getActivity());
+        buzzlist = DBUtil.GetBuzzlist(getActivity());
         ArrayList<String> buzzlistNames = new ArrayList<String>();
         String[] values = new String[buzzlist.size()];
         for(Buzzlist buzz : buzzlist)
@@ -61,12 +66,9 @@ public class ListFragment extends Fragment {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_list_item_1, values);
         listv.setAdapter(adapter);
-        return rootView;
-    }
+        listv.setOnItemClickListener(this);
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+return rootView;
     }
 
 
@@ -94,8 +96,9 @@ public class ListFragment extends Fragment {
         mListener = null;
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getActivity(), "Item: " + position, Toast.LENGTH_SHORT).show();
+    public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
+        Buzzlist buzz = buzzlist.get(position);
+        Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
     }
 
     public interface OnFragmentInteractionListener {

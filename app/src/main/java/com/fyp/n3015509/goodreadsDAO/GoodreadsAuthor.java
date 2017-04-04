@@ -14,6 +14,15 @@ import java.net.URL;
  */
 
 public class GoodreadsAuthor {
+    public int getColumnId() {
+        return columnId;
+    }
+
+    public void setColumnId(int columnId) {
+        this.columnId = columnId;
+    }
+
+    int columnId;
     int id;
     String name;
     Bitmap image;
@@ -128,5 +137,17 @@ public class GoodreadsAuthor {
         this.textReviewsCount = textReviewsCount;
     }
 
+    public void setImageDB(byte[] image) {
+        if (image != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            this.image = bitmap;
+        }
+    }
 
+    public void setSmallImageDB(byte[] image) {
+        if (image != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+            this.smallImage = bitmap;
+        }
+    }
 }
