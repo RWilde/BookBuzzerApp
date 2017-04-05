@@ -53,7 +53,7 @@ public class GoodreadsUtil {
             }
         }
         DBUtil.SaveShelf(shelfList, ctx);
-        APIUtil.SaveShelf(shelvesJSON, ctx);
+//        APIUtil.SaveShelf(shelvesJSON, ctx);
         return true;
     }
 

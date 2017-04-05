@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.bookbuzzerapp.fragment.dummy.DummyContent;
 import com.fyp.n3015509.bookbuzzerapp.fragment.dummy.DummyContent.DummyItem;
 import com.fyp.n3015509.db.dao.Buzzlist;
@@ -98,7 +100,22 @@ return rootView;
 
     public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
         Buzzlist buzz = buzzlist.get(position);
-        Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
+
+        Fragment fragment = new ListFragment();
+
+        Bundle args = new Bundle();
+        args.putInt("listId", buzz.getId());
+        fragment.setArguments(args);
+
+        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+        fragmentTransaction.replace(R.id.frame, fragment);
+        fragmentTransaction.addToBackStack(null);
+
+        // Commit the transaction
+        fragmentTransaction.commit();
+
+       // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
     }
 
     public interface OnFragmentInteractionListener {

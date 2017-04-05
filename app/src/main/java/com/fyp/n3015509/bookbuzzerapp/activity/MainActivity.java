@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             new UserShelves(getApplicationContext()).execute();
         }
 
-       // populateBookShelves();
+        // populateBookShelves();
     }
 
     /***
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
         // If mPendingRunnable is not null, then add to the message queue
         if (mPendingRunnable != null) {
-          mHandler.post(mPendingRunnable);
+            mHandler.post(mPendingRunnable);
         }
 
         // show or hide the fab button
@@ -276,14 +277,14 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_logout:
                         // launch new intent instead of loading fragment
                         SaveSharedPreference.clearToken(getApplicationContext());
-                        startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         drawer.closeDrawers();
                         return true;
                     case R.id.nav_settings:
                         navItemIndex = 5;
                         CURRENT_TAG = TAG_SETTINGS;
                         break;
-                        // launch new intent instead of loading fragment
+                    // launch new intent instead of loading fragment
 
                     default:
                         navItemIndex = 0;
@@ -425,6 +426,8 @@ public class MainActivity extends AppCompatActivity {
             return shelves;
         }
 
+        private ProgressDialog pdia;
+
         protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
             //showProgress(false);
             final ArrayList<String> listOfShelves = new ArrayList<String>();
@@ -455,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
                                                     boolean isChecked) {
                                     if (isChecked) {
                                         // If the user checked the item, add it to the selected items
-                                       // itemChecked[which] = isChecked;
+                                        // itemChecked[which] = isChecked;
                                         //String item = listOfShelves.get(which);
                                         mSelectedItems.add(listOfShelves.get(which));
                                     } else if (mSelectedItems.contains(listOfShelves.get(which))) {
@@ -499,6 +502,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    class ShelfProgressTask extends AsyncTask<String, Integer, Boolean> {
+//        @Override
+//        protected Boolean doInBackground(String... params) {
+//            try {
+//                Thread.sleep(4000);  // Do your real work here
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            return Boolean.TRUE;   // Return your real result here
+//        }
+//        @Override
+//        protected void onPreExecute() {
+//            showDialog(AUTHORIZING_DIALOG);
+//        }
+//        @Override
+//        protected void onPostExecute(Boolean result) {
+//            // result is the value returned from doInBackground
+//            removeDialog(AUTHORIZING_DIALOG);
+//        }
+//    }
+
     private class UserLists extends AsyncTask<Void, Void, ArrayList<GoodreadsBook>> {
         GoodreadsUtil util = new GoodreadsUtil();
         private Context mContext;
@@ -514,17 +538,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class UserGoodreadsShelves extends AsyncTask<Void, Void, Boolean>
-    {
+    private class UserGoodreadsShelves extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
         GoodreadsUtil util = new GoodreadsUtil();
         ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
+        private ProgressDialog pdia;
 
-        UserGoodreadsShelves(Context context, ArrayList<GoodreadsShelf> options)
-        {
+        UserGoodreadsShelves(Context context, ArrayList<GoodreadsShelf> options) {
             this.mContext = context;
             this.options = options;
 
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pdia = new ProgressDialog(MainActivity.this);
+            pdia.setMessage("Loading...");
+            pdia.show();
         }
 
         @Override
@@ -536,11 +567,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-           // showProgress(false);
+            // showProgress(false);
+            pdia.dismiss();
 
-            if (aBoolean)
-            {//SaveSharedPreference.setImported(mContext, true);
-                 }
+            if (aBoolean) {
+                SaveSharedPreference.setImported(mContext, true);
+            }
 
         }
 

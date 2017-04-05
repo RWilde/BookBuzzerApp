@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.db.dao.Buzzlist;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 
 import java.util.ArrayList;
 
@@ -46,21 +47,26 @@ public class ListFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
-        View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
+        rootView = inflater.inflate(R.layout.fragment_list, container, false);
         ListView listv = (ListView) rootView.findViewById(R.id.list);
 
-        ArrayList<Buzzlist> buzzlist = DBUtil.GetBuzzlist(getActivity());
-        ArrayList<String> buzzlistNames = new ArrayList<String>();
-        String[] values = new String[buzzlist.size()];
-        for(Buzzlist buzz : buzzlist)
-        {
-            buzzlistNames.add(buzz.getName());
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            int listId = bundle.getInt("listId");
+            ArrayList<GoodreadsBook> buzzlist = DBUtil.getBooksFromBuzzlist(getActivity(), listId);
+            ArrayList<String> buzzlistNames = new ArrayList<String>();
+            String[] values = new String[buzzlist.size()];
+            for(GoodreadsBook buzz : buzzlist)
+            {
+                buzzlistNames.add(buzz.getTitle());
+            }
+            values = buzzlistNames.toArray(values);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_list_item_1, values);
+            listv.setAdapter(adapter);
         }
-        values = buzzlistNames.toArray(values);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1, values);
-        listv.setAdapter(adapter);
+
+
         return rootView;
     }
 

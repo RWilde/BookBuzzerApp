@@ -333,11 +333,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
+                    while(cursor.isAfterLast()==false) {
 
-                    Buzzlist newList = new Buzzlist();
-                    newList.setId(cursor.getInt(0));
-                    newList.setName(cursor.getString(1));
-                    list.add(newList);
+                        Buzzlist newList = new Buzzlist();
+                        newList.setId(cursor.getInt(0));
+                        newList.setName(cursor.getString(1));
+                        list.add(newList);
+                        cursor.moveToNext();
+                    }
                 }
             } finally {
                 cursor.close();

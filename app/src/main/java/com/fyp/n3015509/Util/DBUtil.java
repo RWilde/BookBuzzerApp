@@ -1,6 +1,7 @@
 package com.fyp.n3015509.Util;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.db.MySQLiteHelper;
@@ -63,4 +64,15 @@ public class DBUtil {
     }
 
 
+    public static ArrayList<GoodreadsBook> getBooksFromBuzzlist(FragmentActivity ctx, int listId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.getBooksFromBuzzlist(listId);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
