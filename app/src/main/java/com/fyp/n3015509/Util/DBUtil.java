@@ -75,4 +75,9 @@ public class DBUtil {
         }
         return null;
     }
+
+    public static Boolean RemoveBookFromBuzzList(String name, int listName) {
+
+        return false;
+    }
 }

@@ -502,27 +502,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    class ShelfProgressTask extends AsyncTask<String, Integer, Boolean> {
-//        @Override
-//        protected Boolean doInBackground(String... params) {
-//            try {
-//                Thread.sleep(4000);  // Do your real work here
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            return Boolean.TRUE;   // Return your real result here
-//        }
-//        @Override
-//        protected void onPreExecute() {
-//            showDialog(AUTHORIZING_DIALOG);
-//        }
-//        @Override
-//        protected void onPostExecute(Boolean result) {
-//            // result is the value returned from doInBackground
-//            removeDialog(AUTHORIZING_DIALOG);
-//        }
-//    }
-
     private class UserLists extends AsyncTask<Void, Void, ArrayList<GoodreadsBook>> {
         GoodreadsUtil util = new GoodreadsUtil();
         private Context mContext;
@@ -542,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
         private Context mContext;
         GoodreadsUtil util = new GoodreadsUtil();
         ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
-        private ProgressDialog pdia;
+        private ProgressDialog progress;
 
         UserGoodreadsShelves(Context context, ArrayList<GoodreadsShelf> options) {
             this.mContext = context;
@@ -553,9 +532,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pdia = new ProgressDialog(MainActivity.this);
-            pdia.setMessage("Loading...");
-            pdia.show();
+            progress = new ProgressDialog(MainActivity.this);
+            progress.setMessage("Loading books from Goodreads, this may a couple of minutes...");
+            progress.show();
         }
 
         @Override
@@ -568,7 +547,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             // showProgress(false);
-            pdia.dismiss();
+            progress.dismiss();
 
             if (aBoolean) {
                 SaveSharedPreference.setImported(mContext, true);

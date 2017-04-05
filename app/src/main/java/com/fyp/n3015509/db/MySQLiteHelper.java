@@ -371,6 +371,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                         if (c.moveToFirst()) {
                             while (c.isAfterLast() == false) {
                                 authorList.add(createAuthor(c));
+                                c.moveToNext();
                             }
                         }
                         b.setAuthors(authorList);

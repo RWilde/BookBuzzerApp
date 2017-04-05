@@ -66,4 +66,8 @@
     <string name="action_logout">Logout</string>
     <string name="action_mark_all_read">Mark All as Read</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="title_activity_signup">SignupActivity</string>
+
+    <color name="white">#2b465e</color>
+
 </resources>
