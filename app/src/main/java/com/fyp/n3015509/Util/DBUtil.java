@@ -76,8 +76,19 @@ public class DBUtil {
         return null;
     }
 
-    public static Boolean RemoveBookFromBuzzList(String name, int listName) {
+    public static Boolean RemoveBookFromBuzzList(Context ctx, int name, int list) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.removeBookFromBuzzlist(name, list);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
+    public static Boolean WatchBook(Context mContext, String mBookName, int mListId) {
         return false;
     }
 }

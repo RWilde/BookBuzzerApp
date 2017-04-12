@@ -92,7 +92,7 @@ public class XMLUtil {
             int id = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
             String isbn = unescapeXML(el.getElementsByTagName("isbn").item(0).getTextContent());
             String isbn13 = unescapeXML(el.getElementsByTagName("isbn13").item(0).getTextContent());
-            int text_reviews_count = getIntFromElement(el.getElementsByTagName("id").item(0).getTextContent());
+            int text_reviews_count = getIntFromElement(el.getElementsByTagName("text_reviews_count").item(0).getTextContent());
             String title = unescapeXML(el.getElementsByTagName("title").item(0).getTextContent());
             String title_without_series = unescapeXML(el.getElementsByTagName("title_without_series").item(0).getTextContent());
             String image_url = unescapeXML(el.getElementsByTagName("image_url").item(0).getTextContent());

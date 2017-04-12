@@ -539,15 +539,22 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            Boolean result = util.RetrieveSelectedShelves(mContext, options);
-            return result;
+            try {
+                Boolean result = util.RetrieveSelectedShelves(mContext, options);
+                return result;
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            return false;
         }
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
+            progress.dismiss();
             super.onPostExecute(aBoolean);
             // showProgress(false);
-            progress.dismiss();
 
             if (aBoolean) {
                 SaveSharedPreference.setImported(mContext, true);

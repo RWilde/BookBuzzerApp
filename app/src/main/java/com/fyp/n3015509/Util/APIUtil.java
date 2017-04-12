@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,13 +25,14 @@ import java.util.HashMap;
  * Created by rwild on 24/03/2017.
  */
 
-class APIUtil {
+public class APIUtil {
     private static final String IP = "192.168.0.10";
-    private static final String BaseURL = "http://" + IP +":8081/api";
+    private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
-//    private static final String RegisterURL = BaseURL + "/users/signup";
+    //    private static final String RegisterURL = BaseURL + "/users/signup";
 //    private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
 //    private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
+    private static final String DeleteBookURL = BaseURL + "/buzzlist/";
 
     public static void SaveShelf(JSONObject booklist, Context ctx) {
 
@@ -40,7 +42,7 @@ class APIUtil {
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setRequestMethod("POST");
-            conn.setRequestProperty ("Authorization", SaveSharedPreference.getToken(ctx));
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(ctx));
             conn.setRequestProperty("Content-Type", "application/json");
 
             //conn.connect();
@@ -83,26 +85,26 @@ class APIUtil {
 
         APIBookList list = new APIBookList();
         //booklist.remove(booklist.size() - 1);
-        HashMap<String, String> books= new HashMap<String, String>();
+        HashMap<String, String> books = new HashMap<String, String>();
 
-            for (GoodreadsBook book : booklist) {
-                if(book != null) {
-                    try {
-                        authorJSON = createJSONAuthor(book.getAuthors());
-                        bookJSON = createJSONbook(book, authorJSON);
-                        listJSON.put(book.getTitle(), bookJSON);
-                        //bookJSON.put("book", new Gson().toJson(book));
-                      //  APIBook newBook = new APIBook();
-                     //   books.put(book.getTitle(),new Gson().toJson();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        for (GoodreadsBook book : booklist) {
+            if (book != null) {
+                try {
+                    authorJSON = createJSONAuthor(book.getAuthors());
+                    bookJSON = createJSONbook(book, authorJSON);
+                    listJSON.put(book.getTitle(), bookJSON);
+                    //bookJSON.put("book", new Gson().toJson(book));
+                    //  APIBook newBook = new APIBook();
+                    //   books.put(book.getTitle(),new Gson().toJson();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-           // list.setBookList(books);
+        }
+        // list.setBookList(books);
 
-            int num = listJSON.length();
-            return listJSON;
+        int num = listJSON.length();
+        return listJSON;
 
     }
 
@@ -137,16 +139,13 @@ class APIUtil {
         return jsonBook;
     }
 
-    public JSONObject createApiBook(GoodreadsBook book, JSONObject author)
-    {
-    return null;
+    public JSONObject createApiBook(GoodreadsBook book, JSONObject author) {
+        return null;
     }
 
-    public JSONObject createJSONAuthor(ArrayList<GoodreadsAuthor> authors)
-    {
+    public JSONObject createJSONAuthor(ArrayList<GoodreadsAuthor> authors) {
         JSONObject authorListJson = new JSONObject();
-        for (GoodreadsAuthor author : authors)
-        {
+        for (GoodreadsAuthor author : authors) {
             JSONObject temp = new JSONObject();
             try {
                 temp.put("name", author.getName());
@@ -157,11 +156,39 @@ class APIUtil {
                 temp.put("ratings_count", author.getRatingsCount());
                 temp.put("sml_img_url", author.getSmallImage());
                 temp.put("txt_reviews_count", author.getTextReviewsCount());
-                authorListJson.put(String.valueOf(author.getId()),temp);
+                authorListJson.put(String.valueOf(author.getId()), temp);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         return authorListJson;
     }
+
+    public static Boolean RemoveBookFromBuzzlist(Context mContext, int bookId, int mListId, String token) {
+        try {
+            String url = DeleteBookURL + mListId + "/" + bookId;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.connect();
+
+            if (conn.getResponseCode() == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
+    public static Boolean WatchBook(Context mContext, JSONObject deletedBook) {
+        return null;
+    }
+
+
 }

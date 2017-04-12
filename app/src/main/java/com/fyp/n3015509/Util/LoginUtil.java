@@ -30,7 +30,7 @@ import java.net.URL;
  */
 
 public class LoginUtil{
-    private static final String IP = "192.168.0.10";
+    private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";

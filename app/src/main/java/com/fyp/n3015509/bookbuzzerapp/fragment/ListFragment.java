@@ -69,13 +69,17 @@ public class ListFragment extends Fragment {
             ArrayList<String> buzzlistNames = new ArrayList<>();
             ArrayList<Bitmap> buzzlistImages = new ArrayList<>();
             ArrayList<String> buzzlistAuthors = new ArrayList<>();
+            ArrayList<Integer> buzzlistIds = new ArrayList<>();
+
             Bitmap[] images = new Bitmap[booklist.size()];
             String[] values = new String[booklist.size()];
             String[] authors = new String[booklist.size()];
+            Integer[] ids = new Integer[booklist.size()];
 
             for (GoodreadsBook buzz : booklist) {
                 buzzlistNames.add(buzz.getTitle());
                 buzzlistImages.add(buzz.getSmallImage());
+                buzzlistIds.add(buzz.getId());
                 String authorList = "";
                 int count = 0;
                 for (GoodreadsAuthor auth : buzz.getAuthors())
@@ -92,8 +96,9 @@ public class ListFragment extends Fragment {
             values = buzzlistNames.toArray(values);
             images = buzzlistImages.toArray(images);
             authors = buzzlistAuthors.toArray(authors);
+            ids = buzzlistIds.toArray(ids);
 
-            mAdapter = new ListViewAdapter(getActivity(), values, images, authors, listId);
+            mAdapter = new ListViewAdapter(getActivity(), values, images, authors, listId, ids);
 
             listv.setAdapter(mAdapter);
             mAdapter.setMode(Attributes.Mode.Single);
@@ -128,13 +133,7 @@ public class ListFragment extends Fragment {
 
                 }
             });
-
-            // ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-            //         android.R.layout.simple_list_item_1, values);
-            // listv.setAdapter(adapter);
         }
-
-
         return rootView;
     }
 
@@ -142,7 +141,6 @@ public class ListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
     }
-
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -154,12 +152,6 @@ public class ListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
 
     @Override
@@ -171,21 +163,18 @@ public class ListFragment extends Fragment {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         GoodreadsBook buzz = booklist.get(position);
 
-        Fragment fragment = new BookFragment();
-
         Bundle args = new Bundle();
         args.putString("book", new Gson().toJson(buzz));
+
+        Fragment fragment = new BookFragment();
         fragment.setArguments(args);
 
         FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         fragmentTransaction.replace(R.id.frame, fragment);
-        //fragmentTransaction.addToBackStack(null);
 
         // Commit the transaction
         fragmentTransaction.commit();
-
-        // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
     }
 
     public interface OnFragmentInteractionListener {
