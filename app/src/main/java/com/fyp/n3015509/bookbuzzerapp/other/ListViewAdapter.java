@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -12,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,12 +26,18 @@ import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class ListViewAdapter extends BaseSwipeAdapter {
 
+    private String listName;
     private Context mContext;
     private FragmentActivity activity;
     private RemoveBookTask deleteTask;
@@ -40,13 +49,14 @@ public class ListViewAdapter extends BaseSwipeAdapter {
     String[] authors;
     Integer[] ids;
     int listId;
+    private WatchBookTask watchTask;
 
     public ListViewAdapter(Context mContext) {
         this.mContext = mContext;
     }
 
 
-    public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids) {
+    public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids, String listName) {
         this.activity = activity;
         this.mContext = activity;
         this.names = values;
@@ -54,7 +64,9 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         this.authors = authors;
         this.listId = listId;
         this.ids = ids;
+        this.listName = listName;
     }
+
 
     @Override
     public int getSwipeLayoutResourceId(int position) {
@@ -72,21 +84,21 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ViewBook();
+                ViewBook(position);
             }
         });
         swipeLayout.findViewById(R.id.star2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Toast.makeText(mContext, "Added to watch list", Toast.LENGTH_SHORT).show();
+                watchTask = new WatchBookTask(ids[position], listId);
+                watchTask.execute((Void) null);
             }
         });
 
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteTask = new RemoveBookTask(ids[position], listId);
+                deleteTask = new RemoveBookTask(ids[position], listId, ListViewAdapter.this.activity);
                 deleteTask.execute((Void) null);
             }
         });
@@ -94,16 +106,20 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.magnifier2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ViewBook();
+                ViewBook(position);
                 // Toast.makeText(mContext, "View Book", Toast.LENGTH_SHORT).show();
             }
         });
         return v;
     }
 
-    public void ViewBook() {
+    public void ViewBook(int position) {
         Fragment fragment = new BookFragment();
 
+        Bundle args = new Bundle();
+        args.putInt("bookId", ids[position]);
+
+        fragment.setArguments(args);
         FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         fragmentTransaction.replace(R.id.frame, fragment);
@@ -143,8 +159,91 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         private final int mListId;
         private JSONObject deletedBook = new JSONObject();
         private ProgressDialog progress;
+        private FragmentActivity frag;
+        private Handler mHandler;
 
-        RemoveBookTask(int book, int listId) {
+        public RemoveBookTask(Integer id, int listId, FragmentActivity frag) {
+            mBook = id;
+            mListId = listId;
+            this.frag = frag;
+        }
+
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Removing book...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                Boolean dbSuccess = DBUtil.RemoveBookFromBuzzList(mContext, mBook, mListId);
+                Boolean apiSuccess = APIUtil.RemoveBookFromBuzzlist(mContext, mBook, listName, SaveSharedPreference.getToken(mContext));
+                if (dbSuccess == false || apiSuccess == false) {
+                    return false;
+                }
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+            mHandler = new Handler();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book successfully removed", Toast.LENGTH_SHORT).show();
+                Runnable mPendingRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        // update the main content by replacing fragments
+                        Fragment fragment = new ListFragment();
+
+                        Bundle args = new Bundle();
+                        args.putInt("listId", listId);
+                        fragment.setArguments(args);
+
+                        FragmentTransaction fragmentTransaction = frag.getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                        fragmentTransaction.replace(R.id.frame, fragment, "Buzzlist");
+                        fragmentTransaction.commitAllowingStateLoss();
+                    }
+                };
+
+                // If mPendingRunnable is not null, then add to the message queue
+                if (mPendingRunnable != null) {
+                    mHandler.post(mPendingRunnable);
+                }
+
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with removing book from buzzlist, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final int mBook;
+        private final int mListId;
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+
+        WatchBookTask(int book, int listId) {
             mBook = book;
             mListId = listId;
         }
@@ -153,7 +252,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         protected void onPreExecute() {
             super.onPreExecute();
             progress = new ProgressDialog(mContext);
-            progress.setMessage("Removing book...");
+            progress.setMessage("Adding to watch list...");
             progress.show();
         }
 
@@ -163,8 +262,9 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                Boolean dbSuccess = DBUtil.RemoveBookFromBuzzList(mContext, mBook, mListId);
-                Boolean apiSuccess = APIUtil.RemoveBookFromBuzzlist(mContext, mBook, mListId, SaveSharedPreference.getToken(mContext));
+                Boolean dbSuccess = DBUtil.WatchBook(mContext, mBook);
+                Boolean apiSuccess = APIUtil.WatchBook(mContext, mBook, SaveSharedPreference.getToken(mContext));
+
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -184,87 +284,10 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
             if (success) {
                 //finish();
-                Toast.makeText(mContext, "Book successfully removed", Toast.LENGTH_SHORT).show();
-                Fragment fragment = new ListFragment();
-
-                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                fragmentTransaction.replace(R.id.frame, fragment);
-                fragmentTransaction.commit();
 
             } else {
                 //book wasnt deleted succesfully
-                Toast.makeText(mContext, "Error with removing book from buzzlist, please try again", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mBookName;
-        private final int mListId;
-        private JSONObject deletedBook = new JSONObject();
-        private ProgressDialog progress;
-
-        WatchBookTask(String book, int listId) {
-            mBookName = book;
-            mListId = listId;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progress = new ProgressDialog(mContext);
-            progress.setMessage("Removing book...");
-            progress.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
-
-            try {
-                Boolean dbSuccess = DBUtil.WatchBook(mContext, mBookName, mListId);
-
-                deletedBook.put("name", mBookName);
-                deletedBook.put("listId", mListId);
-                deletedBook.put("token", SaveSharedPreference.getToken(mContext));
-
-                Boolean apiSuccess = APIUtil.WatchBook(mContext, deletedBook);
-                if (dbSuccess == false || apiSuccess == false) {
-                    return false;
-                }
-
-//
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            } catch (JSONException e) {
-                return false;
-            }
-
-            return true;
-        }
-
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            progress.dismiss();
-
-            if (success) {
-                //finish();
-                Toast.makeText(mContext, "Book successfully removed", Toast.LENGTH_SHORT).show();
-                Fragment fragment = new ListFragment();
-
-                FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                fragmentTransaction.replace(R.id.frame, fragment);
-                fragmentTransaction.commit();
-
-            } else {
-                //book wasnt deleted succesfully
-                Toast.makeText(mContext, "Error with removing book from buzzlist, please try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
             }
         }
     }

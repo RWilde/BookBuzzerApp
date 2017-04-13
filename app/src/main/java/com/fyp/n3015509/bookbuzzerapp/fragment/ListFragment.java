@@ -98,7 +98,9 @@ public class ListFragment extends Fragment {
             authors = buzzlistAuthors.toArray(authors);
             ids = buzzlistIds.toArray(ids);
 
-            mAdapter = new ListViewAdapter(getActivity(), values, images, authors, listId, ids);
+            String listName = DBUtil.getBuzzlistName(getActivity(), listId);
+
+            mAdapter = new ListViewAdapter(getActivity(), values, images, authors, listId, ids, listName);
 
             listv.setAdapter(mAdapter);
             mAdapter.setMode(Attributes.Mode.Single);

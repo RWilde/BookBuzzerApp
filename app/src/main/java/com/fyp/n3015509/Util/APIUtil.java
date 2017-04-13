@@ -26,13 +26,13 @@ import java.util.HashMap;
  */
 
 public class APIUtil {
-    private static final String IP = "192.168.0.10";
+    private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
-    //    private static final String RegisterURL = BaseURL + "/users/signup";
-//    private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
-//    private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
-    private static final String DeleteBookURL = BaseURL + "/buzzlist/";
+    private static final String RegisterURL = BaseURL + "/users/signup";
+    private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
+    private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
+    private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
 
     public static void SaveShelf(JSONObject booklist, Context ctx) {
 
@@ -164,19 +164,20 @@ public class APIUtil {
         return authorListJson;
     }
 
-    public static Boolean RemoveBookFromBuzzlist(Context mContext, int bookId, int mListId, String token) {
+    public static Boolean RemoveBookFromBuzzlist(Context mContext, int bookId, String mListId, String token) {
         try {
-            String url = DeleteBookURL + mListId + "/" + bookId;
+            String url = DeleteBookURL + URLEncoder.encode(mListId,"UTF-8") + "/" + bookId;
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);
             conn.setDoInput(true);
-            conn.setRequestMethod("POST");
+            conn.setRequestMethod("DELETE");
             conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
             conn.setRequestProperty("Content-Type", "application/json");
             conn.connect();
 
-            if (conn.getResponseCode() == 200) {
+            int response = conn.getResponseCode();
+            if ( response == 200) {
                 return true;
             }
         } catch (IOException e) {
@@ -186,9 +187,7 @@ public class APIUtil {
         return false;
     }
 
-    public static Boolean WatchBook(Context mContext, JSONObject deletedBook) {
-        return null;
+    public static Boolean WatchBook(Context mContext, int mBook, String listName) {
+        return true;
     }
-
-
 }

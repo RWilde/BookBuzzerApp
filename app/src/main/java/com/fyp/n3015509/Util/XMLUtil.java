@@ -30,7 +30,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class XMLUtil {
     //GoodreadsUtil gUtil = new GoodreadsUtil();
 
-    public static Document getXMLDocument(String xml) {
+    public Document getXMLDocument(String xml) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         InputSource is;
@@ -46,8 +46,8 @@ public class XMLUtil {
         return null;
     }
 
-    public static ArrayList<GoodreadsShelf> xmlToGoodreadsShelves(String response) {
-        Document doc = XMLUtil.getXMLDocument(response);
+    public ArrayList<GoodreadsShelf> xmlToGoodreadsShelves(String response) {
+        Document doc = getXMLDocument(response);
         NodeList nodeList = doc.getElementsByTagName("*");
         ArrayList<GoodreadsShelf> shelves = new ArrayList<GoodreadsShelf>();
         for (int i = 0; i < nodeList.getLength(); i++) {
@@ -68,22 +68,29 @@ public class XMLUtil {
 
     public ArrayList<GoodreadsBook> xmlToGoodreadsBooks(String response)
     {
-        int count = 0;
-        Document doc = XMLUtil.getXMLDocument(response);
-        NodeList nodeList = doc.getElementsByTagName("*");
-        ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element el = (Element) nodeList.item(i);
-                if (el.getNodeName().contains("book")) {
-                     books.add(xmlToGoodreadsBook(el));
-                    count++;
+        try {
+            int count = 0;
+            Document doc = getXMLDocument(response);
+            NodeList nodeList = doc.getElementsByTagName("*");
+            ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element el = (Element) nodeList.item(i);
+                    if (el.getNodeName().contains("book")) {
+                        books.add(xmlToGoodreadsBook(el));
+                        count++;
+                    }
                 }
             }
-        }
 
-        return books;
+            return books;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public GoodreadsBook xmlToGoodreadsBook(Element el)

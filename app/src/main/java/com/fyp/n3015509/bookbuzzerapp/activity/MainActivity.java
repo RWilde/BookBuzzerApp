@@ -42,6 +42,8 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.tasks.TaskManagement;
+import com.google.android.gms.gcm.GcmNetworkManager;
 
 import java.util.ArrayList;
 
@@ -86,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mHandler = new Handler();
-
+        TaskManagement task = new TaskManagement(GcmNetworkManager.getInstance(this));
+        task.startBookWatchTask();
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -101,14 +104,6 @@ public class MainActivity extends AppCompatActivity {
 
         // load toolbar titles from string resources
         activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
-
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
 
         // load nav menu header data
         loadNavHeader();
@@ -129,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             new UserShelves(getApplicationContext()).execute();
         }
 
-        // populateBookShelves();
     }
 
     /***

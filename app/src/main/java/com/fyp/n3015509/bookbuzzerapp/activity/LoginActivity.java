@@ -88,10 +88,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
 
-        if(SaveSharedPreference.getToken(this).length() != 0)
-        {
+        if (SaveSharedPreference.getToken(this).length() != 0) {
             // Stay at the current activity.
-            Intent mainIntent = new Intent(this,MainActivity.class);
+            Intent mainIntent = new Intent(this, MainActivity.class);
             startActivity(mainIntent);
             finish();
         }
@@ -127,7 +126,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_signin_btn);
-       // Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
+        // Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
         Button mEmailGoodreadsButton = (Button) findViewById(R.id.goodreads_sign_in_button);
         final TextView info = (TextView) findViewById(R.id.info);
 
@@ -161,11 +160,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     @Override
                     public void onCancel() {
-                        info.setText("Login attempt canceled.");            }
+                        info.setText("Login attempt canceled.");
+                    }
 
                     @Override
                     public void onError(FacebookException exception) {
-                        info.setText("Login attempt failed.");            }
+                        info.setText("Login attempt failed.");
+                    }
 
                 });
             }
@@ -202,10 +203,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
 
-           // Show a progress spinner, and kick off a background task to
-           // perform the user login attempt.
-            mGoodreadsAuthTask = new UserGoodreadsLoginTask();
-            mGoodreadsAuthTask.execute((Void) null);
+        // Show a progress spinner, and kick off a background task to
+        // perform the user login attempt.
+        mGoodreadsAuthTask = new UserGoodreadsLoginTask();
+        mGoodreadsAuthTask.execute((Void) null);
 
 //        }
     }
@@ -301,7 +302,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-           // showProgress(true);
+            // showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
 
@@ -479,6 +480,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmail = email;
             mPassword = password;
         }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -497,8 +499,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 login.put("password", mPassword);
 
                 String token = LoginUtil.SignIn(getApplicationContext(), login);
-                if (token != null)
-                {
+                if (token != null) {
                     return true;
                 }
 
@@ -510,7 +511,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
 
             return false;
-       }
+        }
 
 
         @Override
@@ -522,7 +523,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 //finish();
                 LoginUtil.verifyStoragePermissions(LoginActivity.this);
 
-                Intent i = new Intent(getApplicationContext(),MainActivity.class);
+                Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);
                 setContentView(R.layout.activity_main);
             } else {
@@ -539,10 +540,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
 
-
     private class UserGoodreadsLoginTask extends AsyncTask<Void, Void, Boolean> {
         private JSONObject login = new JSONObject();
         private ProgressDialog progress;
+        private GoodreadsLogin gLogin = new GoodreadsLogin();
 
         UserGoodreadsLoginTask() {
 
@@ -563,14 +564,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             try {
                 JSONObject login = new JSONObject();
-                 int goodreads_id = GoodreadsLogin.GetGoodreadsAuthentication(LoginActivity.this);
+                int goodreads_id = gLogin.GetGoodreadsAuthentication(LoginActivity.this);
                 if (goodreads_id != 0) {
                     login.put("goodreads_id", goodreads_id);
                     SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
-                    try{
-                    LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);}
-                    catch (Exception e)
-                    {
+                    try {
+                        LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     return true;
@@ -583,7 +583,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 e.printStackTrace();
             }
             return true;
-       }
+        }
 
 
         @Override
@@ -602,7 +602,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onCancelled() {
             mAuthTask = null;
-          //  showProgress(false);
+            //  showProgress(false);
         }
     }
 }

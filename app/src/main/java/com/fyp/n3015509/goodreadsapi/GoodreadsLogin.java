@@ -41,6 +41,7 @@ public class GoodreadsLogin extends LoginActivity {
     private static final String GOODREADS_KEY = "8vvXeL81U1l6yxnUT1c9Q";
     private static final String GOODREADS_SECRET = "ULtTT6xRNOOCPxX3VS7SLkGhtyLoK9lQ6Rm2fuwRZQ";
     private static final int REQUEST_CODE_CHECK = 1;
+    private final XMLUtil xmlUtil = new XMLUtil();
 
 //    private static OAuthHmacSigner signer;
 //    private static OAuthCredentialsResponse temporaryTokenResponse;
@@ -49,7 +50,7 @@ public class GoodreadsLogin extends LoginActivity {
 //    private static OAuthAuthorizeTemporaryTokenUrl accessTempToken;
 //    static OAuthGetTemporaryToken getTemporaryToken;
 
-    public static int GetGoodreadsAuthentication(Activity ctx) {
+    public int GetGoodreadsAuthentication(Activity ctx) {
         int goodreads_id = 0;
         String goodreads_name = null;
         JSONObject login = null;
@@ -105,7 +106,7 @@ public class GoodreadsLogin extends LoginActivity {
 
             //parse response to get user Id
             String xml = resp.parseAsString();
-            Document doc = XMLUtil.getXMLDocument(xml);
+            Document doc = xmlUtil.getXMLDocument(xml);
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("user");
 

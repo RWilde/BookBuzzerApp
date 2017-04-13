@@ -26,8 +26,7 @@ public class GoodreadsShelves {
     private static final String ShelvesURL = BASE_URL + "/shelf/list.xml?key=" + GOODREADS_KEY + "&user_id=";
     private static final String BookShelvesURL = BASE_URL + "/review/list/";
 
-    StringBuffer response = new StringBuffer();
-    XMLUtil xmlUtil = new XMLUtil();
+
 
     public String getShelvesURL(Context ctx) {
         String userId = SaveSharedPreference.getGoodreadsId(ctx);
@@ -35,6 +34,8 @@ public class GoodreadsShelves {
     }
 
     public ArrayList<GoodreadsShelf> getShelves(Context ctx) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
         try {
             URL authURL = new URL(getShelvesURL(ctx));
             HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
@@ -68,6 +69,8 @@ public class GoodreadsShelves {
     }
 
     public ArrayList<GoodreadsBook> getBookShelf(Context ctx, GoodreadsShelf shelf) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
         ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
 
         try {
