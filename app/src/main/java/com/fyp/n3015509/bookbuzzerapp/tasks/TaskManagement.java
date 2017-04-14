@@ -1,5 +1,6 @@
-package com.fyp.n3015509.tasks;
+package com.fyp.n3015509.bookbuzzerapp.tasks;
 
+import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 

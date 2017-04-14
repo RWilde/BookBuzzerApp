@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,8 +43,9 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
-import com.fyp.n3015509.tasks.TaskManagement;
+import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
+import com.google.android.gms.gcm.PeriodicTask;
 
 import java.util.ArrayList;
 
@@ -78,6 +80,11 @@ public class MainActivity extends AppCompatActivity {
     // flag to load home fragment when user presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
+    private GcmNetworkManager mGcmNetworkManager;
+    private BroadcastReceiver mReceiver;
+    public static final String TASK_TAG_PERIODIC = "periodic_task";
+    long periodSecs = 86400L; // the task should be executed every 30 seconds
+    long flexSecs = 100L; // the task can run as early as -15 seconds from the scheduled time
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,8 +95,30 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mHandler = new Handler();
-        TaskManagement task = new TaskManagement(GcmNetworkManager.getInstance(this));
-        task.startBookWatchTask();
+        mGcmNetworkManager = GcmNetworkManager.getInstance(this);
+
+        PeriodicTask task = new PeriodicTask.Builder()
+                .setService(WatchBooksService.class)
+                .setTag(TASK_TAG_PERIODIC)
+                .setPeriod(periodSecs)
+                .setFlex(flexSecs)
+                .build();
+
+        mGcmNetworkManager.schedule(task);
+
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(WatchBooksService.ACTION_DONE)) {
+                    String tag = intent.getStringExtra(WatchBooksService.EXTRA_TAG);
+                    int result = intent.getIntExtra(WatchBooksService.EXTRA_RESULT, -1);
+
+                    String msg = String.format("DONE: %s (%d)", tag, result);
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        //task.startBookWatchTask();
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);

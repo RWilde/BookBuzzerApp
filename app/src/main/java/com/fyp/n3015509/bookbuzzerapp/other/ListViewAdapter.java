@@ -9,12 +9,10 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,35 +24,32 @@ import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.google.gson.Gson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class ListViewAdapter extends BaseSwipeAdapter {
 
-    private String listName;
     private Context mContext;
     private FragmentActivity activity;
-    private RemoveBookTask deleteTask;
+
     private TextView text;
     private ImageView image;
     private TextView authorText;
-    String[] names;
-    Bitmap[] images;
-    String[] authors;
-    Integer[] ids;
-    int listId;
+
+    private int listId;
+    private String listName;
+    private String[] names;
+    private Bitmap[] images;
+    private String[] authors;
+    private Integer[] ids;
+
+    private RemoveBookTask deleteTask;
     private WatchBookTask watchTask;
 
-    public ListViewAdapter(Context mContext) {
-        this.mContext = mContext;
+    public ListViewAdapter(Context ctx)
+    {
+        this.mContext = ctx;
     }
-
 
     public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids, String listName) {
         this.activity = activity;
@@ -66,7 +61,6 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         this.ids = ids;
         this.listName = listName;
     }
-
 
     @Override
     public int getSwipeLayoutResourceId(int position) {
@@ -87,6 +81,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
                 ViewBook(position);
             }
         });
+
         swipeLayout.findViewById(R.id.star2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,9 +102,9 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             @Override
             public void onClick(View v) {
                 ViewBook(position);
-                // Toast.makeText(mContext, "View Book", Toast.LENGTH_SHORT).show();
             }
         });
+
         return v;
     }
 

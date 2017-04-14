@@ -2,23 +2,17 @@ package com.fyp.n3015509.Util;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
-import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.db.MySQLiteHelper;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
-import com.fyp.n3015509.tasks.WatchBooksService;
-import com.google.android.gms.gcm.PeriodicTask;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  * Created by n3015509 on 24/03/2017.
@@ -124,6 +118,24 @@ public class DBUtil {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public static ArrayList<BuzzNotification> getNotifications(FragmentActivity activity) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(activity);
+            return db.getNotifications();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook) {
+        return null;
+    }
+
+    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook) {
         return null;
     }
 }

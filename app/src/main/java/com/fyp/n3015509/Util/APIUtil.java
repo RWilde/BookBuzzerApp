@@ -1,6 +1,7 @@
 package com.fyp.n3015509.Util;
 
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
@@ -189,5 +190,13 @@ public class APIUtil {
 
     public static Boolean WatchBook(Context mContext, int mBook, String listName) {
         return true;
+    }
+
+    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook, String token) {
+        return null;
+    }
+
+    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, String token) {
+        return null;
     }
 }

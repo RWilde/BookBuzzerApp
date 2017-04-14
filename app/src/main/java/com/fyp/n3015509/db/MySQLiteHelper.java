@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
@@ -161,7 +163,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + NOTIFICATIONS_TABLE + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + BOOK_ID + " integer not null, "
-            + NOTIFICATION_TYPE + " integer not null, "
+            + NOTIFICATION_TYPE + " varchar(255) not null, "
             + "FOREIGN KEY (" + BOOK_ID + ") REFERENCES " + TABLE_BOOKS + "(" + COLUMN_ID + ") ON DELETE CASCADE"
             + ");";
 
@@ -179,6 +181,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             database.execSQL(CREATE_BUZZLIST_INTERIM_TABLE);
             database.execSQL(CREATE_WATCH_TABLE);
             database.execSQL(CREATE_NOTIFICATIONS_TABLE);
+            ContentValues insertValues = new ContentValues();
+            insertValues.put(BOOK_ID, 1);
+            insertValues.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+            database.insertOrThrow(NOTIFICATIONS_TABLE, null, insertValues);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -629,7 +635,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public Integer[] addToNotifications() {
         Integer[] count = new Integer[2];
-        ArrayList<Integer> counts = new ArrayList<>() ;
+        ArrayList<Integer> counts = new ArrayList<>();
         java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
         Date preorderDate = DateUtils.addDays(new Date(), 7);
         String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + currentDate + ";";
@@ -648,7 +654,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             //add to notifications table
                             ContentValues avaliable = new ContentValues();
                             avaliable.put(BOOK_ID, avaialbleCursor.getInt(0));
-                            avaliable.put(NOTIFICATION_TYPE, AVALIABLE_STRING);
+                            avaliable.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
                             db.insert(NOTIFICATIONS_TABLE, null, avaliable);
                             avaialbleCursor.moveToNext();
                         }
@@ -669,7 +675,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             //add to notifications table
                             ContentValues avaliable = new ContentValues();
                             avaliable.put(BOOK_ID, preorderCursor.getInt(0));
-                            avaliable.put(NOTIFICATION_TYPE, PREORDER_STRING);
+                            avaliable.put(NOTIFICATION_TYPE, NotificationTypes.PREORDER.toString());
                             db.insert(NOTIFICATIONS_TABLE, null, avaliable);
                             preorderCursor.moveToNext();
                         }
@@ -686,6 +692,102 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         return counts.toArray(count);
     }
+
+    public ArrayList<BuzzNotification> getNotifications() {
+        String notificationQuery = "SELECT * FROM " + NOTIFICATIONS_TABLE + " LIMIT 50";
+        ArrayList<BuzzNotification> notifications = new ArrayList<BuzzNotification>();
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(notificationQuery, null);
+
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        while (cursor.isAfterLast() == false) {
+                            int bookId = cursor.getInt(1);
+                            String type = cursor.getString(2);
+                            NotificationTypes notification = NotificationTypes.valueOf(type);
+                            String bookQuery = "SELECT " + TITLE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
+                            String notQuery = "";
+                            Cursor c1 = db.rawQuery(bookQuery, null);
+
+                            switch (notification) {
+                                case AVALIABLE:
+                                    notQuery = "SELECT " + NOTIFIED + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+                                    break;
+                                case PREORDER:
+                                    notQuery = "SELECT " + PREORDER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+                                    break;
+                            }
+                            Cursor c2 = db.rawQuery(notQuery, null);
+
+                            String bookName = getSingleString(c1);
+                            int notified = getSingleInt(c2);
+
+                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified);
+                            notifications.add(buzz);
+                            cursor.moveToNext();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    cursor.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return notifications;
+    }
+
+    private BuzzNotification createBuzzNotification(int bookId, NotificationTypes notification, String bookName, int notified) {
+        BuzzNotification not = new BuzzNotification();
+        not.setBookId(bookId);
+        not.setType(notification);
+        not.setBookName(bookName);
+        if (notified == 0)
+            not.setNotified(false);
+        else
+            not.setNotified(true);
+
+        return not;
+    }
+
+    private String getSingleString(Cursor cursor)
+    {
+        String var = "";
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    var = cursor.getString(0);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+        }
+        return var;
+    }
+
+    private int getSingleInt(Cursor cursor)
+    {
+        int var = 0;
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    var = cursor.getInt(0);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+        }
+        return 0;
+    }
+
 }
 
 //                        if (cursor.moveToFirst()) {

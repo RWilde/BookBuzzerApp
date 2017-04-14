@@ -1,14 +1,31 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.util.Attributes;
+import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
+import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -19,17 +36,9 @@ import com.fyp.n3015509.bookbuzzerapp.R;
  * create an instance of this fragment.
  */
 public class NotificationsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
+    ArrayList<BuzzNotification> notifications = new ArrayList<>();
+    NotificationsViewAdapter mAdapter;
     public NotificationsFragment() {
         // Required empty public constructor
     }
@@ -46,8 +55,6 @@ public class NotificationsFragment extends Fragment {
     public static NotificationsFragment newInstance(String param1, String param2) {
         NotificationsFragment fragment = new NotificationsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,17 +62,76 @@ public class NotificationsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_notifications, container, false);
+
+        View rootView = inflater.inflate(R.layout.fragment_notifications, container, false);
+        final ListView listv = (ListView) rootView.findViewById(R.id.not_list);
+        notifications = DBUtil.getNotifications(getActivity());
+
+        ArrayList<String> bookName = new ArrayList<>();
+        ArrayList<Boolean> notified = new ArrayList<>();
+        ArrayList<NotificationTypes> notTypes = new ArrayList<>();
+        ArrayList<Integer> bookIds = new ArrayList<>();
+
+        String[] bookNameArray = new String[notifications.size()];
+        Boolean[] notifiedArray = new Boolean[notifications.size()];
+        NotificationTypes[] notTypesArray = new NotificationTypes[notifications.size()];
+        Integer[] bookIdsArray = new Integer[notifications.size()];
+
+        for (BuzzNotification buzz : notifications) {
+            bookName.add(buzz.getBookName());
+            notified.add(buzz.getNotified());
+            bookIds.add(buzz.getBookId());
+            notTypes.add(buzz.getType());
+        }
+        bookNameArray = bookName.toArray(bookNameArray);
+        notifiedArray = notified.toArray(notifiedArray);
+        notTypesArray = notTypes.toArray(notTypesArray);
+        bookIdsArray = bookIds.toArray(bookIdsArray);
+
+        mAdapter = new NotificationsViewAdapter(getActivity(), bookNameArray, notifiedArray, notTypesArray, bookIdsArray);
+
+        listv.setAdapter(mAdapter);
+        mAdapter.setMode(Attributes.Mode.Single);
+        listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+            }
+        });
+        listv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.e("ListView", "OnTouch");
+                return false;
+            }
+        });
+        listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+        listv.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                Log.e("ListView", "onScrollStateChanged");
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+            }
+        });
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -78,12 +144,6 @@ public class NotificationsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
