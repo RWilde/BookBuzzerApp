@@ -9,4 +9,9 @@
     <color name="red_press">#990000</color>
     <color name="dark_gray">#4C535B</color>
     <color name="dark_gray_press">#ff7e8a97</color>
+
+    <color name="notificationTrueColor">#ffe07b</color>
+    <color name="notificationTrueColorPress">#ffda60</color>
+    <color name="notificationFalseColor">#e8e8e0</color>
+    <color name="notificationFalseColorPress">#DBDBD3</color>
 </resources>

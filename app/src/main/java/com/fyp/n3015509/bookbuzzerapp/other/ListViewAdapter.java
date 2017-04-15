@@ -179,7 +179,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.RemoveBookFromBuzzList(mContext, mBook, mListId);
-                Boolean apiSuccess = APIUtil.RemoveBookFromBuzzlist(mContext, mBook, listName, SaveSharedPreference.getToken(mContext));
+                Boolean apiSuccess = APIUtil.RemoveBookFromBuzzlist(mContext, mBook, listName);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -257,8 +257,9 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
+                APIUtil api = new APIUtil();
                 Boolean dbSuccess = DBUtil.WatchBook(mContext, mBook);
-                Boolean apiSuccess = APIUtil.WatchBook(mContext, mBook, SaveSharedPreference.getToken(mContext));
+                Boolean apiSuccess = api.WatchBook(mContext, mBook, listName);
 
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
@@ -279,7 +280,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
             if (success) {
                 //finish();
-
+                Toast.makeText(mContext, "Book watched", Toast.LENGTH_SHORT).show();
             } else {
                 //book wasnt deleted succesfully
                 Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();

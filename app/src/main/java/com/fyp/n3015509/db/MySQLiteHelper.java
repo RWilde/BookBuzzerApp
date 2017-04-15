@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
@@ -185,6 +186,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             insertValues.put(BOOK_ID, 1);
             insertValues.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
             database.insertOrThrow(NOTIFICATIONS_TABLE, null, insertValues);
+            ContentValues insert = new ContentValues();
+            insert.put(BOOK_ID, 2);
+            insert.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+            database.insertOrThrow(NOTIFICATIONS_TABLE, null, insert);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -486,18 +491,30 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             String countQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + "=" + id + " LIMIT 1;";
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(countQuery, null);
-            GoodreadsBook book = new GoodreadsBook();
+            GoodreadsBook b = new GoodreadsBook();
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
-                        book = createGoodreadsBook(cursor);
+                        b = createGoodreadsBook(cursor);
+                        String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_AUTHORS
+                                + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + AUTHOR_ID + " WHERE " + BOOK_INTERIM + "." + BOOK_ID + "=" + b.getColumnId();
+                        Cursor c = db.rawQuery(authorQuery, null);
+                        ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
+
+                        if (c.moveToFirst()) {
+                            while (c.isAfterLast() == false) {
+                                authorList.add(createAuthor(c));
+                                c.moveToNext();
+                            }
+                        }
+                        b.setAuthors(authorList);
                     }
                 } finally {
                     cursor.close();
                 }
             }
 
-            return book;
+            return b;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -707,7 +724,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             int bookId = cursor.getInt(1);
                             String type = cursor.getString(2);
                             NotificationTypes notification = NotificationTypes.valueOf(type);
-                            String bookQuery = "SELECT " + TITLE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
+                            String bookQuery = "SELECT " + TITLE + ", " + SMALL_IMAGE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
                             String notQuery = "";
                             Cursor c1 = db.rawQuery(bookQuery, null);
 
@@ -721,10 +738,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             }
                             Cursor c2 = db.rawQuery(notQuery, null);
 
-                            String bookName = getSingleString(c1);
                             int notified = getSingleInt(c2);
+                            Bitmap image = null;
+                            String bookName = "";
 
-                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified);
+                            if (c1 != null) {
+                                try {
+                                    if (c1.moveToFirst()) {
+                                        bookName = c1.getString(0);
+                                        byte[] by = c1.getBlob(1);
+                                        image = BitmapFactory.decodeByteArray(by, 0, by.length);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    c1.close();
+                                }
+                            }
+
+                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified, image);
                             notifications.add(buzz);
                             cursor.moveToNext();
                         }
@@ -741,10 +773,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return notifications;
     }
 
-    private BuzzNotification createBuzzNotification(int bookId, NotificationTypes notification, String bookName, int notified) {
+    private BuzzNotification createBuzzNotification(int bookId, NotificationTypes notification, String bookName, int notified, Bitmap image) {
         BuzzNotification not = new BuzzNotification();
         not.setBookId(bookId);
         not.setType(notification);
+        not.setImage(image);
         not.setBookName(bookName);
         if (notified == 0)
             not.setNotified(false);
@@ -754,8 +787,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return not;
     }
 
-    private String getSingleString(Cursor cursor)
-    {
+    private String getSingleString(Cursor cursor) {
         String var = "";
         if (cursor != null) {
             try {
@@ -771,8 +803,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return var;
     }
 
-    private int getSingleInt(Cursor cursor)
-    {
+    private int getSingleInt(Cursor cursor) {
         int var = 0;
         if (cursor != null) {
             try {
@@ -788,6 +819,31 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return 0;
     }
 
+    public Boolean markAsRead(int mBook, NotificationTypes mType) {
+        Boolean success = false;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            ContentValues cv = new ContentValues();
+
+            switch(mType)
+            {
+                case AVALIABLE:
+                    cv.put(NOTIFIED, 1);
+                    db.update(BOOK_WATCH, cv, BOOK_ID+mBook, null);
+                    success=true;
+                    break;
+                case PREORDER:
+                    cv.put(PREORDER, 1);
+                    db.update(BOOK_WATCH, cv, BOOK_ID+mBook, null);
+                    success=true;
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
 }
 
 //                        if (cursor.moveToFirst()) {

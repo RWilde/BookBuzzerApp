@@ -1,6 +1,7 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.app.ProgressDialog;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.icu.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ import com.fyp.n3015509.dao.NotificationTypes;
  */
 
 class NotificationsViewAdapter extends BaseSwipeAdapter {
+    private Bitmap[] mBookImage;
     private FragmentActivity mContext;
     private String[] mBookName;
     private Boolean[] mNotified;
@@ -44,13 +46,16 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
     private MarkNotificationAsReadTask mNotificationTask;
     private RemoveNotificationTask mRemoveTask;
 
-    public NotificationsViewAdapter(FragmentActivity activity, String[] bookNameArray, Boolean[] notifiedArray, NotificationTypes[] notTypesArray, Integer[] bookIdsArray) {
+    public NotificationsViewAdapter(FragmentActivity activity, String[] bookNameArray, Boolean[] notifiedArray, NotificationTypes[] notTypesArray, Integer[] bookIdsArray, Bitmap[] bookImageArray) {
         this.mContext = activity;
         this.mBookIds = bookIdsArray;
         this.mBookName = bookNameArray;
         this.mNotified = notifiedArray;
         this.mNotTypes = notTypesArray;
+        this.mBookImage = bookImageArray;
     }
+
+
 
     @Override
     public int getSwipeLayoutResourceId(int position) {
@@ -66,16 +71,16 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
         if (mNotified[position] == true)
-            v.setBackgroundColor(Color.RED);
+            v.setBackgroundResource(R.drawable.notification_true_selector);
 
         else {
-            v.setBackgroundColor(Color.BLUE);
+            v.setBackgroundResource(R.drawable.notification_false_selector);
         }
 
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(mBookIds[position], mContext);
+                mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(mBookIds[position], mContext, mNotTypes[position]);
                 mNotificationTask.execute((Void) null);
 
             }
@@ -95,8 +100,10 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
     @Override
     public void fillValues(int position, View convertView) {
-//        image = (ImageView) convertView.findViewById(R.id.imageView);
-//        image.setImageBitmap(images[position]);
+
+        image = (ImageView) convertView.findViewById(R.id.notImageView);
+        image.setImageBitmap(mBookImage[position]);
+
         String notification = "";
         String date = "";
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -105,10 +112,10 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         switch (mNotTypes[position]) {
             case AVALIABLE:
-                notification = "The book " + mBookName[position] + " is now available for purchase";
+                notification = mBookName[position] + " is now available for purchase";
                 break;
             case PREORDER:
-                notification = "The book " + mBookName[position] + " will be released next week, and is available for pre-order";
+                notification = mBookName[position] + " will be released next week, and is available for pre-order";
                 break;
         }
 
@@ -160,7 +167,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.RemoveNotification(mContext, mBook);
-                Boolean apiSuccess = APIUtil.RemoveNotification(mContext, mBook, SaveSharedPreference.getToken(mContext));
+                Boolean apiSuccess = APIUtil.RemoveNotification(mContext, mBook);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -209,13 +216,15 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
     private class MarkNotificationAsReadTask extends AsyncTask<Void, Void, Boolean> {
 
         private final int mBook;
+        private final NotificationTypes mType;
         private ProgressDialog progress;
         private FragmentActivity frag;
         private Handler mHandler;
 
-        public MarkNotificationAsReadTask(Integer id, FragmentActivity frag) {
+        public MarkNotificationAsReadTask(Integer id, FragmentActivity frag, NotificationTypes type) {
             this.mBook = id;
             this.frag = frag;
+            this.mType = type;
         }
 
         @Override
@@ -231,8 +240,8 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                Boolean dbSuccess = DBUtil.MarkNotificationAsRead(mContext, mBook);
-                Boolean apiSuccess = APIUtil.MarkNotificationAsRead(mContext, mBook, SaveSharedPreference.getToken(mContext));
+                Boolean dbSuccess = DBUtil.MarkNotificationAsRead(mContext, mBook, mType);
+                Boolean apiSuccess = APIUtil.MarkNotificationAsRead(mContext, mBook, mType);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }

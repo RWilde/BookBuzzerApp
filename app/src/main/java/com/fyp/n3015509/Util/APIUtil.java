@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 
@@ -34,6 +35,9 @@ public class APIUtil {
     private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
     private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
     private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
+
+    private static final String WatchBookURL = BaseURL + "/watch/book/";
+
 
     public static void SaveShelf(JSONObject booklist, Context ctx) {
 
@@ -109,6 +113,22 @@ public class APIUtil {
 
     }
 
+    public JSONObject convertToApi(GoodreadsBook book, String listName) {
+        JSONObject bookJSON = new JSONObject();
+        JSONObject authorJSON = new JSONObject();
+
+        if (book != null) {
+            try {
+                authorJSON = createJSONAuthor(book.getAuthors());
+                bookJSON = createJSONbook(book, authorJSON);
+                bookJSON.put("list_name", listName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return bookJSON;
+    }
+
     private JSONObject createJSONbook(GoodreadsBook book, JSONObject authorJSON) {
         JSONObject jsonBook = new JSONObject();
         try {
@@ -165,9 +185,9 @@ public class APIUtil {
         return authorListJson;
     }
 
-    public static Boolean RemoveBookFromBuzzlist(Context mContext, int bookId, String mListId, String token) {
+    public static Boolean RemoveBookFromBuzzlist(Context mContext, int bookId, String mListId) {
         try {
-            String url = DeleteBookURL + URLEncoder.encode(mListId,"UTF-8") + "/" + bookId;
+            String url = DeleteBookURL + URLEncoder.encode(mListId, "UTF-8") + "/" + bookId;
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);
@@ -178,7 +198,7 @@ public class APIUtil {
             conn.connect();
 
             int response = conn.getResponseCode();
-            if ( response == 200) {
+            if (response == 200) {
                 return true;
             }
         } catch (IOException e) {
@@ -188,15 +208,79 @@ public class APIUtil {
         return false;
     }
 
-    public static Boolean WatchBook(Context mContext, int mBook, String listName) {
-        return true;
+    public Boolean WatchBook(Context mContext, int mBook, String listName) {
+        try {
+            JSONObject object = convertToApi(DBUtil.getBook(mContext, mBook), listName);
+            String url = WatchBookURL;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            String json = object.toString();
+
+            out.write(json);
+            out.close();
+
+            int status = conn.getResponseCode();
+            int response = conn.getResponseCode();
+            if (response == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
     }
 
-    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook, String token) {
-        return null;
+    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook) {
+        try {
+            String url = WatchBookURL + mBook;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.connect();
+
+            int response = conn.getResponseCode();
+            if (response == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
     }
 
-    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, String token) {
-        return null;
+    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, NotificationTypes mType) {
+        try {
+            String url = WatchBookURL + mBook;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.connect();
+
+            int response = conn.getResponseCode();
+            if (response == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
     }
 }

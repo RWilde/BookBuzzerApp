@@ -1,11 +1,23 @@
 package com.fyp.n3015509.dao;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by tomha on 14-Apr-17.
  */
 
 public class BuzzNotification {
     int bookId;
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    Bitmap image;
 
     public int getBookId() {
         return bookId;

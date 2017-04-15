@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.db.MySQLiteHelper;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
@@ -135,7 +136,21 @@ public class DBUtil {
         return null;
     }
 
-    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook) {
-        return null;
-    }
+    public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, NotificationTypes mType) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.markAsRead(mBook, mType);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;    }
+
+    public static GoodreadsBook getBook(Context mContext, int mBook) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.getBook(mBook);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;    }
 }

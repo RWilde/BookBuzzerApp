@@ -78,24 +78,28 @@ public class NotificationsFragment extends Fragment {
         ArrayList<Boolean> notified = new ArrayList<>();
         ArrayList<NotificationTypes> notTypes = new ArrayList<>();
         ArrayList<Integer> bookIds = new ArrayList<>();
+        ArrayList<Bitmap> bookImage = new ArrayList<>();
 
         String[] bookNameArray = new String[notifications.size()];
         Boolean[] notifiedArray = new Boolean[notifications.size()];
         NotificationTypes[] notTypesArray = new NotificationTypes[notifications.size()];
         Integer[] bookIdsArray = new Integer[notifications.size()];
+        Bitmap[] bookImageArray = new Bitmap[notifications.size()];
 
         for (BuzzNotification buzz : notifications) {
             bookName.add(buzz.getBookName());
             notified.add(buzz.getNotified());
             bookIds.add(buzz.getBookId());
             notTypes.add(buzz.getType());
+            bookImage.add(buzz.getImage());
         }
         bookNameArray = bookName.toArray(bookNameArray);
         notifiedArray = notified.toArray(notifiedArray);
         notTypesArray = notTypes.toArray(notTypesArray);
         bookIdsArray = bookIds.toArray(bookIdsArray);
+        bookImageArray = bookImage.toArray(bookImageArray);
 
-        mAdapter = new NotificationsViewAdapter(getActivity(), bookNameArray, notifiedArray, notTypesArray, bookIdsArray);
+        mAdapter = new NotificationsViewAdapter(getActivity(), bookNameArray, notifiedArray, notTypesArray, bookIdsArray, bookImageArray);
 
         listv.setAdapter(mAdapter);
         mAdapter.setMode(Attributes.Mode.Single);
