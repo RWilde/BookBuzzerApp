@@ -137,7 +137,7 @@ public class ShelfImportFrag extends DialogFragment {
                                 }
                             }
                             Boolean result = util.RetrieveSelectedShelves(getActivity(), options);
-                            SaveSharedPreference.setImported(getActivity(), result);
+                            SaveSharedPreference.setImported(getActivity(), false);
                         }
                     })
                     .setNegativeButton("cancel", new DialogInterface.OnClickListener() {

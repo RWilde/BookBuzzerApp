@@ -38,22 +38,22 @@ public class GoodreadsUtil {
 
     public Boolean RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
         APIUtil util = new APIUtil();
-        JSONObject shelvesJSON = new JSONObject();
         ArrayList<GoodreadsShelf> shelfList= new ArrayList<>();
 
         for (GoodreadsShelf shelf : options) {
             try {
+                JSONObject shelvesJSON = new JSONObject();
                 ArrayList<GoodreadsBook> booklist = shelves.getBookShelf(ctx, shelf);
                 shelf.setBooks(booklist);
                 shelfList.add(shelf);
                 JSONObject apiParam = util.convertToApi(booklist);
                 shelvesJSON.put(shelf.getShelfName(), apiParam);
+                APIUtil.SaveShelf(shelvesJSON, ctx);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         DBUtil.SaveShelf(shelfList, ctx);
-      //  APIUtil.SaveShelf(shelvesJSON, ctx);
         return true;
     }
 

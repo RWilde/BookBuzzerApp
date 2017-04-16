@@ -31,6 +31,8 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.fyp.n3015509.Util.APIUtil;
+import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.Util.GoodreadsUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
@@ -564,6 +566,7 @@ public class MainActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
             try {
                 Boolean result = util.RetrieveSelectedShelves(mContext, options);
+
                 return result;
             }
             catch(Exception e)
