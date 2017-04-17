@@ -36,10 +36,10 @@ public class GoodreadsUtil {
         return shelves.getShelves(ctx);
     }
 
-    public Boolean RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
+    public ArrayList<JSONObject> RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
         APIUtil util = new APIUtil();
         ArrayList<GoodreadsShelf> shelfList= new ArrayList<>();
-
+        ArrayList<JSONObject> json = new ArrayList<>();
         for (GoodreadsShelf shelf : options) {
             try {
                 JSONObject shelvesJSON = new JSONObject();
@@ -48,13 +48,13 @@ public class GoodreadsUtil {
                 shelfList.add(shelf);
                 JSONObject apiParam = util.convertToApi(booklist);
                 shelvesJSON.put(shelf.getShelfName(), apiParam);
-                APIUtil.SaveShelf(shelvesJSON, ctx);
+                json.add(shelvesJSON);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         DBUtil.SaveShelf(shelfList, ctx);
-        return true;
+        return json;
     }
 
     public ArrayList<GoodreadsBook> getBooks(Context ctx) {

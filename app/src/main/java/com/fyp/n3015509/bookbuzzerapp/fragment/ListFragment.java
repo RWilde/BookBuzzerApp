@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
+import com.fyp.n3015509.Util.AppUtil;
 import com.fyp.n3015509.Util.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
@@ -46,6 +47,7 @@ public class ListFragment extends Fragment {
     private ListFragment.OnFragmentInteractionListener mListener;
     View rootView;
     private ListViewAdapter mAdapter;
+    private String mListName;
 
     public ListFragment() {
     }
@@ -65,42 +67,13 @@ public class ListFragment extends Fragment {
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             int listId = bundle.getInt("listId");
+
+            AppUtil app = new AppUtil();
+
+            mListName = DBUtil.getBuzzlistName(getActivity(), listId);
             booklist = DBUtil.getBooksFromBuzzlist(getActivity(), listId);
-            ArrayList<String> buzzlistNames = new ArrayList<>();
-            ArrayList<Bitmap> buzzlistImages = new ArrayList<>();
-            ArrayList<String> buzzlistAuthors = new ArrayList<>();
-            ArrayList<Integer> buzzlistIds = new ArrayList<>();
 
-            Bitmap[] images = new Bitmap[booklist.size()];
-            String[] values = new String[booklist.size()];
-            String[] authors = new String[booklist.size()];
-            Integer[] ids = new Integer[booklist.size()];
-
-            for (GoodreadsBook buzz : booklist) {
-                buzzlistNames.add(buzz.getTitle());
-                buzzlistImages.add(buzz.getSmallImage());
-                buzzlistIds.add(buzz.getId());
-                String authorList = "";
-                int count = 0;
-                for (GoodreadsAuthor auth : buzz.getAuthors())
-                {
-                    authorList += auth.getName();
-                    if (count >=1 )
-                    {
-                        authorList += ", ";
-                    }
-                    count++;
-                }
-                buzzlistAuthors.add(authorList);
-            }
-            values = buzzlistNames.toArray(values);
-            images = buzzlistImages.toArray(images);
-            authors = buzzlistAuthors.toArray(authors);
-            ids = buzzlistIds.toArray(ids);
-
-            String listName = DBUtil.getBuzzlistName(getActivity(), listId);
-
-            mAdapter = new ListViewAdapter(getActivity(), values, images, authors, listId, ids, listName);
+            mAdapter = app.setAdapter(booklist, listId, mListName, getActivity());
 
             listv.setAdapter(mAdapter);
             mAdapter.setMode(Attributes.Mode.Single);

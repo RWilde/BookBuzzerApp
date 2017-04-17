@@ -39,7 +39,7 @@ public class APIUtil {
     private static final String WatchBookURL = BaseURL + "/watch/book/";
 
 
-    public static void SaveShelf(JSONObject booklist, Context ctx) {
+    public static boolean SaveShelf(JSONObject booklist, Context ctx) {
 
         try {
             URL authURL = new URL(NewBuzzlistURL);
@@ -81,6 +81,7 @@ public class APIUtil {
         }
         //return null;
 
+        return false;
     }
 
     public JSONObject convertToApi(ArrayList<GoodreadsBook> booklist) {

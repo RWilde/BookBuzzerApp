@@ -42,12 +42,15 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
+import com.fyp.n3015509.bookbuzzerapp.fragment.WatchListFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -74,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG_NOTIFICATIONS = "notifications";
     private static final String TAG_SUGGESTIONS = "suggestions";
     private static final String TAG_SETTINGS = "settings";
+    private static final String TAG_WATCHED = "watched";
+
     public static String CURRENT_TAG = TAG_HOME;
 
     // toolbar titles respected to selected nav menu item
@@ -247,14 +252,18 @@ public class MainActivity extends AppCompatActivity {
                 ListFragment listFragment = new ListFragment();
                 return listFragment;
             case 3:
+                // settings fragment
+                WatchListFragment watchFragment = new WatchListFragment();
+                return watchFragment;
+            case 4:
                 // notifications fragment
                 NotificationsFragment notificationsFragment = new NotificationsFragment();
                 return notificationsFragment;
-
-            case 4:
+            case 5:
                 // settings fragment
                 SettingsFragment settingsFragment = new SettingsFragment();
                 return settingsFragment;
+
             default:
                 return new HomeFragment();
         }
@@ -291,12 +300,16 @@ public class MainActivity extends AppCompatActivity {
                         navItemIndex = 2;
                         CURRENT_TAG = TAG_BEELIST;
                         break;
-                    case R.id.nav_notifications:
+                    case R.id.nav_watched:
                         navItemIndex = 3;
+                        CURRENT_TAG = TAG_WATCHED;
+                        break;
+                    case R.id.nav_notifications:
+                        navItemIndex = 4;
                         CURRENT_TAG = TAG_NOTIFICATIONS;
                         break;
                     case R.id.nav_suggestions:
-                        navItemIndex = 4;
+                        navItemIndex = 5;
                         CURRENT_TAG = TAG_SUGGESTIONS;
                         break;
                     case R.id.nav_logout:
@@ -306,8 +319,8 @@ public class MainActivity extends AppCompatActivity {
                         drawer.closeDrawers();
                         return true;
                     case R.id.nav_settings:
-                        navItemIndex = 5;
-                        CURRENT_TAG = TAG_SETTINGS;
+                        //navItemIndex = 5;
+                       //CURRENT_TAG = TAG_SETTINGS;
                         break;
                     // launch new intent instead of loading fragment
 
@@ -565,9 +578,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                Boolean result = util.RetrieveSelectedShelves(mContext, options);
+                ArrayList<JSONObject> result = util.RetrieveSelectedShelves(mContext, options);
+                boolean success = false;
+                progress.dismiss();
 
-                return result;
+                for (JSONObject shelf : result)
+                {
+                    success = APIUtil.SaveShelf(shelf, mContext);
+                }
+
+                return success;
             }
             catch(Exception e)
             {
@@ -578,7 +598,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean aBoolean) {
-            progress.dismiss();
             super.onPostExecute(aBoolean);
             // showProgress(false);
 

@@ -44,12 +44,11 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.0'
     compile 'commons-lang:commons-lang:2.6'
     compile 'org.jsoup:jsoup:1.10.2'
-    testCompile 'junit:junit:4.12'
-    compile "com.daimajia.swipelayout:library:1.2.0@aar"
-    compile 'com.android.support:recyclerview-v7:25.1.1'
+    compile 'com.daimajia.swipelayout:library:1.2.0@aar'
     compile 'com.daimajia.easing:library:1.0.0@aar'
     compile 'com.daimajia.androidanimations:library:1.1.2@aar'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'jp.wasabeef:recyclerview-animators:1.0.3@aar'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    testCompile 'junit:junit:4.12'
 }

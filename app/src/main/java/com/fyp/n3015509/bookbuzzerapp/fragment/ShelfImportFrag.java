@@ -2,6 +2,7 @@ package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.DialogFragment;
 
+import com.fyp.n3015509.Util.AppUtil;
 import com.fyp.n3015509.Util.GoodreadsUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
@@ -136,7 +138,8 @@ public class ShelfImportFrag extends DialogFragment {
                                     }
                                 }
                             }
-                            Boolean result = util.RetrieveSelectedShelves(getActivity(), options);
+                            AppUtil appuUtil = new AppUtil();
+                            Boolean result = appuUtil.SaveShelves(getContext(), util, options);
                             SaveSharedPreference.setImported(getActivity(), false);
                         }
                     })

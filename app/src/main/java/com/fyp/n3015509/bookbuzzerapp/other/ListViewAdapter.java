@@ -85,16 +85,37 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.star2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                watchTask = new WatchBookTask(ids[position], listId);
-                watchTask.execute((Void) null);
+                image = (ImageView) v.findViewById(R.id.star2);
+                image.setImageResource(R.drawable.bg_circle);
+                setStar(v, position);
+
+                if (setStar(v, position) == true)
+                {
+                    //removeFromWatchList
+                    DBUtil.RemoveFromWatched(mContext, ids[position]);
+                    setStar(v, position);
+                    Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    watchTask = new WatchBookTask(ids[position], listId);
+                    watchTask.execute((Void) null);
+                }
             }
         });
 
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteTask = new RemoveBookTask(ids[position], listId, ListViewAdapter.this.activity);
-                deleteTask.execute((Void) null);
+                if (listName.contentEquals(""))
+                {
+                    //from watch list
+                    Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    //from buzzlist
+                    deleteTask = new RemoveBookTask(ids[position], listId, ListViewAdapter.this.activity);
+                    deleteTask.execute((Void) null);
+                }
             }
         });
 
@@ -131,6 +152,23 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
         authorText = (TextView) convertView.findViewById(R.id.book_author);
         authorText.setText(authors[position]);
+
+        setStar(convertView, position);
+    }
+
+    public boolean setStar(View view, int position)
+    {
+        boolean watched = DBUtil.checkIfWatched(mContext, ids[position]);
+        image = (ImageView) view.findViewById(R.id.star2);
+
+        if (watched == true)
+        {
+            image.setImageResource(R.drawable.star_filled);
+        }
+        else{
+            image.setImageResource(R.drawable.star);
+        }
+        return watched;
     }
 
     @Override

@@ -9,21 +9,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
-import com.google.api.client.util.DateTime;
 
 import org.apache.commons.lang.time.DateUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -455,24 +450,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
-                        ArrayList<GoodreadsBook> booklist = new ArrayList<>();
-                        while (cursor.isAfterLast() == false) {
-                            GoodreadsBook b = createGoodreadsBook(cursor);
-                            String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_AUTHORS
-                                    + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + AUTHOR_ID + " WHERE " + BOOK_INTERIM + "." + BOOK_ID + "=" + b.getColumnId();
-                            Cursor c = db.rawQuery(authorQuery, null);
-                            ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
-
-                            if (c.moveToFirst()) {
-                                while (c.isAfterLast() == false) {
-                                    authorList.add(createAuthor(c));
-                                    c.moveToNext();
-                                }
-                            }
-                            b.setAuthors(authorList);
-                            book.add(b);
-                            cursor.moveToNext();
-                        }
+                        book = CreateGoodreadsBookArrayList(cursor, db);
                     }
                 } finally {
                     cursor.close();
@@ -495,19 +473,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
-                        b = createGoodreadsBook(cursor);
-                        String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_AUTHORS
-                                + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + AUTHOR_ID + " WHERE " + BOOK_INTERIM + "." + BOOK_ID + "=" + b.getColumnId();
-                        Cursor c = db.rawQuery(authorQuery, null);
-                        ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
-
-                        if (c.moveToFirst()) {
-                            while (c.isAfterLast() == false) {
-                                authorList.add(createAuthor(c));
-                                c.moveToNext();
-                            }
-                        }
-                        b.setAuthors(authorList);
+                        b = CreateGoodreadsBookObject(cursor, db);
                     }
                 } finally {
                     cursor.close();
@@ -520,47 +486,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         }
         return null;
     }
-
-    private GoodreadsBook createGoodreadsBook(Cursor cursor) {
-        GoodreadsBook b = new GoodreadsBook();
-        b.setColumnId(cursor.getInt(0));
-        b.setId(cursor.getInt(1));
-        b.setIsbn(cursor.getString(2));
-        b.setIsbn13(cursor.getString(3));
-        b.setTextReviewsCount(cursor.getInt(4));
-        b.setTitle(cursor.getString(5));
-        b.setTitleWithoutSeries(cursor.getString(6));
-        b.setImage(cursor.getBlob(7));
-        b.setSmallImage(cursor.getBlob(8));
-        b.setLargeImage(cursor.getBlob(9));
-        b.setLink(cursor.getString(10));
-        b.setNumPages(cursor.getInt(11));
-        b.setYearPublished(cursor.getInt(12));
-        b.setAverage_rating(cursor.getDouble(13));
-        b.setPublisher(cursor.getString(14));
-        b.setReleaseDate(cursor.getString(15));
-        b.setRatingsCount(cursor.getInt(16));
-        b.setDescription(cursor.getString(17));
-        b.setFormat(cursor.getString(18));
-        b.setEditionInformation(cursor.getString(19));
-
-        return b;
-    }
-
-    private GoodreadsAuthor createAuthor(Cursor c) {
-        GoodreadsAuthor b = new GoodreadsAuthor();
-        b.setColumnId(c.getInt(0));
-        b.setId(c.getInt(1));
-        b.setName(c.getString(2));
-        b.setImageDB(c.getBlob(3));
-        b.setSmallImageDB(c.getBlob(4));
-        b.setLink(c.getString(5));
-        b.setAverage_rating(c.getDouble(6));
-        b.setRatingsCount(c.getInt(7));
-        b.setTextReviewsCount(c.getInt(8));
-        return b;
-    }
-
 
     public Boolean removeBookFromBuzzlist(int bookId, int list) {
         int bookColumnId = 0;
@@ -643,6 +568,22 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                 } finally {
                     cursor.close();
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public boolean RemoveBookFromWatchList(int mBookId) {
+        boolean success = false;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            String whereClause = BOOK_ID + "=" + mBookId;
+            int delete = db.delete(BOOK_WATCH, whereClause, null);
+            if (delete == 1)
+            {
+                success = true;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -773,6 +714,137 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return notifications;
     }
 
+    public Boolean markAsRead(int mBook, NotificationTypes mType) {
+        Boolean success = false;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            ContentValues cv = new ContentValues();
+
+            switch (mType) {
+                case AVALIABLE:
+                    cv.put(NOTIFIED, 1);
+                    db.update(BOOK_WATCH, cv, BOOK_ID + mBook, null);
+                    success = true;
+                    break;
+                case PREORDER:
+                    cv.put(PREORDER, 1);
+                    db.update(BOOK_WATCH, cv, BOOK_ID + mBook, null);
+                    success = true;
+                    break;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return success;
+    }
+
+    public ArrayList<GoodreadsBook> getWatchedBooks() {
+        try {
+            String watchQuery = "SELECT " + BOOK_ID + " FROM " + BOOK_WATCH;
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(watchQuery, null);
+            ArrayList<GoodreadsBook> book = new ArrayList<>();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        ArrayList<GoodreadsBook> booklist = new ArrayList<>();
+                        while (cursor.isAfterLast() == false) {
+                            String bookQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + "=" + cursor.getInt(0);
+                            Cursor c1 = db.rawQuery(bookQuery, null);
+                            if (c1 != null) {
+                                try {
+                                    if (c1.moveToFirst()) {
+                                        book.add(CreateGoodreadsBookObject(c1, db));
+                                    }
+                                } finally {
+                                    c1.close();
+                                }
+                            }
+                            cursor.moveToNext();
+                        }
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+
+            return book;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Boolean checkIfWatched(int mBookId) {
+        Boolean watched = false;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            String watchString = "SELECT " + COLUMN_ID + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " + " + mBookId + " LIMIT 1";
+            Cursor cursor = db.rawQuery(watchString, null);
+
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+
+                        int id = cursor.getInt(0);
+                        if (id != 0) {
+                            watched = true;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    cursor.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return watched;
+
+    }
+
+    private GoodreadsBook createGoodreadsBook(Cursor cursor) {
+        GoodreadsBook b = new GoodreadsBook();
+        b.setColumnId(cursor.getInt(0));
+        b.setId(cursor.getInt(1));
+        b.setIsbn(cursor.getString(2));
+        b.setIsbn13(cursor.getString(3));
+        b.setTextReviewsCount(cursor.getInt(4));
+        b.setTitle(cursor.getString(5));
+        b.setTitleWithoutSeries(cursor.getString(6));
+        b.setImage(cursor.getBlob(7));
+        b.setSmallImage(cursor.getBlob(8));
+        b.setLargeImage(cursor.getBlob(9));
+        b.setLink(cursor.getString(10));
+        b.setNumPages(cursor.getInt(11));
+        b.setYearPublished(cursor.getInt(12));
+        b.setAverage_rating(cursor.getDouble(13));
+        b.setPublisher(cursor.getString(14));
+        b.setReleaseDate(cursor.getString(15));
+        b.setRatingsCount(cursor.getInt(16));
+        b.setDescription(cursor.getString(17));
+        b.setFormat(cursor.getString(18));
+        b.setEditionInformation(cursor.getString(19));
+
+        return b;
+    }
+
+    private GoodreadsAuthor createAuthor(Cursor c) {
+        GoodreadsAuthor b = new GoodreadsAuthor();
+        b.setColumnId(c.getInt(0));
+        b.setId(c.getInt(1));
+        b.setName(c.getString(2));
+        b.setImageDB(c.getBlob(3));
+        b.setSmallImageDB(c.getBlob(4));
+        b.setLink(c.getString(5));
+        b.setAverage_rating(c.getDouble(6));
+        b.setRatingsCount(c.getInt(7));
+        b.setTextReviewsCount(c.getInt(8));
+        return b;
+    }
+
     private BuzzNotification createBuzzNotification(int bookId, NotificationTypes notification, String bookName, int notified, Bitmap image) {
         BuzzNotification not = new BuzzNotification();
         not.setBookId(bookId);
@@ -785,6 +857,32 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             not.setNotified(true);
 
         return not;
+    }
+
+    private ArrayList<GoodreadsBook> CreateGoodreadsBookArrayList(Cursor cursor, SQLiteDatabase db) {
+        ArrayList<GoodreadsBook> book = new ArrayList<>();
+        while (cursor.isAfterLast() == false) {
+            book.add(CreateGoodreadsBookObject(cursor, db));
+            cursor.moveToNext();
+        }
+        return book;
+    }
+
+    private GoodreadsBook CreateGoodreadsBookObject(Cursor c1, SQLiteDatabase db) {
+        GoodreadsBook b = createGoodreadsBook(c1);
+        String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_AUTHORS
+                + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + AUTHOR_ID + " WHERE " + BOOK_INTERIM + "." + BOOK_ID + "=" + b.getColumnId();
+        Cursor c = db.rawQuery(authorQuery, null);
+        ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
+
+        if (c.moveToFirst()) {
+            while (c.isAfterLast() == false) {
+                authorList.add(createAuthor(c));
+                c.moveToNext();
+            }
+        }
+        b.setAuthors(authorList);
+        return b;
     }
 
     private String getSingleString(Cursor cursor) {
@@ -819,51 +917,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return 0;
     }
 
-    public Boolean markAsRead(int mBook, NotificationTypes mType) {
-        Boolean success = false;
-        try {
-            SQLiteDatabase db = this.getReadableDatabase();
-            ContentValues cv = new ContentValues();
 
-            switch(mType)
-            {
-                case AVALIABLE:
-                    cv.put(NOTIFIED, 1);
-                    db.update(BOOK_WATCH, cv, BOOK_ID+mBook, null);
-                    success=true;
-                    break;
-                case PREORDER:
-                    cv.put(PREORDER, 1);
-                    db.update(BOOK_WATCH, cv, BOOK_ID+mBook, null);
-                    success=true;
-                    break;
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return success;
-    }
 }
 
-//                        if (cursor.moveToFirst()) {
-//        String releaseDate = cursor.getString(0);
-//
-//        DateFormat sourceFormat = new SimpleDateFormat("dd/MM/yyyy");
-//        Date date = sourceFormat.parse(releaseDate);
-//
-//        Date currentDate = new Date(System.currentTimeMillis());
-//
-//        if (lastActive != null) {
-//            if (date == currentDate || date.after(lastActive) && date.before(currentDate)) {
-//                //add to notifications db
-//                ContentValues notification = new ContentValues();
-//
-//                db.insert(BOOK_WATCH, null, notification);
-//            }
-//        } else {
-//            if (date == currentDate) {
-//                //add to notifications db
-//            }
-//        }
-//    }

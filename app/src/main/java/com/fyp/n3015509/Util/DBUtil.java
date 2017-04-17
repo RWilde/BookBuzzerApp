@@ -143,7 +143,8 @@ public class DBUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;    }
+        return false;
+    }
 
     public static GoodreadsBook getBook(Context mContext, int mBook) {
         try {
@@ -152,5 +153,36 @@ public class DBUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;    }
+        return null;
+    }
+
+    public static ArrayList<GoodreadsBook> getWatchedBooks(FragmentActivity activity) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(activity);
+            return db.getWatchedBooks();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Boolean checkIfWatched(Context activity, int mBookId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(activity);
+            return db.checkIfWatched(mBookId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static Boolean RemoveFromWatched(Context mContext, int mBookId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.RemoveBookFromWatchList(mBookId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

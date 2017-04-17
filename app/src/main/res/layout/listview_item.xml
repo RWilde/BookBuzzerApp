@@ -25,7 +25,6 @@
 
         <ImageView
             android:id="@+id/star2"
-            android:src="@drawable/star"
             android:layout_width="70dp"
             android:background="#4cd964"
             android:paddingLeft="25dp"
