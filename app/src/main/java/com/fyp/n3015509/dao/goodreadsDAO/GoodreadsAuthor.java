@@ -1,4 +1,4 @@
-package com.fyp.n3015509.goodreadsDAO;
+package com.fyp.n3015509.dao.goodreadsDAO;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

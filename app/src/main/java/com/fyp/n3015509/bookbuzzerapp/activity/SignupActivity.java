@@ -3,17 +3,14 @@ package com.fyp.n3015509.bookbuzzerapp.activity;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.fyp.n3015509.Util.LoginUtil;
+import com.fyp.n3015509.APIs.LoginAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 
 import org.json.JSONException;
@@ -143,7 +140,7 @@ public class SignupActivity extends AppCompatActivity {
                 login.put("name", mEmail);
                 login.put("password", mPassword);
 
-                String token = LoginUtil.RegisterNewUser(getApplicationContext(), login);
+                String token = LoginAPI.RegisterNewUser(getApplicationContext(), login);
                 if (token != null) {
                     return true;
                 }

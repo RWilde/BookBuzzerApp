@@ -1,13 +1,15 @@
-package com.fyp.n3015509.Util;
+package com.fyp.n3015509.APIs;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
-import com.fyp.n3015509.apiDAO.APIBookList;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.dao.APIdao.APIBookList;
 import com.fyp.n3015509.dao.NotificationTypes;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.db.DBUtil;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,7 +29,7 @@ import java.util.HashMap;
  * Created by rwild on 24/03/2017.
  */
 
-public class APIUtil {
+public class BookBuzzerAPI {
     private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
@@ -37,6 +39,8 @@ public class APIUtil {
     private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
 
     private static final String WatchBookURL = BaseURL + "/watch/book/";
+    private static final String PriceCheckerURL = BaseURL + "/watch/price/";
+    private static final String TAG = "price checker";
 
 
     public static boolean SaveShelf(JSONObject booklist, Context ctx) {
@@ -281,6 +285,46 @@ public class APIUtil {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
+        }
+        return false;
+    }
+
+    public static Boolean RunPriceChecker(FragmentActivity mContext, int isbn) {
+        StringBuffer response = new StringBuffer();
+
+        try {
+            String url = PriceCheckerURL + isbn;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.connect();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
+            JSONObject prices = new JSONObject(response.toString());
+
+            for(int i = 0; i<prices.names().length(); i++){
+                Log.v(TAG, "key = " + prices.names().getString(i) + " value = " + prices.get(prices.names().getString(i)));
+            }
+
+//            if (response == 200) {
+//                return true;
+//            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return false;
     }

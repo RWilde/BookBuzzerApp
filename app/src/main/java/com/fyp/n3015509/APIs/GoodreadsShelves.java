@@ -1,11 +1,11 @@
-package com.fyp.n3015509.goodreadsapi;
+package com.fyp.n3015509.APIs;
 
 import android.content.Context;
 
 import com.fyp.n3015509.Util.XMLUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import java.io.BufferedReader;
 import java.io.IOException;

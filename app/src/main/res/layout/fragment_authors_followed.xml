@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fyp.n3015509.bookbuzzerapp.AuthorsFollowedFrag">
+    tools:context="com.fyp.n3015509.bookbuzzerapp.fragment.AuthorsFollowedFrag">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView

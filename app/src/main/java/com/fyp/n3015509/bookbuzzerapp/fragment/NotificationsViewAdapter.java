@@ -2,9 +2,6 @@ package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.icu.text.DateFormat;
-import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,9 +18,8 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
-import com.fyp.n3015509.Util.APIUtil;
-import com.fyp.n3015509.Util.DBUtil;
-import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.NotificationTypes;
 
@@ -167,7 +163,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.RemoveNotification(mContext, mBook);
-                Boolean apiSuccess = APIUtil.RemoveNotification(mContext, mBook);
+                Boolean apiSuccess = BookBuzzerAPI.RemoveNotification(mContext, mBook);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -241,7 +237,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.MarkNotificationAsRead(mContext, mBook, mType);
-                Boolean apiSuccess = APIUtil.MarkNotificationAsRead(mContext, mBook, mType);
+                Boolean apiSuccess = BookBuzzerAPI.MarkNotificationAsRead(mContext, mBook, mType);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }

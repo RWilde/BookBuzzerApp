@@ -1,8 +1,9 @@
 package com.fyp.n3015509.Util;
 
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.APIs.GoodreadsAPI;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,7 +29,7 @@ import org.apache.commons.lang.StringEscapeUtils;
  */
 
 public class XMLUtil {
-    //GoodreadsUtil gUtil = new GoodreadsUtil();
+    //GoodreadsAPI gUtil = new GoodreadsAPI();
 
     public Document getXMLDocument(String xml) {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -58,7 +59,7 @@ public class XMLUtil {
                     int id = getInt(el.getElementsByTagName("id").item(0).getTextContent());
                     String name = el.getElementsByTagName("name").item(0).getTextContent();
                     int count = getInt(el.getElementsByTagName("book_count").item(0).getTextContent());
-                    GoodreadsShelf shelf = GoodreadsUtil.createGoodreadsShelf(id, name, count);
+                    GoodreadsShelf shelf = com.fyp.n3015509.APIs.GoodreadsAPI.createGoodreadsShelf(id, name, count);
                     shelves.add(shelf);
                 }
             }
@@ -140,7 +141,7 @@ public class XMLUtil {
             //needs to be in bested loop
 
 
-            return GoodreadsUtil.CreateGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
+            return GoodreadsAPI.CreateGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
                     format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, authors);
         }
         catch (Exception e)

@@ -1,7 +1,6 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,11 +18,10 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.Util.AppUtil;
-import com.fyp.n3015509.Util.DBUtil;
+import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
-package com.fyp.n3015509.apiDAO;
+package com.fyp.n3015509.dao.APIdao;
 
 
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.google.gson.Gson;
 
 /**
@@ -39,9 +39,9 @@ public class APIBook {
         this.text_reviews_count = book.getTextReviewsCount();
         this.title = book.getTitle();
         this.title_without_series = book.getTitleWithoutSeries();
-       // this.image_url = book.getImage();
-       // this.small_image_url = book.getSmall_image_url();
-       // this.large_image_url = book.getLarge_image_url();
+        // this.image_url = book.getImage();
+        // this.small_image_url = book.getSmall_image_url();
+        // this.large_image_url = book.getLarge_image_url();
         this.link = book.getLink();
         this.num_pages = book.getNumPages();
         this.format = book.getFormat();

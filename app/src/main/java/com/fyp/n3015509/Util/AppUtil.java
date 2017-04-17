@@ -1,14 +1,15 @@
 package com.fyp.n3015509.Util;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
 
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import org.json.JSONObject;
 
@@ -54,14 +55,14 @@ public class AppUtil {
         return new ListViewAdapter(activity, values, images, authors, listId, ids, listName);
     }
 
-    public Boolean SaveShelves(Context mContext, GoodreadsUtil util, ArrayList<GoodreadsShelf> options)
+    public Boolean SaveShelves(Context mContext, GoodreadsAPI util, ArrayList<GoodreadsShelf> options)
     {
         ArrayList<JSONObject> result = util.RetrieveSelectedShelves(mContext, options);
         boolean success = false;
 
         for (JSONObject shelf : result)
         {
-            success = APIUtil.SaveShelf(shelf, mContext);
+            success = BookBuzzerAPI.SaveShelf(shelf, mContext);
         }
 
         return success;

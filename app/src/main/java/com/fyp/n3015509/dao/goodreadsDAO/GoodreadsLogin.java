@@ -1,4 +1,4 @@
-package com.fyp.n3015509.goodreadsapi;
+package com.fyp.n3015509.dao.goodreadsDAO;
 
 /**
  * Created by tomha on 23-Mar-17.
@@ -184,7 +184,7 @@ public class GoodreadsLogin extends LoginActivity {
 //                    {
 //                        login.put("goodreads_id", goodreads_id);
 //                        SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
-//                        LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+//                        LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
 //
 //                        Intent newIntent = new Intent(this, MainActivity.class);
 //                        startActivity(newIntent);

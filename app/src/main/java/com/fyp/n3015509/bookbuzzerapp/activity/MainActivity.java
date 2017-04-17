@@ -31,10 +31,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.fyp.n3015509.Util.APIUtil;
-import com.fyp.n3015509.Util.DBUtil;
-import com.fyp.n3015509.Util.GoodreadsUtil;
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
@@ -44,8 +43,8 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.fragment.WatchListFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
@@ -451,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
-        GoodreadsUtil util = new GoodreadsUtil();
+        GoodreadsAPI util = new GoodreadsAPI();
         private final Context mContext;
 
         UserShelves(Context context) {
@@ -541,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UserLists extends AsyncTask<Void, Void, ArrayList<GoodreadsBook>> {
-        GoodreadsUtil util = new GoodreadsUtil();
+        GoodreadsAPI util = new GoodreadsAPI();
         private Context mContext;
 
         UserLists(Context context) {
@@ -557,7 +556,7 @@ public class MainActivity extends AppCompatActivity {
 
     private class UserGoodreadsShelves extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-        GoodreadsUtil util = new GoodreadsUtil();
+        GoodreadsAPI util = new GoodreadsAPI();
         ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
         private ProgressDialog progress;
 
@@ -584,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
 
                 for (JSONObject shelf : result)
                 {
-                    success = APIUtil.SaveShelf(shelf, mContext);
+                    success = BookBuzzerAPI.SaveShelf(shelf, mContext);
                 }
 
                 return success;

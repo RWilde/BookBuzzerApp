@@ -8,9 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.fyp.n3015509.Util.DBUtil;
+import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 
 /**
  * A simple {@link Fragment} subclass.

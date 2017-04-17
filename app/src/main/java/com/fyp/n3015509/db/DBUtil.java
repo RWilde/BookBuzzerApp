@@ -1,4 +1,4 @@
-package com.fyp.n3015509.Util;
+package com.fyp.n3015509.db;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
@@ -6,11 +6,10 @@ import android.support.v4.app.FragmentActivity;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.NotificationTypes;
-import com.fyp.n3015509.db.MySQLiteHelper;
 import com.fyp.n3015509.db.dao.Buzzlist;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -166,7 +165,7 @@ public class DBUtil {
         return null;
     }
 
-    public static Boolean checkIfWatched(Context activity, int mBookId) {
+    public Boolean checkIfWatched(Context activity, int mBookId) {
         try {
             MySQLiteHelper db = new MySQLiteHelper(activity);
             return db.checkIfWatched(mBookId);

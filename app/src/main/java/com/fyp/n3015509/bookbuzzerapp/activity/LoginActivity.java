@@ -26,15 +26,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,10 +47,10 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.fyp.n3015509.Util.LoginUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.APIs.LoginAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.goodreadsapi.GoodreadsLogin;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsLogin;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -428,7 +425,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 login.put("name", mEmail);
                 login.put("password", mPassword);
 
-                String token = LoginUtil.RegisterNewUser(getApplicationContext(), login);
+                String token = com.fyp.n3015509.APIs.LoginAPI.RegisterNewUser(getApplicationContext(), login);
                 if (token != null) {
                     return true;
                 }
@@ -498,7 +495,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 login.put("name", mEmail);
                 login.put("password", mPassword);
 
-                String token = LoginUtil.SignIn(getApplicationContext(), login);
+                String token = com.fyp.n3015509.APIs.LoginAPI.SignIn(getApplicationContext(), login);
                 if (token != null) {
                     return true;
                 }
@@ -521,7 +518,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
                 //finish();
-                LoginUtil.verifyStoragePermissions(LoginActivity.this);
+                com.fyp.n3015509.APIs.LoginAPI.verifyStoragePermissions(LoginActivity.this);
 
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);
@@ -569,7 +566,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     login.put("goodreads_id", goodreads_id);
                     SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
                     try {
-                        LoginUtil.RegisterGoodreadsUser(getApplicationContext(), login);
+                        LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

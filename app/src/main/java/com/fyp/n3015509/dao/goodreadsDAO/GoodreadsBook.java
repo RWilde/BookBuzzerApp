@@ -1,13 +1,12 @@
-package com.fyp.n3015509.goodreadsDAO;
+package com.fyp.n3015509.dao.goodreadsDAO;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.fyp.n3015509.Util.GoodreadsUtil;
+import com.fyp.n3015509.APIs.GoodreadsAPI;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ public class GoodreadsBook {
 
     String releaseDate;
 
-    GoodreadsUtil util = new GoodreadsUtil();
+    GoodreadsAPI util = new GoodreadsAPI();
 
     public GoodreadsBook createGoodreadsBook(int id,
                                              String isbn,

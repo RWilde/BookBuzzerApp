@@ -1,7 +1,5 @@
-package com.fyp.n3015509.apiDAO;
+package com.fyp.n3015509.dao.APIdao;
 
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;

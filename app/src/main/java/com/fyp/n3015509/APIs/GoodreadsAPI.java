@@ -1,24 +1,22 @@
-package com.fyp.n3015509.Util;
+package com.fyp.n3015509.APIs;
 
 import android.content.Context;
 
-import com.fyp.n3015509.apiDAO.APIBookList;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsShelf;
-import com.fyp.n3015509.goodreadsapi.GoodreadsShelves;
+import com.fyp.n3015509.db.DBUtil;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by tomha on 24-Mar-17.
  */
 
-public class GoodreadsUtil {
+public class GoodreadsAPI {
     GoodreadsShelves shelves = new GoodreadsShelves();
     //GoodreadsShelf shelf = new GoodreadsShelf();
     GoodreadsAuthor author = new GoodreadsAuthor();
@@ -37,7 +35,7 @@ public class GoodreadsUtil {
     }
 
     public ArrayList<JSONObject> RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
-        APIUtil util = new APIUtil();
+        BookBuzzerAPI util = new BookBuzzerAPI();
         ArrayList<GoodreadsShelf> shelfList= new ArrayList<>();
         ArrayList<JSONObject> json = new ArrayList<>();
         for (GoodreadsShelf shelf : options) {

@@ -18,9 +18,8 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
-import com.fyp.n3015509.Util.APIUtil;
-import com.fyp.n3015509.Util.DBUtil;
-import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
@@ -87,16 +86,16 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             public void onClick(View v) {
                 image = (ImageView) v.findViewById(R.id.star2);
                 image.setImageResource(R.drawable.bg_circle);
-                setStar(v, position);
 
                 if (setStar(v, position) == true)
                 {
                     //removeFromWatchList
                     DBUtil.RemoveFromWatched(mContext, ids[position]);
-                    setStar(v, position);
+                    setNotWatched(v);
                     Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
                 }
                 else {
+                    setWatched(v);
                     watchTask = new WatchBookTask(ids[position], listId);
                     watchTask.execute((Void) null);
                 }
@@ -158,17 +157,30 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
     public boolean setStar(View view, int position)
     {
-        boolean watched = DBUtil.checkIfWatched(mContext, ids[position]);
-        image = (ImageView) view.findViewById(R.id.star2);
+        DBUtil db = new DBUtil();
+        boolean watched = db.checkIfWatched(mContext, ids[position]);
 
         if (watched == true)
         {
-            image.setImageResource(R.drawable.star_filled);
+            setWatched(view);
         }
         else{
-            image.setImageResource(R.drawable.star);
+            setNotWatched(view);
         }
         return watched;
+    }
+    public void setWatched(View view)
+    {
+        image = (ImageView) view.findViewById(R.id.star2);
+
+        image.setImageResource(R.drawable.star_filled);
+    }
+
+    public void setNotWatched(View view)
+    {
+        image = (ImageView) view.findViewById(R.id.star2);
+
+        image.setImageResource(R.drawable.star);
     }
 
     @Override
@@ -217,7 +229,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.RemoveBookFromBuzzList(mContext, mBook, mListId);
-                Boolean apiSuccess = APIUtil.RemoveBookFromBuzzlist(mContext, mBook, listName);
+                Boolean apiSuccess = BookBuzzerAPI.RemoveBookFromBuzzlist(mContext, mBook, listName);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -295,7 +307,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                APIUtil api = new APIUtil();
+                BookBuzzerAPI api = new BookBuzzerAPI();
                 Boolean dbSuccess = DBUtil.WatchBook(mContext, mBook);
                 Boolean apiSuccess = api.WatchBook(mContext, mBook, listName);
 

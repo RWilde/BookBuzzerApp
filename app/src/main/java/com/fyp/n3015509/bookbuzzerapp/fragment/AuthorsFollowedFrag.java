@@ -1,4 +1,4 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,16 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fyp.n3015509.bookbuzzerapp.R;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link Fragment3.OnFragmentInteractionListener} interface
+ * {@link AuthorsFollowedFrag.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link Fragment3#newInstance} factory method to
+ * Use the {@link AuthorsFollowedFrag#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Fragment3 extends Fragment {
+public class AuthorsFollowedFrag extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,7 +31,7 @@ public class Fragment3 extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public Fragment3() {
+    public AuthorsFollowedFrag() {
         // Required empty public constructor
     }
 
@@ -39,11 +41,11 @@ public class Fragment3 extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment Fragment3.
+     * @return A new instance of fragment AuthorsFollowedFrag.
      */
     // TODO: Rename and change types and number of parameters
-    public static Fragment3 newInstance(String param1, String param2) {
-        Fragment3 fragment = new Fragment3();
+    public static AuthorsFollowedFrag newInstance(String param1, String param2) {
+        AuthorsFollowedFrag fragment = new AuthorsFollowedFrag();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -64,7 +66,7 @@ public class Fragment3 extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fragment3, container, false);
+        return inflater.inflate(R.layout.fragment_authors_followed, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

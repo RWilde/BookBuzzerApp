@@ -1,4 +1,4 @@
-package com.fyp.n3015509.Util;
+package com.fyp.n3015509.APIs;
 
 import android.Manifest;
 import android.content.Context;
@@ -29,7 +29,7 @@ import java.net.URL;
  * Created by tomha on 23-Mar-17.
  */
 
-public class LoginUtil{
+public class LoginAPI {
     private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP +":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";

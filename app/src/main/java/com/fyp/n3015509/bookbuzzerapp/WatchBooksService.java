@@ -5,9 +5,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
 
-import com.fyp.n3015509.Util.DBUtil;
+import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
@@ -36,7 +35,7 @@ public class WatchBooksService extends GcmTaskService {
 //            result = doChargingTask();
 //        } else if (MainActivity.TASK_TAG_PERIODIC.equals(tag)) {
         try {
-            result = doPeriodicTask();
+            result = checkForNewBooks();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,7 +55,45 @@ public class WatchBooksService extends GcmTaskService {
         return result;
     }
 
-    private int doPeriodicTask() {
+    private int checkForNewBooks() {
+        DBUtil db = new DBUtil();
+        String available = "";
+        String preorder = "";
+        Integer[] notifications = db.createNotifications(this);
+
+        if (notifications != null) {
+            String title = "BookBuzzer";
+            if (notifications[0] > 0) {
+                available = notifications[0] + " new books out ";
+            }
+            if (notifications[1] > 0) {
+                if (available.contentEquals("")) {
+                    preorder = " with ";
+                }
+                preorder += notifications[1] + "avaliable for preorder ";
+
+            }
+            if (available.contentEquals("") || preorder.contentEquals("")) {
+                String subject = "You have new books to look at";
+                String body = "There are " + available + preorder;
+
+
+                NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                Notification notify = new Notification.Builder
+                        (getApplicationContext()).setContentTitle(title).setContentText(body).
+                        setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
+
+                notify.flags |= Notification.FLAG_AUTO_CANCEL;
+                notif.notify(0, notify);
+            }
+        } else {
+            return GcmNetworkManager.RESULT_FAILURE;
+        }
+
+        return GcmNetworkManager.RESULT_SUCCESS;
+    }
+
+    private int checkForPrices() {
         DBUtil db = new DBUtil();
         String available = "";
         String preorder = "";

@@ -17,13 +17,10 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
-import com.fyp.n3015509.Util.DBUtil;
+import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.NotificationTypes;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsAuthor;
-import com.fyp.n3015509.goodreadsDAO.GoodreadsBook;
 
 import java.util.ArrayList;
 
