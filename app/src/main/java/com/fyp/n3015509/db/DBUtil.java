@@ -4,8 +4,10 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
@@ -13,6 +15,7 @@ import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by n3015509 on 24/03/2017.
@@ -183,5 +186,36 @@ public class DBUtil {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public String[] GetISBNFromWatch(Context mContext) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.GetWatchedISBNs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static ArrayList<PriceChecker> CheckAgainstDb(Context mContext, ArrayList<PriceChecker> priceCheckValues, String isbn) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.CheckDBForPreviousPrices(priceCheckValues, isbn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Integer[] CreatePriceCheckerNotifications(Context ctx, ConcurrentHashMap<String, ArrayList<PriceChecker>> isbn) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.addPriceCheckerNotification(isbn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

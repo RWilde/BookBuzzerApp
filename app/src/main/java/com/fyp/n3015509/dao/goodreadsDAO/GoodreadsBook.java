@@ -50,6 +50,34 @@ public class GoodreadsBook {
     ArrayList<GoodreadsAuthor> author;
     int yearPublished;
 
+    public double getKindlePrice() {
+        return kindlePrice;
+    }
+
+    public void setKindlePrice(double kindlePrice) {
+        this.kindlePrice = kindlePrice;
+    }
+
+    public double getPaperbackPrice() {
+        return paperbackPrice;
+    }
+
+    public void setPaperbackPrice(double paperbackPrice) {
+        this.paperbackPrice = paperbackPrice;
+    }
+
+    public double getHardcoverPrice() {
+        return hardcoverPrice;
+    }
+
+    public void setHardcoverPrice(double hardcoverPrice) {
+        this.hardcoverPrice = hardcoverPrice;
+    }
+
+    double kindlePrice;
+    double paperbackPrice;
+    double hardcoverPrice;
+
     public String getReleaseDate() {
         return releaseDate;
     }

@@ -26,16 +26,19 @@ public class AppUtil {
         ArrayList<Bitmap> buzzlistImages = new ArrayList<>();
         ArrayList<String> buzzlistAuthors = new ArrayList<>();
         ArrayList<Integer> buzzlistIds = new ArrayList<>();
+        ArrayList<String> buzzlistIsbns = new ArrayList<>();
 
         Bitmap[] images = new Bitmap[booklist.size()];
         String[] values = new String[booklist.size()];
         String[] authors = new String[booklist.size()];
         Integer[] ids = new Integer[booklist.size()];
+        String[] isbns = new String[booklist.size()];
 
         for (GoodreadsBook buzz : booklist) {
             buzzlistNames.add(buzz.getTitle());
             buzzlistImages.add(buzz.getSmallImage());
             buzzlistIds.add(buzz.getId());
+            buzzlistIsbns.add(buzz.getIsbn());
             String authorList = "";
             int count = 0;
             for (GoodreadsAuthor auth : buzz.getAuthors()) {
@@ -51,8 +54,9 @@ public class AppUtil {
         images = buzzlistImages.toArray(images);
         authors = buzzlistAuthors.toArray(authors);
         ids = buzzlistIds.toArray(ids);
+        isbns = buzzlistIsbns.toArray(isbns);
 
-        return new ListViewAdapter(activity, values, images, authors, listId, ids, listName);
+        return new ListViewAdapter(activity, values, images, authors, listId, ids, listName, isbns);
     }
 
     public Boolean SaveShelves(Context mContext, GoodreadsAPI util, ArrayList<GoodreadsShelf> options)

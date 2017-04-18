@@ -2,21 +2,24 @@ package com.fyp.n3015509.APIs;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.APIdao.APIBookList;
+import com.fyp.n3015509.dao.EditionTypes;
 import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -39,7 +42,7 @@ public class BookBuzzerAPI {
     private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
 
     private static final String WatchBookURL = BaseURL + "/watch/book/";
-    private static final String PriceCheckerURL = BaseURL + "/watch/price/";
+    private static final String PriceCheckerURL = BaseURL + "/watch/price";
     private static final String TAG = "price checker";
 
 
@@ -289,43 +292,94 @@ public class BookBuzzerAPI {
         return false;
     }
 
-    public static Boolean RunPriceChecker(FragmentActivity mContext, int isbn) {
-        StringBuffer response = new StringBuffer();
-
+    public ArrayList<PriceChecker> RunPriceChecker(Context mContext, String isbn) {
+        ArrayList<PriceChecker> cheaperOptions = new ArrayList<>();
+        String jsonReply;
         try {
-            String url = PriceCheckerURL + isbn;
+            String url = PriceCheckerURL;
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setRequestMethod("GET");
+            conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.connect();
+            //   conn.connect();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            JSONObject json = new JSONObject();
+            json.put("isbn", isbn);
 
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine.toString());
+            String jsonString = json.toString();
+
+            out.write(jsonString);
+            out.close();
+
+            InputStream response = conn.getInputStream();
+            jsonReply = convertStreamToString(response);
+
+            JSONObject obj = new JSONObject(jsonReply);
+            JSONArray array = (JSONArray) obj.get("jsonArray");
+
+            ArrayList<PriceChecker> priceCheckValues = new ArrayList<>();
+
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject priceCheck = array.getJSONObject(i);
+                PriceChecker priceChecker = null;
+                String type = (String) priceCheck.get("type");
+                if(type.contains("Paperback")) {
+                    priceChecker = new PriceChecker();
+                    priceChecker.setType(EditionTypes.PAPERBACK);
+                    String price = (String) priceCheck.get("price");
+                    price = price.replace("£", "");
+                    priceChecker.setPrice(Double.parseDouble(price));
+                    priceCheckValues.add(priceChecker);
+                }
+                else if(type.contains("Hardcover"))
+                {
+                    priceChecker = new PriceChecker();
+                    priceChecker.setType(EditionTypes.HARDBACK);
+                    String price = (String) priceCheck.get("price");
+                    price = price.replace("£", "");
+                    priceChecker.setPrice(Double.parseDouble(price));
+                    priceCheckValues.add(priceChecker);
+                }
+                else if (type.contains("Kindle Edition"))
+                {
+                    priceChecker = new PriceChecker();
+                    priceChecker.setType(EditionTypes.KINDLE_EDITION);
+                    String price = (String) priceCheck.get("price");
+                    price = price.replace("£", "");
+                    priceChecker.setPrice(Double.parseDouble(price));
+                    priceCheckValues.add(priceChecker);
+                }
             }
-            //close input stream
-            in.close();
-            JSONObject prices = new JSONObject(response.toString());
+            return DBUtil.CheckAgainstDb(mContext, priceCheckValues, isbn);
 
-            for(int i = 0; i<prices.names().length(); i++){
-                Log.v(TAG, "key = " + prices.names().getString(i) + " value = " + prices.get(prices.names().getString(i)));
-            }
-
-//            if (response == 200) {
-//                return true;
-//            }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return false;
+        return null;
+    }
+
+    private static String convertStreamToString(InputStream is) {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        try {
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
     }
 }

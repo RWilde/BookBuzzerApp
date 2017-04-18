@@ -2,6 +2,7 @@ package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.Util.AppUtil;
+import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
@@ -75,7 +77,8 @@ public class WatchListFragment extends Fragment {
         AppUtil app = new AppUtil();
         booklist = DBUtil.getWatchedBooks(getActivity());
         mAdapter = app.setAdapter(booklist, 0, "", getActivity());
-
+        PriceChecker checkerTask = new PriceChecker(getContext());
+        checkerTask.execute((Void) null);
         listv.setAdapter(mAdapter);
         mAdapter.setMode(Attributes.Mode.Single);
         listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -154,5 +157,26 @@ public class WatchListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class PriceChecker extends AsyncTask<Void, Void, Boolean> {
+        private final Context mContext;
+
+        PriceChecker(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            WatchBooksService watch = new WatchBooksService();
+            watch.checkForPrices(mContext);
+            return true;
+        }
+
+
+        protected void onPostExecute() {
+            //showProgress(false);
+
+        }
     }
 }

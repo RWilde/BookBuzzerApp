@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 public class ListViewAdapter extends BaseSwipeAdapter {
 
+    private String[] isbns;
     private Context mContext;
     private FragmentActivity activity;
 
@@ -44,13 +45,14 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
     private RemoveBookTask deleteTask;
     private WatchBookTask watchTask;
+    private PriceChecker priceTask;
 
     public ListViewAdapter(Context ctx)
     {
         this.mContext = ctx;
     }
 
-    public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids, String listName) {
+    public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids, String listName, String[] isbns) {
         this.activity = activity;
         this.mContext = activity;
         this.names = values;
@@ -59,6 +61,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         this.listId = listId;
         this.ids = ids;
         this.listName = listName;
+        this.isbns = isbns;
     }
 
     @Override
@@ -77,6 +80,8 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                priceTask = new PriceChecker(mContext, isbns[position]);
+                priceTask.execute((Void) null);
                 ViewBook(position);
             }
         });
@@ -121,6 +126,8 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.magnifier2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                priceTask = new PriceChecker(mContext, isbns[position]);
+                priceTask.execute((Void) null);
                 ViewBook(position);
             }
         });
@@ -335,6 +342,29 @@ public class ListViewAdapter extends BaseSwipeAdapter {
                 //book wasnt deleted succesfully
                 Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    private class PriceChecker extends AsyncTask<Void, Void, Boolean> {
+        private final Context mContext;
+        private final String mIsbn;
+
+        PriceChecker(Context context,String isbn) {
+            this.mContext = context;
+            this.mIsbn = isbn;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            BookBuzzerAPI util = new BookBuzzerAPI();
+            util.RunPriceChecker(mContext, mIsbn);
+            return true;
+        }
+
+
+        protected void onPostExecute() {
+            //showProgress(false);
+
         }
     }
 }

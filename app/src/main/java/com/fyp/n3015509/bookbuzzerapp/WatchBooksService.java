@@ -6,10 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by tomha on 13-Apr-17.
@@ -36,6 +41,7 @@ public class WatchBooksService extends GcmTaskService {
 //        } else if (MainActivity.TASK_TAG_PERIODIC.equals(tag)) {
         try {
             result = checkForNewBooks();
+            // checkForPrices();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,18 +79,11 @@ public class WatchBooksService extends GcmTaskService {
                 preorder += notifications[1] + "avaliable for preorder ";
 
             }
-            if (available.contentEquals("") || preorder.contentEquals("")) {
+            if (!available.contentEquals("") || !preorder.contentEquals("")) {
                 String subject = "You have new books to look at";
                 String body = "There are " + available + preorder;
 
-
-                NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                Notification notify = new Notification.Builder
-                        (getApplicationContext()).setContentTitle(title).setContentText(body).
-                        setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
-
-                notify.flags |= Notification.FLAG_AUTO_CANCEL;
-                notif.notify(0, notify);
+                setNotififcation(title, body, subject);
             }
         } else {
             return GcmNetworkManager.RESULT_FAILURE;
@@ -93,41 +92,49 @@ public class WatchBooksService extends GcmTaskService {
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 
-    private int checkForPrices() {
+    public int checkForPrices(Context ctx) {
         DBUtil db = new DBUtil();
-        String available = "";
-        String preorder = "";
-        Integer[] notifications = db.createNotifications(this);
+        BookBuzzerAPI bb = new BookBuzzerAPI();
 
-        if (notifications != null) {
-            String title = "BookBuzzer";
-            if (notifications[0] > 0) {
-                available = notifications[0] + " new books out ";
+        String[] isbns = db.GetISBNFromWatch(ctx);
+        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = new ConcurrentHashMap<>();
+        if (isbns != null) {
+            for (String isbn : isbns) {
+                ArrayList<PriceChecker> p =bb.RunPriceChecker(ctx, isbn);
+                results.put(isbn, p);
             }
-            if (notifications[1] > 0) {
-                if (available.contentEquals("")) {
-                    preorder = " with ";
+            db.CreatePriceCheckerNotifications(ctx, results);
+
+            if (results != null) {
+                if (results.size() > 0) {
+
+                    String title = "BookBuzzer";
+
+                    String subject = "Books you are watching are cheaper!";
+                    String body = "";
+                    if (results.size() == 1) {
+                        body = "There is 1 book you are watching that is cheaper!";
+                    } else {
+                        body = "There are " + results.size() + " books you are watching that are cheaper!";
+                    }
+
+                   // setNotififcation(title, body, subject);
                 }
-                preorder += notifications[1] + "avaliable for preorder ";
-
-            }
-            if (available.contentEquals("") || preorder.contentEquals("")) {
-                String subject = "You have new books to look at";
-                String body = "There are " + available + preorder;
-
-
-                NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                Notification notify = new Notification.Builder
-                        (getApplicationContext()).setContentTitle(title).setContentText(body).
-                        setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
-
-                notify.flags |= Notification.FLAG_AUTO_CANCEL;
-                notif.notify(0, notify);
             }
         } else {
             return GcmNetworkManager.RESULT_FAILURE;
         }
-
         return GcmNetworkManager.RESULT_SUCCESS;
+    }
+
+    public void setNotififcation(String title, String body, String subject)
+    {
+        NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification notify = new Notification.Builder
+                (getApplicationContext()).setContentTitle(title).setContentText(body).
+                setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
+
+        notify.flags |= Notification.FLAG_AUTO_CANCEL;
+        notif.notify(0, notify);
     }
 }

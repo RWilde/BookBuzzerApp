@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
@@ -24,12 +26,12 @@ public class BookFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "bookId";
-    private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
     private int mBookId;
-    private String mParam2;
-
+    private GoodreadsBook mBook;
+    ImageView image;
+    TextView title;
     private OnFragmentInteractionListener mListener;
 
     public BookFragment() {
@@ -58,14 +60,47 @@ public class BookFragment extends Fragment {
         if (getArguments() != null) {
             mBookId = getArguments().getInt(ARG_PARAM1);
         }
-        GoodreadsBook book = DBUtil.getBookFromBuzzlist(getActivity(), mBookId);
+        mBook = DBUtil.getBookFromBuzzlist(getActivity(), mBookId);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_book, container, false);
+        View view = inflater.inflate(R.layout.fragment_book, container, false);
+        image = (ImageView) view.findViewById(R.id.book_cover);
+        image.setImageBitmap(mBook.getImage());
+
+        title = (TextView) view.findViewById(R.id.book_title);
+        title.setText(mBook.getTitle());
+        String kindlePrice = "";
+        String paperPrice="";
+        String hardPrice="";
+        if( mBook.getKindlePrice() != 0.0)
+            kindlePrice = "£"+Double.toString(mBook.getKindlePrice());
+        else
+            kindlePrice = "Not available";
+        if( mBook.getPaperbackPrice() != 0.0)
+            paperPrice = "£"+Double.toString(mBook.getPaperbackPrice());
+        else
+            paperPrice = "Not available";
+        if( mBook.getHardcoverPrice() != 0.0)
+            hardPrice = "£"+Double.toString(mBook.getHardcoverPrice());
+        else
+            hardPrice = "Not available";
+
+
+        TextView kindle = (TextView) view.findViewById(R.id.kindle_price);
+        kindle.setText( kindlePrice);
+
+        TextView paper = (TextView) view.findViewById(R.id.paper_price);
+        paper.setText(paperPrice);
+
+        TextView hard = (TextView) view.findViewById(R.id.hard_price);
+        hard.setText(hardPrice);
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
