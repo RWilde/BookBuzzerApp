@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tableLayout1"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <!-- 2 columns -->
     <TableRow
         android:id="@+id/tableRow1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip" >
+        android:padding="5dip">
 
         <TextView
             android:text="Prices from amazon"
@@ -22,11 +22,12 @@
         android:id="@+id/tableRow2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip" >
+        android:padding="5dip">
 
         <TextView
             android:layout_span="2"
             android:text="Kindle " />
+
         <TextView
             android:id="@+id/kindle_price"
             android:layout_column="1"
@@ -35,19 +36,20 @@
 
     <!-- just draw a red line -->
     <!--<View-->
-        <!--android:layout_height="2dip"-->
-        <!--android:background="#FF0000" />-->
+    <!--android:layout_height="2dip"-->
+    <!--android:background="#FF0000" />-->
 
     <!-- 3 columns -->
     <TableRow
         android:id="@+id/tableRow3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip" >
+        android:padding="5dip">
 
         <TextView
             android:layout_span="2"
             android:text="Paperback " />
+
         <TextView
             android:id="@+id/paper_price"
             android:layout_column="1"
@@ -59,11 +61,12 @@
         android:id="@+id/tableRow4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip" >
+        android:padding="5dip">
 
         <TextView
             android:layout_span="2"
             android:text="Hardcover " />
+
         <TextView
             android:id="@+id/hard_price"
             android:layout_column="1"
@@ -75,7 +78,7 @@
         android:id="@+id/tableRow5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip" >
+        android:padding="5dip">
 
         <Button
             android:id="@+id/button5"

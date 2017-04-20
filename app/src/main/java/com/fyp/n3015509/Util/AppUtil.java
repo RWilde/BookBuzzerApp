@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
+import com.fyp.n3015509.dao.BookAdapter;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
@@ -34,11 +35,15 @@ public class AppUtil {
         Integer[] ids = new Integer[booklist.size()];
         String[] isbns = new String[booklist.size()];
 
+        ArrayList<BookAdapter> adapter = new ArrayList<>();
+
         for (GoodreadsBook buzz : booklist) {
-            buzzlistNames.add(buzz.getTitle());
-            buzzlistImages.add(buzz.getSmallImage());
-            buzzlistIds.add(buzz.getId());
-            buzzlistIsbns.add(buzz.getIsbn());
+            BookAdapter b = new BookAdapter();
+            b.setBuzzlistNames(buzz.getTitle());
+            b.setBuzzlistImages(buzz.getSmallImage());
+            b.setBuzzlistIds(buzz.getId());
+            b.setBuzzlistIsbns(buzz.getIsbn());
+
             String authorList = "";
             int count = 0;
             for (GoodreadsAuthor auth : buzz.getAuthors()) {
@@ -48,15 +53,14 @@ public class AppUtil {
                 }
                 count++;
             }
-            buzzlistAuthors.add(authorList);
-        }
-        values = buzzlistNames.toArray(values);
-        images = buzzlistImages.toArray(images);
-        authors = buzzlistAuthors.toArray(authors);
-        ids = buzzlistIds.toArray(ids);
-        isbns = buzzlistIsbns.toArray(isbns);
+            b.setBuzzlistAuthors(authorList);
+            b.setAdded(false);
+            adapter.add(b);
 
-        return new ListViewAdapter(activity, values, images, authors, listId, ids, listName, isbns);
+        }
+
+
+        return new ListViewAdapter(activity, adapter , listId, listName);
     }
 
     public Boolean SaveShelves(Context mContext, GoodreadsAPI util, ArrayList<GoodreadsShelf> options)

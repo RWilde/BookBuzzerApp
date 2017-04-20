@@ -446,8 +446,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     cursor.close();
                 }
             }
-
-            cursor.close();
             return list;
         } catch (Exception e) {
             e.printStackTrace();
@@ -654,7 +652,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor avaialbleCursor = db.rawQuery(columnIdQuery, null);
-            Cursor preorderCursor = db.rawQuery(columnIdQuery, null);
+            Cursor preorderCursor = db.rawQuery(preorderQuery, null);
 
             if (avaialbleCursor != null) {
                 try {
@@ -917,7 +915,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = this.getReadableDatabase();
 
-            String watchQuery = "SELECT " + KINDLE + "," + PAPERBACK + "," + HARDCOVER + " FROM " + TABLE_BOOKS + " WHERE " + ISBN + " = '" + isbn+"';";
+            String watchQuery = "SELECT " + KINDLE + "," + PAPERBACK + "," + HARDCOVER + " FROM " + TABLE_BOOKS + " WHERE " + ISBN + " = '" + isbn + "';";
             Cursor c1 = db.rawQuery(watchQuery, null);
 
             if (c1 != null) {
@@ -983,7 +981,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                     formats.append(p.getType().toString().toLowerCase());
 
-                    if(p.getPrice() == 0)
+                    if (p.getPrice() == 0)
                         lowestPrice = p.getPrice();
                     else if (p.getPrice() < lowestPrice)
                         lowestPrice = p.getPrice();
@@ -992,7 +990,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                 ContentValues avaliable = new ContentValues();
                 avaliable.put(BOOK_ID, b.getColumnId());
                 avaliable.put(NOTIFICATION_TYPE, NotificationTypes.CHEAPER.toString());
-                avaliable.put(MESSAGE, b.getTitle() + " is cheaper today from £" + lowestPrice +" in the following formats: " + formats);
+                avaliable.put(MESSAGE, b.getTitle() + " is cheaper today from £" + lowestPrice + " in the following formats: " + formats);
                 long id = db.insert(NOTIFICATIONS_TABLE, null, avaliable);
                 ids.add(Ints.checkedCast(id));
             } catch (Exception e) {
@@ -1062,13 +1060,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return not;
     }
 
-    private ArrayList<GoodreadsBook> CreateGoodreadsBookArrayList(Cursor
-                                                                          cursor, SQLiteDatabase db) {
+    private ArrayList<GoodreadsBook> CreateGoodreadsBookArrayList(Cursor cursor, SQLiteDatabase db) {
         ArrayList<GoodreadsBook> book = new ArrayList<>();
         while (cursor.isAfterLast() == false) {
             book.add(CreateGoodreadsBookObject(cursor, db));
             cursor.moveToNext();
         }
+        cursor.close();
         return book;
     }
 
@@ -1076,13 +1074,20 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         GoodreadsBook b = createGoodreadsBook(c1);
         String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_AUTHORS
                 + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + AUTHOR_ID + " WHERE " + BOOK_INTERIM + "." + BOOK_ID + "=" + b.getColumnId();
-        Cursor c = db.rawQuery(authorQuery, null);
+        Cursor cursor = db.rawQuery(authorQuery, null);
         ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
-
-        if (c.moveToFirst()) {
-            while (c.isAfterLast() == false) {
-                authorList.add(createAuthor(c));
-                c.moveToNext();
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    while (cursor.isAfterLast() == false) {
+                        authorList.add(createAuthor(cursor));
+                        cursor.moveToNext();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
             }
         }
         b.setAuthors(authorList);

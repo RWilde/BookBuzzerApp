@@ -12,6 +12,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.dao.BookAdapter;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
@@ -26,7 +29,12 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
 
 import org.json.JSONObject;
 
-public class ListViewAdapter extends BaseSwipeAdapter {
+import java.util.ArrayList;
+
+public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
+
+    private ArrayList<BookAdapter> bookList = new ArrayList();
+    private ArrayList<BookAdapter> filteredBookList = new ArrayList();
 
     private String[] isbns;
     private Context mContext;
@@ -38,31 +46,24 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
     private int listId;
     private String listName;
-    private String[] names;
-    private Bitmap[] images;
-    private String[] authors;
-    private Integer[] ids;
 
     private RemoveBookTask deleteTask;
     private WatchBookTask watchTask;
     private PriceChecker priceTask;
 
-    public ListViewAdapter(Context ctx)
-    {
+    public ListViewAdapter(Context ctx) {
         this.mContext = ctx;
     }
 
-    public ListViewAdapter(FragmentActivity activity, String[] values, Bitmap[] images, String[] authors, int listId, Integer[] ids, String listName, String[] isbns) {
+    public ListViewAdapter(FragmentActivity activity, ArrayList<BookAdapter> adapter, int listId, String listName) {
         this.activity = activity;
         this.mContext = activity;
-        this.names = values;
-        this.images = images;
-        this.authors = authors;
         this.listId = listId;
-        this.ids = ids;
         this.listName = listName;
-        this.isbns = isbns;
+        this.bookList = adapter;
+        this.filteredBookList = adapter;
     }
+
 
     @Override
     public int getSwipeLayoutResourceId(int position) {
@@ -77,10 +78,12 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
+
+
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                priceTask = new PriceChecker(mContext, isbns[position]);
+                priceTask = new PriceChecker(mContext, getItem(position).getBuzzlistIsbns());
                 priceTask.execute((Void) null);
                 ViewBook(position);
             }
@@ -92,16 +95,14 @@ public class ListViewAdapter extends BaseSwipeAdapter {
                 image = (ImageView) v.findViewById(R.id.star2);
                 image.setImageResource(R.drawable.bg_circle);
 
-                if (setStar(v, position) == true)
-                {
+                if (setStar(v, position) == true) {
                     //removeFromWatchList
-                    DBUtil.RemoveFromWatched(mContext, ids[position]);
+                    DBUtil.RemoveFromWatched(mContext, getItem(position).getBuzzlistIds());
                     setNotWatched(v);
                     Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     setWatched(v);
-                    watchTask = new WatchBookTask(ids[position], listId);
+                    watchTask = new WatchBookTask(getItem(position).getBuzzlistIds(), listId);
                     watchTask.execute((Void) null);
                 }
             }
@@ -110,14 +111,12 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (listName.contentEquals(""))
-                {
+                if (listName.contentEquals("")) {
                     //from watch list
                     Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     //from buzzlist
-                    deleteTask = new RemoveBookTask(ids[position], listId, ListViewAdapter.this.activity);
+                    deleteTask = new RemoveBookTask(getItem(position).getBuzzlistIds(), listId, ListViewAdapter.this.activity);
                     deleteTask.execute((Void) null);
                 }
             }
@@ -126,7 +125,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.magnifier2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                priceTask = new PriceChecker(mContext, isbns[position]);
+                priceTask = new PriceChecker(mContext, getItem(position).getBuzzlistIsbns());
                 priceTask.execute((Void) null);
                 ViewBook(position);
             }
@@ -139,7 +138,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         Fragment fragment = new BookFragment();
 
         Bundle args = new Bundle();
-        args.putInt("bookId", ids[position]);
+        args.putInt("bookId", getItem(position).getBuzzlistIds());
 
         fragment.setArguments(args);
         FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
@@ -151,40 +150,36 @@ public class ListViewAdapter extends BaseSwipeAdapter {
     @Override
     public void fillValues(int position, View convertView) {
         image = (ImageView) convertView.findViewById(R.id.imageView);
-        image.setImageBitmap(images[position]);
+        image.setImageBitmap(getItem(position).getBuzzlistImages());
 
         text = (TextView) convertView.findViewById(R.id.book_name);
-        text.setText(names[position]);
+        text.setText(getItem(position).getBuzzlistNames() + " " + position);
 
         authorText = (TextView) convertView.findViewById(R.id.book_author);
-        authorText.setText(authors[position]);
+        authorText.setText(getItem(position).getBuzzlistAuthors());
 
         setStar(convertView, position);
     }
 
-    public boolean setStar(View view, int position)
-    {
+    public boolean setStar(View view, int position) {
         DBUtil db = new DBUtil();
-        boolean watched = db.checkIfWatched(mContext, ids[position]);
+        boolean watched = db.checkIfWatched(mContext, getItem(position).getBuzzlistIds());
 
-        if (watched == true)
-        {
+        if (watched == true) {
             setWatched(view);
-        }
-        else{
+        } else {
             setNotWatched(view);
         }
         return watched;
     }
-    public void setWatched(View view)
-    {
+
+    public void setWatched(View view) {
         image = (ImageView) view.findViewById(R.id.star2);
 
         image.setImageResource(R.drawable.star_filled);
     }
 
-    public void setNotWatched(View view)
-    {
+    public void setNotWatched(View view) {
         image = (ImageView) view.findViewById(R.id.star2);
 
         image.setImageResource(R.drawable.star);
@@ -192,18 +187,68 @@ public class ListViewAdapter extends BaseSwipeAdapter {
 
     @Override
     public int getCount() {
-        return names.length;
+        return filteredBookList.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return null;
+    public BookAdapter getItem(int position) {
+        return filteredBookList.get(position);
     }
 
     @Override
     public long getItemId(int position) {
         return position;
     }
+
+    @Override
+    public Filter getFilter() {
+
+        Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults results = new FilterResults();
+                String s = charSequence.toString().toLowerCase();
+                //If there's nothing to filter on, return the original data for your list
+                if (charSequence == null || charSequence.length() == 0) {
+                    results.values = bookList;
+                    results.count = bookList.size();
+                } else {
+                    ArrayList<BookAdapter> filterResultsData = new ArrayList<BookAdapter>();
+                    try {
+                        for (BookAdapter data : bookList) {
+                            // && data.getBuzzlistIsbns() != null && data.getBuzzlistAuthors() != null
+                            //|| data.getBuzzlistIsbns().toLowerCase().contains(charSequence) || (data.getBuzzlistAuthors().toLowerCase().contains(charSequence))
+                            if (data.getBuzzlistNames() != null) {
+                                if (data.getBuzzlistNames().toLowerCase().startsWith(s)) {
+                                    data.setAdded(true);
+                                    filterResultsData.add(data);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    results.values = filterResultsData;
+                    results.count = filterResultsData.size();
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                if (filterResults.values == null) {
+                    filteredBookList = new ArrayList<BookAdapter>();
+                } else {
+                    filteredBookList = (ArrayList<BookAdapter>) filterResults.values;
+                }
+                notifyDataSetChanged();
+            }
+        };
+        return filter;
+    }
+
 
     private class RemoveBookTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -219,7 +264,6 @@ public class ListViewAdapter extends BaseSwipeAdapter {
             mListId = listId;
             this.frag = frag;
         }
-
 
 
         @Override
@@ -349,7 +393,7 @@ public class ListViewAdapter extends BaseSwipeAdapter {
         private final Context mContext;
         private final String mIsbn;
 
-        PriceChecker(Context context,String isbn) {
+        PriceChecker(Context context, String isbn) {
             this.mContext = context;
             this.mIsbn = isbn;
         }

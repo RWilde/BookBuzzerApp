@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,14 +19,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +47,7 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.fragment.WatchListFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
+import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
@@ -396,8 +401,13 @@ public class MainActivity extends AppCompatActivity {
             getMenuInflater().inflate(R.menu.main, menu);
         }
 
+        if(navItemIndex == 2)
+        {
+
+        }
+
         // when fragment is notifications, load the menu created for notifications
-        if (navItemIndex == 3) {
+        if (navItemIndex == 4) {
             getMenuInflater().inflate(R.menu.notifications, menu);
         }
         return true;

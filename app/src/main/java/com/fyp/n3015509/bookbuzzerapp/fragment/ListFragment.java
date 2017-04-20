@@ -1,10 +1,14 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,12 +16,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.Util.AppUtil;
+import com.fyp.n3015509.apppreferences.OnScrollObserver;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
@@ -44,6 +51,7 @@ public class ListFragment extends Fragment {
     View rootView;
     private ListViewAdapter mAdapter;
     private String mListName;
+    EditText inputSearch;
 
     public ListFragment() {
     }
@@ -70,13 +78,17 @@ public class ListFragment extends Fragment {
             booklist = DBUtil.getBooksFromBuzzlist(getActivity(), listId);
 
             mAdapter = app.setAdapter(booklist, listId, mListName, getActivity());
+            inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
+            inputSearch.setVisibility(View.GONE);
 
             listv.setAdapter(mAdapter);
             mAdapter.setMode(Attributes.Mode.Single);
             listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                  //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                    ((SwipeLayout) (listv.getChildAt(Integer.parseInt((String)parent.getAdapter().getItem(position)) + 1))).open(true);
+
                 }
             });
             listv.setOnTouchListener(new View.OnTouchListener() {
@@ -93,14 +105,60 @@ public class ListFragment extends Fragment {
                     return true;
                 }
             });
-            listv.setOnScrollListener(new AbsListView.OnScrollListener() {
+            listv.setOnScrollListener(new OnScrollObserver() {
                 @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    Log.e("ListView", "onScrollStateChanged");
+                public void onScrollUp() {
+                    String search = inputSearch.getText().toString();
+                    if (search.matches("")){
+                    inputSearch.setVisibility(View.GONE);}
+//                        inputSearch.animate()
+//                                .translationY(inputSearch.getHeight())
+//                                .alpha(0.0f)
+//                                .setDuration(300)
+//                                .setListener(new AnimatorListenerAdapter() {
+//                                    @Override
+//                                    public void onAnimationEnd(Animator animation) {
+//                                        super.onAnimationEnd(animation);
+//                                        inputSearch.setVisibility(View.GONE);
+//                                    }
+//                                });
                 }
 
                 @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                public void onScrollDown() {
+                    inputSearch.setVisibility(View.VISIBLE);
+//                        inputSearch.animate()
+//                                .translationY(inputSearch.getHeight())
+//                                .alpha(0.0f)
+//                                .setDuration(300)
+//                                .setListener(new AnimatorListenerAdapter() {
+//                                    @Override
+//                                    public void onAnimationEnd(Animator animation) {
+//                                        super.onAnimationEnd(animation);
+//                                        inputSearch.setVisibility(View.VISIBLE);
+//                                    }
+//                                });
+                }
+            });
+
+            inputSearch.addTextChangedListener(new TextWatcher() {
+
+                @Override
+                public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                    // When user changed the Text
+                    mAdapter.getFilter().filter(cs);
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+                                              int arg3) {
+                    // TODO Auto-generated method stub
 
                 }
             });

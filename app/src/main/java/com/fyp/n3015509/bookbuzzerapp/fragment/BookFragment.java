@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
@@ -99,6 +100,17 @@ public class BookFragment extends Fragment {
 
         TextView hard = (TextView) view.findViewById(R.id.hard_price);
         hard.setText(hardPrice);
+        TextView author = (TextView) view.findViewById(R.id.author_name);
+        StringBuilder b = new StringBuilder();
+        for (GoodreadsAuthor a:mBook.getAuthors() )
+        {
+            if (b.length() != 0)
+            {
+                b.append(", ");
+            }
+            b.append(a.getName());
+        }
+        author.setText(b);
 
         return view;
     }

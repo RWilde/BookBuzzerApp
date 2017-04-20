@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -54,6 +55,7 @@ View rootView;
         buzzlist = DBUtil.GetBuzzlist(getActivity());
         ArrayList<String> buzzlistNames = new ArrayList<String>();
         String[] values = new String[buzzlist.size()];
+
         for(Buzzlist buzz : buzzlist)
         {
             buzzlistNames.add(buzz.getName());
@@ -61,6 +63,7 @@ View rootView;
         values = buzzlistNames.toArray(values);
 
         listv.setAdapter( new ArraySwipeAdapterSample<String>(getActivity(), R.layout.listview_item, R.id.position, values));
+
 
        // listv.getAdapter().setMode(Attributes.Mode.Single);
         listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
