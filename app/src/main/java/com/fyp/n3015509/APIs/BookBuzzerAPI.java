@@ -12,6 +12,7 @@ import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -145,9 +146,9 @@ public class BookBuzzerAPI {
             jsonBook.put("id", book.getId());
             jsonBook.put("ratings_count", book.getRatingsCount());
             jsonBook.put("txt_reviews_count", book.getTextReviewsCount());
-            jsonBook.put("img_url", book.getImage());
-            jsonBook.put("sml_img_url", book.getSmallImage());
-            jsonBook.put("lrg_img_url", book.getLargeImage());
+            jsonBook.put("img_url", book.getImgUrl());
+            jsonBook.put("sml_img_url", book.getSmallImgUrl());
+            jsonBook.put("lrg_img_url", book.getLrgImgUrl());
             jsonBook.put("link", book.getLink());
             jsonBook.put("avg_rating", book.getAverage_rating());
             jsonBook.put("description", book.getDescription());
@@ -260,7 +261,8 @@ public class BookBuzzerAPI {
             conn.setRequestProperty("Content-Type", "application/json");
 
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-            String json = buzzList.toString();
+            Gson gson = new Gson();
+            String json = gson.toJson(buzzList);
 
             out.write(json);
             out.close();
@@ -276,9 +278,9 @@ public class BookBuzzerAPI {
         return false;
     }
 
-    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook) {
+    public static Boolean RemoveNotification(FragmentActivity mContext, int mBook, NotificationTypes mType) {
         try {
-            String url = NotificationURL + mBook;
+            String url = NotificationURL +"/id="+ mBook + "&type="+mType.toString();
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);
@@ -301,7 +303,7 @@ public class BookBuzzerAPI {
 
     public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, NotificationTypes mType) {
         try {
-            String url = NotificationURL +"/id="+ mBook + "&type="+mType.toString();
+            String url = NotificationURL +"read/id="+ mBook + "&type="+mType.toString();
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);

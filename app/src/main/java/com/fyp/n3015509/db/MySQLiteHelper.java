@@ -197,12 +197,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             ContentValues insertValues = new ContentValues();
             insertValues.put(BOOK_ID, 1);
             insertValues.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
-            insertValues.put(READ, 0);
+            insertValues.put(MESSAGE, "This book is available next week, preorder it now");
+            insertValues.put(READ, 1);
 
             database.insertOrThrow(NOTIFICATIONS_TABLE, null, insertValues);
             ContentValues insert = new ContentValues();
             insert.put(BOOK_ID, 2);
             insert.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+            insert.put(MESSAGE, "This book is available");
             insert.put(READ, 0);
             database.insertOrThrow(NOTIFICATIONS_TABLE, null, insert);
         } catch (Exception e) {
@@ -336,7 +338,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                 todo_id = db.insertWithOnConflict(TABLE_BOOKS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             }
 
-           // long todo_id = db.insert(TABLE_BOOKS, null, values);
+            // long todo_id = db.insert(TABLE_BOOKS, null, values);
             db.close();
             return todo_id;
         } catch (Exception e) {
@@ -712,7 +714,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
             if (preorderCursor != null) {
                 try {
-                   // counts.add(preorderCursor.getCount());
+                    // counts.add(preorderCursor.getCount());
                     if (preorderCursor.moveToFirst()) {
                         while (preorderCursor.isAfterLast() == false) {
 
@@ -761,37 +763,38 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                         while (cursor.isAfterLast() == false) {
                             int bookId = cursor.getInt(1);
                             String type = cursor.getString(2);
-                            String message = cursor.getString(5);
+                            String message = cursor.getString(4);
                             int read = cursor.getInt(5);
 
                             NotificationTypes notification = NotificationTypes.valueOf(type);
-                            String bookQuery = "SELECT " + TITLE + ", " + SMALL_IMAGE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
+                            String bookQuery = "SELECT " + GOODREADS_ID + ", " + TITLE + ", " + SMALL_IMAGE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
                             String notQuery = "";
                             Cursor c1 = db.rawQuery(bookQuery, null);
 
-                            switch (notification) {
-                                case AVALIABLE:
-                                    notQuery = "SELECT " + NOTIFIED + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-                                    break;
-                                case PREORDER:
-                                    notQuery = "SELECT " + PREORDER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-                                    break;
-                                case CHEAPER:
-                                    //notQuery = "SELECT " + CHEAPER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-                                    break;
-
-                            }
-                            Cursor c2 = db.rawQuery(notQuery, null);
-
-                            int notified = getSingleInt(c2);
+//                            switch (notification) {
+//                                case AVALIABLE:
+//                                    notQuery = "SELECT " + NOTIFIED + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+//                                    break;
+//                                case PREORDER:
+//                                    notQuery = "SELECT " + PREORDER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+//                                    break;
+//                                case CHEAPER:
+//                                    //notQuery = "SELECT " + CHEAPER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+//                                    break;
+//
+//                            }
+//                            Cursor c2 = db.rawQuery(notQuery, null);
+//
+//                            int notified = getSingleInt(c2);
                             Bitmap image = null;
                             String bookName = "";
-
+                            int goodreadsId = 0;
                             if (c1 != null) {
                                 try {
                                     if (c1.moveToFirst()) {
-                                        bookName = c1.getString(0);
-                                        byte[] by = c1.getBlob(1);
+                                        goodreadsId = c1.getInt(0);
+                                        bookName = c1.getString(1);
+                                        byte[] by = c1.getBlob(2);
                                         image = BitmapFactory.decodeByteArray(by, 0, by.length);
                                     }
                                 } catch (Exception e) {
@@ -801,7 +804,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                                 }
                             }
 
-                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified, image, read, message);
+                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, 0, image, read, message, goodreadsId);
                             notifications.add(buzz);
                             cursor.moveToNext();
                         }
@@ -834,8 +837,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     bookT.put(PREORDER, 1);
                     break;
             }
-            db.update(BOOK_WATCH, bookT, BOOK_ID +"="+ mBook, null);
-            String where = BOOK_ID + "=" +mBook + " and " + NOTIFICATION_TYPE + "= '" + mType.toString()+"'";
+            db.update(BOOK_WATCH, bookT, BOOK_ID + "=" + mBook, null);
+            String where = BOOK_ID + "=" + mBook + " and " + NOTIFICATION_TYPE + "= '" + mType.toString() + "'";
             db.update(NOTIFICATIONS_TABLE, cv, where, null);
             success = true;
 
@@ -1037,7 +1040,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                     formats.append(p.getType().toString().toLowerCase());
 
-                    if (p.getPrice() == 0&& lowestPrice == 0.0)
+                    if (p.getPrice() == 0 && lowestPrice == 0.0)
                         lowestPrice = p.getPrice();
                     else if (p.getPrice() < lowestPrice && lowestPrice == 0.0)
                         lowestPrice = p.getPrice();
@@ -1109,12 +1112,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     private BuzzNotification createBuzzNotification(int bookId, NotificationTypes
-            notification, String bookName, int notified, Bitmap image, int read, String message) {
+            notification, String bookName, int notified, Bitmap image, int read, String message, int goodreadsId) {
         BuzzNotification not = new BuzzNotification();
         not.setBookId(bookId);
         not.setType(notification);
         not.setImage(image);
         not.setBookName(bookName);
+        not.setGoodreadsId(goodreadsId);
         if (notified == 0)
             not.setNotified(false);
         else
@@ -1124,6 +1128,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             not.setRead(false);
         else
             not.setRead(true);
+
         not.setMessage(message);
 
         return not;

@@ -19,21 +19,26 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.NotificationTypes;
+
+import java.util.ArrayList;
 
 /**
  * Created by tomha on 14-Apr-17.
  */
 
 class NotificationsViewAdapter extends BaseSwipeAdapter {
-    private Bitmap[] mBookImage;
+//    private Bitmap[] mBookImage;
+//    private String[] mBookName;
+//    private Boolean[] mNotified;
+//    private NotificationTypes[] mNotTypes;
+//    private Integer[] mBookIds;
+
+    ArrayList<BuzzNotification> notifications;
     private FragmentActivity mContext;
-    private String[] mBookName;
-    private Boolean[] mNotified;
-    private NotificationTypes[] mNotTypes;
-    private Integer[] mBookIds;
 
     private TextView text;
     private ImageView image;
@@ -42,13 +47,18 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
     private MarkNotificationAsReadTask mNotificationTask;
     private RemoveNotificationTask mRemoveTask;
 
-    public NotificationsViewAdapter(FragmentActivity activity, String[] bookNameArray, Boolean[] notifiedArray, NotificationTypes[] notTypesArray, Integer[] bookIdsArray, Bitmap[] bookImageArray) {
+//    public NotificationsViewAdapter(FragmentActivity activity, String[] bookNameArray, Boolean[] notifiedArray, NotificationTypes[] notTypesArray, Integer[] bookIdsArray, Bitmap[] bookImageArray) {
+//        this.mContext = activity;
+//        this.mBookIds = bookIdsArray;
+//        this.mBookName = bookNameArray;
+//        this.mNotified = notifiedArray;
+//        this.mNotTypes = notTypesArray;
+//        this.mBookImage = bookImageArray;
+//    }
+
+    public NotificationsViewAdapter(FragmentActivity activity, ArrayList<BuzzNotification> notifications) {
         this.mContext = activity;
-        this.mBookIds = bookIdsArray;
-        this.mBookName = bookNameArray;
-        this.mNotified = notifiedArray;
-        this.mNotTypes = notTypesArray;
-        this.mBookImage = bookImageArray;
+        this.notifications = notifications;
     }
 
     @Override
@@ -64,7 +74,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
-        if (mNotified[position] == true)
+        if (notifications.get(position).getRead() == true)
             v.setBackgroundResource(R.drawable.notification_true_selector);
 
         else {
@@ -74,7 +84,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(mBookIds[position], mContext, mNotTypes[position]);
+                mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType(), notifications.get(position).getGoodreadsId());
                 mNotificationTask.execute((Void) null);
 
             }
@@ -83,7 +93,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRemoveTask = new NotificationsViewAdapter.RemoveNotificationTask(mBookIds[position], mContext);
+                mRemoveTask = new NotificationsViewAdapter.RemoveNotificationTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType());
                 mRemoveTask.execute((Void) null);
             }
         });
@@ -96,25 +106,15 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
     public void fillValues(int position, View convertView) {
 
         image = (ImageView) convertView.findViewById(R.id.notImageView);
-        image.setImageBitmap(mBookImage[position]);
+        image.setImageBitmap(notifications.get(position).getImage());
 
-        String notification = "";
+        text = (TextView) convertView.findViewById(R.id.notification);
+        text.setText(notifications.get(position).getMessage());
+
         String date = "";
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             date = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
         }
-
-        switch (mNotTypes[position]) {
-            case AVALIABLE:
-                notification = mBookName[position] + " is now available for purchase";
-                break;
-            case PREORDER:
-                notification = mBookName[position] + " will be released next week, and is available for pre-order";
-                break;
-        }
-
-        text = (TextView) convertView.findViewById(R.id.notification);
-        text.setText(notification);
 
         currentTime = (TextView) convertView.findViewById(R.id.date);
         currentTime.setText(date);
@@ -122,7 +122,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
     @Override
     public int getCount() {
-        return mBookIds.length;
+        return notifications.size();
     }
 
     @Override
@@ -137,14 +137,16 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
     private class RemoveNotificationTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final int mBook;
+        private int mBook;
+        private NotificationTypes mType;
         private ProgressDialog progress;
         private FragmentActivity frag;
         private Handler mHandler;
 
-        public RemoveNotificationTask(Integer id, FragmentActivity frag) {
+        public RemoveNotificationTask(Integer id, FragmentActivity frag, NotificationTypes type) {
             this.mBook = id;
             this.frag = frag;
+            this.mType = type;
         }
 
         @Override
@@ -161,7 +163,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.RemoveNotification(mContext, mBook);
-                Boolean apiSuccess = BookBuzzerAPI.RemoveNotification(mContext, mBook);
+                Boolean apiSuccess = BookBuzzerAPI.RemoveNotification(mContext, mBook, mType);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -211,11 +213,13 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         private final int mBook;
         private final NotificationTypes mType;
+        private final Integer mGoodreadsId;
         private ProgressDialog progress;
         private FragmentActivity frag;
         private Handler mHandler;
 
-        public MarkNotificationAsReadTask(Integer id, FragmentActivity frag, NotificationTypes type) {
+        public MarkNotificationAsReadTask(Integer id, FragmentActivity frag, NotificationTypes type, Integer goodreadsId) {
+            this.mGoodreadsId = goodreadsId;
             this.mBook = id;
             this.frag = frag;
             this.mType = type;
@@ -235,7 +239,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             try {
                 Boolean dbSuccess = DBUtil.MarkNotificationAsRead(mContext, mBook, mType);
-                Boolean apiSuccess = BookBuzzerAPI.MarkNotificationAsRead(mContext, mBook, mType);
+                Boolean apiSuccess = BookBuzzerAPI.MarkNotificationAsRead(mContext, mGoodreadsId, mType);
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
@@ -271,7 +275,7 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
             } else {
                 //book wasnt deleted succesfully
-                Toast.makeText(mContext, "Error with removing notification, please try agasin", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Error with removing notification, please try again", Toast.LENGTH_SHORT).show();
             }
         }
 

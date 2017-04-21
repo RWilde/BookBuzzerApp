@@ -1,10 +1,15 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,6 +22,7 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
@@ -71,32 +77,10 @@ public class NotificationsFragment extends Fragment {
         final ListView listv = (ListView) rootView.findViewById(R.id.not_list);
         notifications = DBUtil.GetWatchNotifications(getActivity());
 
-        ArrayList<String> bookName = new ArrayList<>();
-        ArrayList<Boolean> notified = new ArrayList<>();
-        ArrayList<NotificationTypes> notTypes = new ArrayList<>();
-        ArrayList<Integer> bookIds = new ArrayList<>();
-        ArrayList<Bitmap> bookImage = new ArrayList<>();
+        SaveTask saveTask = new SaveTask(notifications, getActivity());
+        saveTask.execute((Void) null);
 
-        String[] bookNameArray = new String[notifications.size()];
-        Boolean[] notifiedArray = new Boolean[notifications.size()];
-        NotificationTypes[] notTypesArray = new NotificationTypes[notifications.size()];
-        Integer[] bookIdsArray = new Integer[notifications.size()];
-        Bitmap[] bookImageArray = new Bitmap[notifications.size()];
-
-        for (BuzzNotification buzz : notifications) {
-            bookName.add(buzz.getBookName());
-            notified.add(buzz.getNotified());
-            bookIds.add(buzz.getBookId());
-            notTypes.add(buzz.getType());
-            bookImage.add(buzz.getImage());
-        }
-        bookNameArray = bookName.toArray(bookNameArray);
-        notifiedArray = notified.toArray(notifiedArray);
-        notTypesArray = notTypes.toArray(notTypesArray);
-        bookIdsArray = bookIds.toArray(bookIdsArray);
-        bookImageArray = bookImage.toArray(bookImageArray);
-
-        mAdapter = new NotificationsViewAdapter(getActivity(), bookNameArray, notifiedArray, notTypesArray, bookIdsArray, bookImageArray);
+        mAdapter = new NotificationsViewAdapter(getActivity(), notifications);
 
         listv.setAdapter(mAdapter);
         mAdapter.setMode(Attributes.Mode.Single);
@@ -166,5 +150,57 @@ public class NotificationsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class SaveTask extends AsyncTask<Void, Void, Boolean> {
+
+        private ArrayList<BuzzNotification> mNotification;
+        private ProgressDialog progress;
+        private FragmentActivity frag;
+        private Handler mHandler;
+
+        public SaveTask(ArrayList<BuzzNotification> n, FragmentActivity frag) {
+            this.frag = frag;
+            this.mNotification = n;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(frag);
+            progress.setMessage("Opening Book...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                api.SaveNotifications(frag, notifications);
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+            mHandler = new Handler();
+
+            if (success) {
+                //finish();
+
+            } else {
+                //book wasnt deleted succesfully
+            }
+        }
+
     }
 }

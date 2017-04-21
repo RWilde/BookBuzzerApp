@@ -29,6 +29,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -146,6 +147,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                 try {
                                     String email = object.getString("email");
                                     String password = object.getString("birthday"); // 01/31/1980 format
+                                    SaveSharedPreference.setPrefGoodreadsAuth(getApplicationContext(), true);
 
                                     mRegisterTask = new UserRegisterTask(email, object.toString());
                                     mRegisterTask.execute((Void) null);
@@ -377,15 +379,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
-//    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-//        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-//        ArrayAdapter<String> adapter =
-//                new ArrayAdapter<>(LoginActivity.this,
-//                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-//
-//        mEmailView.setAdapter(adapter);
-//    }
-
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -557,7 +550,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
@@ -569,7 +561,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     try {
                         JSONObject lists = LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
                         progress.dismiss();
-                        DBUtil.InsertFromAPI(lists);
+                        DBUtil.InsertFromAPI(lists, getApplicationContext());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -590,12 +582,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             progress.dismiss();
-
             if (success) {
+                SaveSharedPreference.setPrefGoodreadsAuth(getApplicationContext(), true);
+                Toast.makeText(getApplicationContext(), "Application synced", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                Toast.makeText(getApplicationContext(), "Error with connecting to your goodreads account", Toast.LENGTH_SHORT).show();
+                //  mPasswordView.setError(getString(R.string.error_incorrect_password));
+              //  mPasswordView.requestFocus();
             }
         }
 

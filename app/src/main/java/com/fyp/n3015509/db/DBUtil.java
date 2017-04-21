@@ -147,7 +147,7 @@ public class DBUtil {
     public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, NotificationTypes mType) {
         try {
             MySQLiteHelper db = new MySQLiteHelper(mContext);
-            return db.markAsRead(mBook, mType);
+            return db.MarkAsRead(mBook, mType);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -299,8 +299,8 @@ public class DBUtil {
             b.setTextReviewsCount(checkForNullInt(o, "text_reviews_count"));
             b.setTitle(checkForNullString(o, "title"));
             b.setTitleWithoutSeries(checkForNullString(o, "title_without_name"));
-            b.setImage(getBitmapFromString(checkForNullString(o, "image_url")));
-            b.setSmallImage(getBitmapFromString(checkForNullString(o, "small_img")));
+            b.setImage_url(checkForNullString(o, "image_url"));
+            b.setSmall_image_url(checkForNullString(o, "small_img"));
             b.setLink(checkForNullString(o, "link"));
             //b.setNumPages(o.getInt(""));
             b.setYearPublished(checkForNullInt(o, "yearPublished"));

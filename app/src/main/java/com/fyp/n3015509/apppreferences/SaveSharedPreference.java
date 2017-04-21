@@ -13,13 +13,60 @@ import java.util.Date;
  * Created by tomha on 23-Mar-17.
  */
 
-public class SaveSharedPreference
-{
+public class SaveSharedPreference {
     //static final String PREF_USER_NAME= "username";
-    static final String PREF_TOKEN= "token";
-    static final String PREF_GOODREADS= "goodreads_id";
+    static final String PREF_TOKEN = "token";
+    static final String PREF_GOODREADS = "goodreads_id";
     static final String PREF_IMPORTED = "imported";
     static final String PREF_USERNAME = "username";
+
+    static final String PREF_SYNC_FREQ = "sync";
+    static final String PREF_LAST_SYNC = "last_sync";
+
+    static final String PREF_GOODREADS_AUTH = "goodreads_auth";
+    static final String PREF_FACEBOOK_AUTH = "facebook_auth";
+
+
+    public static int getPrefSyncFreq(Context cxt) {
+        return getSharedPreferences(cxt).getInt(PREF_SYNC_FREQ, 0);
+    }
+
+    public static String getPrefLastSync(Context cxt) {
+        return getSharedPreferences(cxt).getString(PREF_LAST_SYNC, "");
+    }
+
+    public static void setPrefSyncFreq(Context cxt, int freq) {
+        SharedPreferences.Editor editor = getSharedPreferences(cxt).edit();
+        editor.putInt(PREF_SYNC_FREQ, freq);
+        editor.apply();
+    }
+
+    public static void setPrefLastSync(Context cxt, String sync) {
+        SharedPreferences.Editor editor = getSharedPreferences(cxt).edit();
+        editor.putString(PREF_LAST_SYNC, sync);
+        editor.apply();
+    }
+
+    public static Boolean getPrefGoodreadsAuth(Context ctx) {
+        return getSharedPreferences(ctx).getBoolean(PREF_GOODREADS_AUTH, false);
+    }
+
+    public static Boolean getPrefFacebookAuth(Context ctx) {
+        return getSharedPreferences(ctx).getBoolean(PREF_FACEBOOK_AUTH, false);
+    }
+
+    public static void setPrefGoodreadsAuth(Context ctx, Boolean auth) {
+        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
+        editor.putBoolean(PREF_GOODREADS_AUTH, auth);
+        editor.apply();
+    }
+
+    public static void setPrefFacebookAuth(Context ctx, Boolean auth) {
+        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
+        editor.putBoolean(PREF_FACEBOOK_AUTH, auth);
+        editor.apply();
+    }
+
     private static final String PREF_LAST_ACTIVE = "last_active";
 
 
@@ -27,53 +74,44 @@ public class SaveSharedPreference
         return PreferenceManager.getDefaultSharedPreferences(ctx);
     }
 
-    public static void setToken(Context ctx, String token)
-    {
+    public static void setToken(Context ctx, String token) {
         SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
         editor.putString(PREF_TOKEN, token);
         editor.apply();
     }
 
-    public static String getToken(Context ctx)
-    {
+    public static String getToken(Context ctx) {
         return getSharedPreferences(ctx).getString(PREF_TOKEN, "");
     }
 
-    public static void clearToken(Context ctx)
-    {
+    public static void clearToken(Context ctx) {
         SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
         editor.clear(); //clear all stored data
         editor.apply();
     }
 
-    public static void setGoodreadsId(Context ctx, String userId)
-    {
+    public static void setGoodreadsId(Context ctx, String userId) {
         try {
             SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
             editor.putString(PREF_GOODREADS, userId);
             editor.apply();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public static String getGoodreadsId(Context ctx)
-    {
+    public static String getGoodreadsId(Context ctx) {
         return getSharedPreferences(ctx).getString(PREF_GOODREADS, "");
     }
 
-    public static void setImported(Context ctx, boolean imported)
-    {
+    public static void setImported(Context ctx, boolean imported) {
         SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
         editor.putBoolean(PREF_IMPORTED, imported);
         editor.apply();
     }
 
-    public static Boolean getImported(Context ctx)
-    {
+    public static Boolean getImported(Context ctx) {
         return getSharedPreferences(ctx).getBoolean(PREF_IMPORTED, false);
 
     }

@@ -26,6 +26,35 @@ public class GoodreadsBook {
         this.columnId = columnId;
     }
 
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    String imgUrl;
+
+    public String getSmallImgUrl() {
+        return smallImgUrl;
+    }
+
+    public void setSmallImgUrl(String smallImgUrl) {
+        this.smallImgUrl = smallImgUrl;
+    }
+
+    public String getLrgImgUrl() {
+        return lrgImgUrl;
+    }
+
+    public void setLrgImgUrl(String lrgImgUrl) {
+        this.lrgImgUrl = lrgImgUrl;
+    }
+
+    String smallImgUrl;
+    String lrgImgUrl;
+
     int columnId;
     int id;
     String isbn;
@@ -116,6 +145,10 @@ public class GoodreadsBook {
         setImage_url(image_url);
         setSmall_image_url(small_image_url);
         setLarge_image_url(large_image_url);
+
+        this.imgUrl = image_url;
+        this.smallImgUrl = small_image_url;
+        this.lrgImgUrl = large_image_url;
 
         this.id = id;
         this.isbn = isbn;
