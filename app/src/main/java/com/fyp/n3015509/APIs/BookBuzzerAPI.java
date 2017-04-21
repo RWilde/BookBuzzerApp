@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.APIdao.APIBookList;
+import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.EditionTypes;
 import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
@@ -42,6 +43,7 @@ public class BookBuzzerAPI {
     private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
 
     private static final String WatchBookURL = BaseURL + "/watch/book/";
+    private static final String NotificationURL = BaseURL + "/notification/";
     private static final String PriceCheckerURL = BaseURL + "/watch/price";
     private static final String TAG = "price checker";
 
@@ -180,7 +182,7 @@ public class BookBuzzerAPI {
                 temp.put("name", author.getName());
                 temp.put("avg_rating", author.getAverage_rating());
                 temp.put("id", author.getId());
-                temp.put("img_url", author.getImage());
+                temp.put("img_url", author.getImgLink());
                 temp.put("link", author.getLink());
                 temp.put("ratings_count", author.getRatingsCount());
                 temp.put("sml_img_url", author.getSmallImage());
@@ -246,9 +248,37 @@ public class BookBuzzerAPI {
         return false;
     }
 
+    public Boolean SaveNotifications(Context ctx, ArrayList<BuzzNotification> buzzList) {
+        try {
+            String url = NotificationURL;
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(ctx));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            String json = buzzList.toString();
+
+            out.write(json);
+            out.close();
+
+            int response = conn.getResponseCode();
+            if (response == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
     public static Boolean RemoveNotification(FragmentActivity mContext, int mBook) {
         try {
-            String url = WatchBookURL + mBook;
+            String url = NotificationURL + mBook;
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);
@@ -271,7 +301,7 @@ public class BookBuzzerAPI {
 
     public static Boolean MarkNotificationAsRead(FragmentActivity mContext, int mBook, NotificationTypes mType) {
         try {
-            String url = WatchBookURL + mBook;
+            String url = NotificationURL +"/id="+ mBook + "&type="+mType.toString();
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 
             conn.setDoOutput(true);
@@ -382,4 +412,7 @@ public class BookBuzzerAPI {
         }
         return sb.toString();
     }
+
+
+
 }

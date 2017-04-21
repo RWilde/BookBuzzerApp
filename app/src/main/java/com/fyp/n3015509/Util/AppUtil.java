@@ -8,13 +8,17 @@ import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
 import com.fyp.n3015509.dao.BookAdapter;
+import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.db.DBUtil;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by tomha on 16-Apr-17.
@@ -74,5 +78,22 @@ public class AppUtil {
         }
 
         return success;
+    }
+
+    public ConcurrentHashMap<String, ArrayList<PriceChecker>> GetLatestPrices(Context ctx)
+    {
+        BookBuzzerAPI bb = new BookBuzzerAPI();
+        DBUtil db = new DBUtil();
+        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = new ConcurrentHashMap<>();
+
+
+        String[] isbns = db.GetISBNFromWatch(ctx);
+        if (isbns != null) {
+            for (String isbn : isbns) {
+                ArrayList<PriceChecker> p = bb.RunPriceChecker(ctx, isbn);
+                results.put(isbn, p);
+            }
+        }
+        return results;
     }
 }

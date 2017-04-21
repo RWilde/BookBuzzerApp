@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.Util.AppUtil;
+import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -41,7 +44,7 @@ public class WatchBooksService extends GcmTaskService {
 //        } else if (MainActivity.TASK_TAG_PERIODIC.equals(tag)) {
         try {
             result = checkForNewBooks();
-            // checkForPrices();
+            checkForPrices(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,18 +68,33 @@ public class WatchBooksService extends GcmTaskService {
         DBUtil db = new DBUtil();
         String available = "";
         String preorder = "";
-        Integer[] notifications = db.createNotifications(this);
+        ArrayList<BuzzNotification> notifications = db.CreateWatchNotifications(this);
+
+        int availableCount = 0;
+        int preorderCount = 0;
+
+        for (BuzzNotification b : notifications)
+        {
+            if (b.getType() == NotificationTypes.AVALIABLE)
+            {
+                availableCount++;
+            }
+            else if (b.getType() == NotificationTypes.PREORDER)
+            {
+                preorderCount++;
+            }
+        }
 
         if (notifications != null) {
             String title = "BookBuzzer";
-            if (notifications[0] > 0) {
-                available = notifications[0] + " new books out ";
+            if (availableCount > 0) {
+                available = availableCount + " new books out ";
             }
-            if (notifications[1] > 0) {
+            if (preorderCount > 0) {
                 if (available.contentEquals("")) {
                     preorder = " with ";
                 }
-                preorder += notifications[1] + "avaliable for preorder ";
+                preorder += preorderCount + "avaliable for preorder ";
 
             }
             if (!available.contentEquals("") || !preorder.contentEquals("")) {
@@ -93,33 +111,26 @@ public class WatchBooksService extends GcmTaskService {
     }
 
     public int checkForPrices(Context ctx) {
+        AppUtil app = new AppUtil();
         DBUtil db = new DBUtil();
-        BookBuzzerAPI bb = new BookBuzzerAPI();
+        BookBuzzerAPI api = new BookBuzzerAPI();
 
-        String[] isbns = db.GetISBNFromWatch(ctx);
-        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = new ConcurrentHashMap<>();
-        if (isbns != null) {
-            for (String isbn : isbns) {
-                ArrayList<PriceChecker> p =bb.RunPriceChecker(ctx, isbn);
-                results.put(isbn, p);
-            }
-            db.CreatePriceCheckerNotifications(ctx, results);
+        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = app.GetLatestPrices(ctx);
+        ArrayList<BuzzNotification> buzzList = db.CreatePriceCheckerNotifications(ctx, results);
 
-            if (results != null) {
-                if (results.size() > 0) {
-
-                    String title = "BookBuzzer";
-
-                    String subject = "Books you are watching are cheaper!";
-                    String body = "";
-                    if (results.size() == 1) {
-                        body = "There is 1 book you are watching that is cheaper!";
-                    } else {
-                        body = "There are " + results.size() + " books you are watching that are cheaper!";
-                    }
-
-                   // setNotififcation(title, body, subject);
+        api.SaveNotifications(this, buzzList);
+        if (results != null) {
+            if (results.size() > 0) {
+                String title = "BookBuzzer";
+                String subject = "Books you are watching are cheaper!";
+                String body = "";
+                if (results.size() == 1) {
+                    body = "There is 1 book you are watching that is cheaper!";
+                } else {
+                    body = "There are " + results.size() + " books you are watching that are cheaper!";
                 }
+
+                setNotififcation(title, body, subject);
             }
         } else {
             return GcmNetworkManager.RESULT_FAILURE;
@@ -127,8 +138,7 @@ public class WatchBooksService extends GcmTaskService {
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 
-    public void setNotififcation(String title, String body, String subject)
-    {
+    public void setNotififcation(String title, String body, String subject) {
         NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notify = new Notification.Builder
                 (getApplicationContext()).setContentTitle(title).setContentText(body).

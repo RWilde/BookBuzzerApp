@@ -15,6 +15,8 @@ import com.fyp.n3015509.bookbuzzerapp.activity.LoginActivity;
 import com.fyp.n3015509.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
+import com.fyp.n3015509.db.DBUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -192,7 +194,8 @@ public class LoginAPI {
         return null;
     }
 
-    public static void RegisterGoodreadsUser(Context cxt, JSONObject login) {
+    public static JSONObject RegisterGoodreadsUser(Context cxt, JSONObject login) {
+        JSONObject jsonObject = null;
         try {
             URL authURL = new URL(GoodreadsLoginURL);
             HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
@@ -211,69 +214,17 @@ public class LoginAPI {
                 // read the response
                 InputStream in = new BufferedInputStream(conn.getInputStream());
                 String result = convertStreamToString(in);
-                JSONObject jsonObject = new JSONObject(result);
+                jsonObject = new JSONObject(result);
 
-                JSONParser parser_obj = new JSONParser();
-                try {
-                    JSONArray lists = (JSONArray) parser_obj.parse(jsonObject.getString("list"));
-                    JSONArray books = (JSONArray) parser_obj.parse(jsonObject.getString("books"));
-                    JSONArray authors = (JSONArray) parser_obj.parse(jsonObject.getString("authors"));
-
-                    HashMap<Integer, GoodreadsAuthor> authorList = new HashMap();
-                    HashMap<Integer, GoodreadsBook> bookList = new HashMap();
-                    ArrayList<Buzzlist> buzzList = new ArrayList<>();
-                    for (int i = 0; i > authors.length(); i++) {
-                        GoodreadsAuthor author = CreateGoodreadsAuthor(authors.getJSONObject(i));
-                        authorList.put(author.getId(), author);
-                    }
-
-                    for (int i = 0; i > books.length(); i++) {
-                        GoodreadsBook book = CreateGoodreadsBook(books.getJSONObject(i));
-                        JSONArray authorIds = books.getJSONObject(i).getJSONArray("author");
-                        ArrayList<GoodreadsAuthor> bAuthors = new ArrayList();
-                        for (int m = 0; m > authorIds.length(); m++) {
-                            bAuthors.add(authorList.get(authorIds.get(m)));
-                        }
-                        book.setAuthors(bAuthors);
-                        bookList.put(book.getId(), book);
-                    }
-
-                    for (int i = 0; i > lists.length(); i++) {
-                        Buzzlist buzz = new Buzzlist();
-                        buzz.setListName(lists.getJSONObject(i).getString("list_name"));
-                        JSONArray bookIds = lists.getJSONObject(i).getJSONArray("book_list");
-                        ArrayList<GoodreadsBook> gBooks = new ArrayList();
-                        for (int m = 0; m > bookIds.length(); m++) {
-                            gBooks.add(bookList.get(bookIds.get(m)));
-                        }
-                        buzz.setBookList(gBooks);
-                        buzzList.add(buzz);
-                    }
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-
-
-
+                // JSONObject listJSON = new JSONObject(jsonObject.getString("list"));
+                //JSONObject bookJSON = new JSONObject(jsonObject.getString("books"));
+                //JSONObject authorJSON = new JSONObject(jsonObject.getString("authors"));
 
                 in.close();
                 conn.disconnect();
 
 
                 Log.d("response", Integer.toString(status));
-
-//                String json_response = "";
-//                InputStreamReader in = new InputStreamReader(conn.getInputStream());
-//                BufferedReader br = new BufferedReader(in);
-//                String text = "";
-//                JSONObject jsonObj = null;
-//
-//                while ((text = br.readLine()) != null) {
-//                    json_response += text;
-//                    jsonObj = new JSONObject(json_response);
-//                }
-
                 String token = jsonObject.getString("token");
                 SaveSharedPreference.setToken(cxt, token);
             }
@@ -287,58 +238,10 @@ public class LoginAPI {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return jsonObject;
     }
 
-    private static GoodreadsAuthor CreateGoodreadsAuthor(JSONObject o) {
-        GoodreadsAuthor b = new GoodreadsAuthor();
-        try {
-            b.setId(o.getInt("goodreads_id"));
-            b.setName(o.getString("name"));
-            b.setImageDB(getBitmapFromString(o.getString("img")));
-            b.setLink(o.getString("link"));
-            b.setAverage_rating(o.getDouble("avg_rating"));
-            b.setRatingsCount(o.getInt("ratings_count"));
-            b.setTextReviewsCount(o.getInt("reviews_count"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return b;
-    }
 
-    private static GoodreadsBook CreateGoodreadsBook(JSONObject o) {
-        GoodreadsBook b = new GoodreadsBook();
-        try{
-        b.setId(o.getInt("work_id"));
-        b.setIsbn(o.getString("isbn"));
-        b.setIsbn13(o.getString("isbn13"));
-        b.setTextReviewsCount(o.getInt("text_reviews_count"));
-        b.setTitle(o.getString("title"));
-        b.setTitleWithoutSeries(o.getString("title_without_name"));
-        b.setImage(getBitmapFromString(o.getString("image_url")));
-        b.setSmallImage(getBitmapFromString(o.getString("small_img")));
-        b.setLink(o.getString("link"));
-       //b.setNumPages(o.getInt(""));
-        b.setYearPublished(o.getInt("yearPublished"));
-        b.setAverage_rating(o.getDouble("avg_rating"));
-        b.setPublisher(o.getString("publisher"));
-        b.setReleaseDate(o.getString("release_date"));
-        //b.setRatingsCount(o.getInt(""));
-        b.setDescription(o.getString("blurb"));
-        b.setFormat(o.getString("format"));
-        //b.setEditionInformation(o.getString(""));
-        }catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        return b;
-    }
-
-    private static byte[] getBitmapFromString(String jsonString) {
-
-        byte[] decodedString = Base64.decode(jsonString, Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        return decodedString;
-    }
 
     static String convertStreamToString(java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");

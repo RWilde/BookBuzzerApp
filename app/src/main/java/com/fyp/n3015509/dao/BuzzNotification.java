@@ -8,6 +8,12 @@ import android.graphics.Bitmap;
 
 public class BuzzNotification {
     int bookId;
+    Boolean notified;
+    NotificationTypes type;
+    String bookName;
+    Bitmap image;
+    String message;
+    Boolean read;
 
     public Bitmap getImage() {
         return image;
@@ -16,8 +22,6 @@ public class BuzzNotification {
     public void setImage(Bitmap image) {
         this.image = image;
     }
-
-    Bitmap image;
 
     public int getBookId() {
         return bookId;
@@ -51,7 +55,21 @@ public class BuzzNotification {
         this.bookName = bookName;
     }
 
-    Boolean notified;
-    NotificationTypes type;
-    String bookName;
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Boolean getRead() {
+        return read;
+    }
+
+    public void setRead(Boolean read) {
+        this.read = read;
+    }
+
+
 }

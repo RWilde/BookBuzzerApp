@@ -51,6 +51,7 @@ import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.APIs.LoginAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsLogin;
+import com.fyp.n3015509.db.DBUtil;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -566,7 +567,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     login.put("goodreads_id", goodreads_id);
                     SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
                     try {
-                        LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
+                        JSONObject lists = LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
+                        progress.dismiss();
+                        DBUtil.InsertFromAPI(lists);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

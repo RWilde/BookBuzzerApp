@@ -168,8 +168,8 @@ public class WatchListFragment extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            WatchBooksService watch = new WatchBooksService();
-            watch.checkForPrices(mContext);
+            AppUtil app = new AppUtil();
+            app.GetLatestPrices(mContext);
             return true;
         }
 

@@ -135,6 +135,7 @@ public class XMLUtil {
                 int authorTextReviewsCount = getIntFromElement(value.getElementsByTagName("text_reviews_count").item(0).getTextContent());
                 GoodreadsAuthor author = new GoodreadsAuthor();
                 author.createGoodreadsAuthor(authorId, authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
+                author.setImgLink(authorImageURL);
                 authors.add(author);
             }
             //author information

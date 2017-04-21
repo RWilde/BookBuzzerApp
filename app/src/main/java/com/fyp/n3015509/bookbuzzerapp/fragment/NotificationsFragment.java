@@ -69,7 +69,7 @@ public class NotificationsFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_notifications, container, false);
         final ListView listv = (ListView) rootView.findViewById(R.id.not_list);
-        notifications = DBUtil.getNotifications(getActivity());
+        notifications = DBUtil.GetWatchNotifications(getActivity());
 
         ArrayList<String> bookName = new ArrayList<>();
         ArrayList<Boolean> notified = new ArrayList<>();

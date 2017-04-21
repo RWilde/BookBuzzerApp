@@ -26,6 +26,16 @@ public class GoodreadsAuthor {
     int id;
     String name;
     Bitmap image;
+
+    public String getImgLink() {
+        return imgLink;
+    }
+
+    public void setImgLink(String imgLink) {
+        this.imgLink = imgLink;
+    }
+
+    String imgLink;
     Bitmap smallImage;
     String link;
     double average_rating;

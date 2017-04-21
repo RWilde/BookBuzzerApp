@@ -68,12 +68,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String FORMAT = "format";
     private static final String EDITION = "edition";
     private static final String OWN = "owned";
-
-    private static final String NOTIFIED = "notified";
-    private static final String PREORDER = "preorder";
     private static final String KINDLE = "kindle";
     private static final String PAPERBACK = "paperback";
     private static final String HARDCOVER = "hardcover";
+
+    private static final String NOTIFIED = "notified";
+    private static final String PREORDER = "preorder";
+    private static final String READ = "read";
 
     //public static final String AUTHOR_ID = "id";
     public static final String AUTHOR_NAME = "name";
@@ -98,7 +99,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String CREATE_AUTHOR_TABLE = "create table "
             + TABLE_AUTHORS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
-            + AUTHOR_ID + " integer not null,"
+            + AUTHOR_ID + " integer not null UNIQUE,"
             + AUTHOR_NAME + " varchar(255),"
             + AUTHOR_IMAGE + " blob,"
             + AUTHOR_SMALL_IMAGE + " blob,"
@@ -110,7 +111,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String CREATE_BOOK_TABLE = "create table "
             + TABLE_BOOKS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
-            + GOODREADS_ID + " integer not null,"
+            + GOODREADS_ID + " integer not null UNIQUE,"
             + ISBN + " varchar(255),"
             + ISBN13 + " varchar(255),"
             + REVIEW_COUNT + " integer not null,"
@@ -138,7 +139,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String CREATE_BUZZLIST_TABLE = "create table "
             + TABLE_BUZZLISTS + "( "
             + COLUMN_ID + " integer primary key autoincrement, "
-            + BUZZLIST_NAME + " varchar(255) not null,"
+            + BUZZLIST_NAME + " varchar(255) not null UNIQUE,"
             + BUZZLIST_BOOK_NUM + " integer);";
 
     private static final String CREATE_BUZZLIST_INTERIM_TABLE = "create table "
@@ -175,6 +176,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + NOTIFICATION_TYPE + " varchar(255), "
             + EDITION_TYPE + " varchar(255), "
             + MESSAGE + " varchar(255), "
+            + READ + " integer not null,"
             + "FOREIGN KEY (" + BOOK_ID + ") REFERENCES " + TABLE_BOOKS + "(" + COLUMN_ID + ") ON DELETE CASCADE"
             + ");";
 
@@ -195,10 +197,13 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             ContentValues insertValues = new ContentValues();
             insertValues.put(BOOK_ID, 1);
             insertValues.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+            insertValues.put(READ, 0);
+
             database.insertOrThrow(NOTIFICATIONS_TABLE, null, insertValues);
             ContentValues insert = new ContentValues();
             insert.put(BOOK_ID, 2);
             insert.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+            insert.put(READ, 0);
             database.insertOrThrow(NOTIFICATIONS_TABLE, null, insert);
         } catch (Exception e) {
             e.printStackTrace();
@@ -225,7 +230,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         }
     }
 
-    public long insertAuthor(GoodreadsAuthor author, Context context) {
+    public long insertAuthor(GoodreadsAuthor author) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -256,8 +261,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             values.put(AUTHOR_TEXT_REVIEWS_COUNT, author.getTextReviewsCount());
             values.put(AUTHOR_NAME, author.getName());
 
+            String where = AUTHOR_ID + "=" + author.getId() + "";
             // insert row
-            long todo_id = db.insert(TABLE_AUTHORS, null, values);
+            long todo_id = db.update(TABLE_AUTHORS, values, where, null);
+            if (todo_id == 0) {
+                todo_id = db.insertWithOnConflict(TABLE_AUTHORS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            // insert row
+            //long todo_id = db.insert(TABLE_AUTHORS, null, values);
             db.close();
             return todo_id;
         } catch (Exception e) {
@@ -317,7 +328,15 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             values.put(OWN, 0);
 
             // insert row
-            long todo_id = db.insert(TABLE_BOOKS, null, values);
+
+            String where = GOODREADS_ID + "=" + book.getId() + "";
+            // insert row
+            long todo_id = db.update(TABLE_BOOKS, values, where, null);
+            if (todo_id == 0) {
+                todo_id = db.insertWithOnConflict(TABLE_BOOKS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+
+           // long todo_id = db.insert(TABLE_BOOKS, null, values);
             db.close();
             return todo_id;
         } catch (Exception e) {
@@ -350,9 +369,14 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(BUZZLIST_NAME, buzz.getShelfName());
             values.put(BUZZLIST_BOOK_NUM, buzz.getBookNum());
-
+            String where = BUZZLIST_NAME + "='" + buzz.getShelfName() + "'";
             // insert row
-            long todo_id = db.insert(TABLE_BUZZLISTS, null, values);
+            long todo_id = db.update(TABLE_BUZZLISTS, values, where, null);
+            if (todo_id == 0) {
+                todo_id = db.insertWithOnConflict(TABLE_BUZZLISTS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+
+            //long todo_id = db.up(TABLE_BUZZLISTS, null, values);
 
             return todo_id;
         } catch (Exception e) {
@@ -641,9 +665,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return success;
     }
 
-    public Integer[] addToNotifications() {
-        Integer[] count = new Integer[2];
-        ArrayList<Integer> counts = new ArrayList<>();
+    public ArrayList<BuzzNotification> AddToWatchNotifications() {
+        ArrayList<BuzzNotification> notification = new ArrayList<>();
+
         java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
         Date preorderDate = DateUtils.addDays(new Date(), 7);
         String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + currentDate + ";";
@@ -656,13 +680,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
             if (avaialbleCursor != null) {
                 try {
-                    counts.add(avaialbleCursor.getCount());
+                    //counts.add(avaialbleCursor.getCount());
                     if (avaialbleCursor.moveToFirst()) {
                         while (avaialbleCursor.isAfterLast() == false) {
+
+                            BuzzNotification buzz = new BuzzNotification();
+                            String message = avaialbleCursor.getString(5) + " is now avaliable to buy";
+                            buzz.setBookId(avaialbleCursor.getInt(1));
+                            buzz.setType(NotificationTypes.AVALIABLE);
+                            buzz.setMessage(message);
+                            buzz.setRead(false);
+                            notification.add(buzz);
+
                             //add to notifications table
                             ContentValues avaliable = new ContentValues();
                             avaliable.put(BOOK_ID, avaialbleCursor.getInt(0));
                             avaliable.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
+                            avaliable.put(MESSAGE, message);
+                            avaliable.put(READ, 0);
+
                             db.insert(NOTIFICATIONS_TABLE, null, avaliable);
                             avaialbleCursor.moveToNext();
                         }
@@ -676,14 +712,25 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
             if (preorderCursor != null) {
                 try {
-                    counts.add(preorderCursor.getCount());
+                   // counts.add(preorderCursor.getCount());
                     if (preorderCursor.moveToFirst()) {
                         while (preorderCursor.isAfterLast() == false) {
+
+                            BuzzNotification buzz = new BuzzNotification();
+                            String message = avaialbleCursor.getString(5) + " is now avaliable to buy";
+                            buzz.setBookId(avaialbleCursor.getInt(1));
+                            buzz.setType(NotificationTypes.PREORDER);
+                            buzz.setMessage(message);
+                            buzz.setRead(false);
+                            notification.add(buzz);
 
                             //add to notifications table
                             ContentValues avaliable = new ContentValues();
                             avaliable.put(BOOK_ID, preorderCursor.getInt(0));
                             avaliable.put(NOTIFICATION_TYPE, NotificationTypes.PREORDER.toString());
+                            avaliable.put(MESSAGE, message);
+                            avaliable.put(READ, 0);
+
                             db.insert(NOTIFICATIONS_TABLE, null, avaliable);
                             preorderCursor.moveToNext();
                         }
@@ -698,7 +745,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
 
-        return counts.toArray(count);
+        return notification;
     }
 
     public ArrayList<BuzzNotification> getNotifications() {
@@ -714,6 +761,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                         while (cursor.isAfterLast() == false) {
                             int bookId = cursor.getInt(1);
                             String type = cursor.getString(2);
+                            String message = cursor.getString(5);
+                            int read = cursor.getInt(5);
+
                             NotificationTypes notification = NotificationTypes.valueOf(type);
                             String bookQuery = "SELECT " + TITLE + ", " + SMALL_IMAGE + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + " = " + bookId + " LIMIT 1";
                             String notQuery = "";
@@ -726,6 +776,10 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                                 case PREORDER:
                                     notQuery = "SELECT " + PREORDER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
                                     break;
+                                case CHEAPER:
+                                    //notQuery = "SELECT " + CHEAPER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
+                                    break;
+
                             }
                             Cursor c2 = db.rawQuery(notQuery, null);
 
@@ -747,7 +801,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                                 }
                             }
 
-                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified, image);
+                            BuzzNotification buzz = createBuzzNotification(bookId, notification, bookName, notified, image, read, message);
                             notifications.add(buzz);
                             cursor.moveToNext();
                         }
@@ -764,24 +818,26 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return notifications;
     }
 
-    public Boolean markAsRead(int mBook, NotificationTypes mType) {
+    public Boolean MarkAsRead(int mBook, NotificationTypes mType) {
         Boolean success = false;
         try {
             SQLiteDatabase db = this.getReadableDatabase();
+            ContentValues bookT = new ContentValues();
             ContentValues cv = new ContentValues();
+            cv.put(READ, 1);
 
             switch (mType) {
                 case AVALIABLE:
-                    cv.put(NOTIFIED, 1);
-                    db.update(BOOK_WATCH, cv, BOOK_ID + mBook, null);
-                    success = true;
+                    bookT.put(NOTIFIED, 1);
                     break;
                 case PREORDER:
-                    cv.put(PREORDER, 1);
-                    db.update(BOOK_WATCH, cv, BOOK_ID + mBook, null);
-                    success = true;
+                    bookT.put(PREORDER, 1);
                     break;
             }
+            db.update(BOOK_WATCH, bookT, BOOK_ID +"="+ mBook, null);
+            String where = BOOK_ID + "=" +mBook + " and " + NOTIFICATION_TYPE + "= '" + mType.toString()+"'";
+            db.update(NOTIFICATIONS_TABLE, cv, where, null);
+            success = true;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -965,8 +1021,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return cheaperOptions;
     }
 
-    public Integer[] addPriceCheckerNotification(ConcurrentHashMap<String, ArrayList<PriceChecker>> isbn) {
-        ArrayList<Integer> ids = new ArrayList();
+    public ArrayList<BuzzNotification> AddPriceCheckerNotification(ConcurrentHashMap<String, ArrayList<PriceChecker>> isbn) {
+        ArrayList<BuzzNotification> buzzNotifications = new ArrayList();
         for (Map.Entry<String, ArrayList<PriceChecker>> entry : isbn.entrySet()) {
             String key = entry.getKey();
             ArrayList<PriceChecker> value = entry.getValue();
@@ -981,24 +1037,31 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                     formats.append(p.getType().toString().toLowerCase());
 
-                    if (p.getPrice() == 0)
+                    if (p.getPrice() == 0&& lowestPrice == 0.0)
                         lowestPrice = p.getPrice();
-                    else if (p.getPrice() < lowestPrice)
+                    else if (p.getPrice() < lowestPrice && lowestPrice == 0.0)
                         lowestPrice = p.getPrice();
                 }
                 SQLiteDatabase db = this.getReadableDatabase();
+                String message = b.getTitle() + " is cheaper today from £" + lowestPrice + " in the following formats: " + formats;
+
                 ContentValues avaliable = new ContentValues();
+                BuzzNotification buzz = new BuzzNotification();
+                buzz.setType(NotificationTypes.CHEAPER);
+                buzz.setBookId(b.getId());
+                buzz.setMessage(message);
+
                 avaliable.put(BOOK_ID, b.getColumnId());
                 avaliable.put(NOTIFICATION_TYPE, NotificationTypes.CHEAPER.toString());
-                avaliable.put(MESSAGE, b.getTitle() + " is cheaper today from £" + lowestPrice + " in the following formats: " + formats);
+                avaliable.put(MESSAGE, message);
+                avaliable.put(READ, 0);
                 long id = db.insert(NOTIFICATIONS_TABLE, null, avaliable);
-                ids.add(Ints.checkedCast(id));
+                buzzNotifications.add(buzz);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        Integer[] idArray = new Integer[ids.size()];
-        return ids.toArray(idArray);
+        return buzzNotifications;
     }
 
 
@@ -1046,7 +1109,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     private BuzzNotification createBuzzNotification(int bookId, NotificationTypes
-            notification, String bookName, int notified, Bitmap image) {
+            notification, String bookName, int notified, Bitmap image, int read, String message) {
         BuzzNotification not = new BuzzNotification();
         not.setBookId(bookId);
         not.setType(notification);
@@ -1056,6 +1119,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             not.setNotified(false);
         else
             not.setNotified(true);
+
+        if (read == 0)
+            not.setRead(false);
+        else
+            not.setRead(true);
+        not.setMessage(message);
 
         return not;
     }

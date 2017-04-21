@@ -51,8 +51,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
         this.mBookImage = bookImageArray;
     }
 
-
-
     @Override
     public int getSwipeLayoutResourceId(int position) {
         return R.id.swipe;
