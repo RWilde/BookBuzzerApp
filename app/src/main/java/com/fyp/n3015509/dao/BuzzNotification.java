@@ -2,6 +2,8 @@ package com.fyp.n3015509.dao;
 
 import android.graphics.Bitmap;
 
+import com.fyp.n3015509.dao.enums.NotificationTypes;
+
 /**
  * Created by tomha on 14-Apr-17.
  */

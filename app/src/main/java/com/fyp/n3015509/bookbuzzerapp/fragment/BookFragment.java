@@ -111,6 +111,8 @@ public class BookFragment extends Fragment {
             b.append(a.getName());
         }
         author.setText(b);
+        TextView description = (TextView) view.findViewById(R.id.textView2);
+        description.setText( mBook.getDescription());
 
         return view;
     }

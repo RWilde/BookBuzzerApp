@@ -11,9 +11,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.DialogFragment;
 
+import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.Util.AppUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ShelfImportFrag extends DialogFragment {
 
-    GoodreadsAPI util = new GoodreadsAPI();
+    GoodreadsShelves util = new GoodreadsShelves();
     private OnFragmentInteractionListener mListener;
 
     public ShelfImportFrag() {

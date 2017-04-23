@@ -1,4 +1,4 @@
-package com.fyp.n3015509.bookbuzzerapp;
+package com.fyp.n3015509.bookbuzzerapp.tasks;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -8,8 +8,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.Util.AppUtil;
+import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
-import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;

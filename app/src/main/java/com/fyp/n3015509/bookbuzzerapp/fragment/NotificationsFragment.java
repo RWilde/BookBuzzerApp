@@ -2,14 +2,12 @@ package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,10 +21,10 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.bookbuzzerapp.other.NotificationsViewAdapter;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
-import com.fyp.n3015509.dao.NotificationTypes;
 
 import java.util.ArrayList;
 
@@ -77,8 +75,8 @@ public class NotificationsFragment extends Fragment {
         final ListView listv = (ListView) rootView.findViewById(R.id.not_list);
         notifications = DBUtil.GetWatchNotifications(getActivity());
 
-        SaveTask saveTask = new SaveTask(notifications, getActivity());
-        saveTask.execute((Void) null);
+//        SaveTask saveTask = new SaveTask(notifications, getActivity());
+//        saveTask.execute((Void) null);
 
         mAdapter = new NotificationsViewAdapter(getActivity(), notifications);
 

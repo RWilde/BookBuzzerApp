@@ -19,7 +19,6 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.Util.AppUtil;
-import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;

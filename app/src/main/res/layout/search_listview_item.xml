@@ -9,36 +9,19 @@
     swipe:rightEdgeSwipeOffset="0dp">
 
     <LinearLayout
-        android:tag="Bottom4"
         android:id="@+id/bottom_wrapper_2"
-        android:layout_width="wrap_content"
-        android:layout_height="80dp">
-
-        <ImageView
-            android:id="@+id/magnifier2"
-            android:src="@drawable/magnifier"
-            android:layout_width="70dp"
-            android:background="#f7e79c"
-            android:paddingLeft="25dp"
-            android:paddingRight="25dp"
-            android:layout_height="match_parent" />
+        android:layout_width="70dp"
+        android:layout_height="80dp"
+        android:tag="Bottom4">
 
         <ImageView
             android:id="@+id/star2"
             android:layout_width="70dp"
+            android:layout_height="match_parent"
             android:background="#4cd964"
             android:paddingLeft="25dp"
             android:paddingRight="25dp"
-            android:layout_height="match_parent" />
-
-        <ImageView
-            android:id="@+id/trash2"
-            android:src="@drawable/trash"
-            android:layout_width="70dp"
-            android:background="@drawable/red"
-            android:paddingLeft="25dp"
-            android:paddingRight="25dp"
-            android:layout_height="match_parent" />
+            android:src="@drawable/star" />
     </LinearLayout>
 
     <LinearLayout
@@ -52,34 +35,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="40dp"
-                android:layout_height="130dp"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_margin="7dp"
-                android:layout_marginRight="15dp"
-                android:background="#ffcccccc" />
-
             <TextView
                 android:id="@+id/book_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/imageView"
-                android:layout_toRightOf="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
                 android:text="A List item title"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/book_author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
                 android:layout_below="@+id/book_name"
                 android:layout_marginTop="5dp"
                 android:maxLines="4"
-                android:layout_toRightOf="@+id/imageView"
                 android:text="The List item description"
                 android:textSize="14sp" />
 

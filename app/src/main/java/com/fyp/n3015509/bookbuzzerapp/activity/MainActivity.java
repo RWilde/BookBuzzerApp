@@ -19,25 +19,24 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
-import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
@@ -47,10 +46,9 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.fragment.WatchListFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
-import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
-import com.fyp.n3015509.bookbuzzerapp.WatchBooksService;
+import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 
@@ -273,6 +271,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void switchContent(Fragment mfragment, int bookId) {
+        Fragment fragment = mfragment;
+        Bundle args = new Bundle();
+        args.putInt("bookId", bookId);
+
+        fragment.setArguments(args);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+        fragmentTransaction.commitAllowingStateLoss();
+    }
+
+    public void switchToDownloadBook(Fragment mfragment, String book) {
+        Fragment fragment = mfragment;
+        Bundle args = new Bundle();
+        args.putString("book", book);
+
+        fragment.setArguments(args);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+        fragmentTransaction.commitAllowingStateLoss();
+    }
+
     private void setToolbarTitle() {
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
     }
@@ -394,23 +418,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate( R.menu.search_menu, menu );
+
+        // Add SearchWidget.
+        SearchManager searchManager = (SearchManager) getSystemService( Context.SEARCH_SERVICE );
+        SearchView searchView = (SearchView) menu.findItem( R.id.options_menu_main_search ).getActionView();
+
+        searchView.setSearchableInfo( searchManager.getSearchableInfo( getComponentName() ) );
+
+        return super.onCreateOptionsMenu( menu );
 
         // show menu only when home fragment is selected
-        if (navItemIndex == 0) {
-            getMenuInflater().inflate(R.menu.main, menu);
-        }
-
-        if(navItemIndex == 2)
-        {
-
-        }
-
-        // when fragment is notifications, load the menu created for notifications
-        if (navItemIndex == 4) {
-            getMenuInflater().inflate(R.menu.notifications, menu);
-        }
-        return true;
+//        if (navItemIndex == 0) {
+//            getMenuInflater().inflate(R.menu.main, menu);
+//        }
+//
+//        if(navItemIndex == 2)
+//        {
+//
+//        }
+//
+//        // when fragment is notifications, load the menu created for notifications
+//        if (navItemIndex == 4) {
+//            getMenuInflater().inflate(R.menu.notifications, menu);
+//        }
+        //return true;
     }
 
     @Override
@@ -461,7 +493,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
-        GoodreadsAPI util = new GoodreadsAPI();
+        GoodreadsShelves util = new GoodreadsShelves();
         private final Context mContext;
 
         UserShelves(Context context) {
@@ -551,7 +583,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class UserLists extends AsyncTask<Void, Void, ArrayList<GoodreadsBook>> {
-        GoodreadsAPI util = new GoodreadsAPI();
+        GoodreadsShelves util = new GoodreadsShelves();
         private Context mContext;
 
         UserLists(Context context) {
@@ -567,7 +599,7 @@ public class MainActivity extends AppCompatActivity {
 
     private class UserGoodreadsShelves extends AsyncTask<Void, Void, Boolean> {
         private Context mContext;
-        GoodreadsAPI util = new GoodreadsAPI();
+        GoodreadsShelves util = new GoodreadsShelves();
         ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
         private ProgressDialog progress;
 

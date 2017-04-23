@@ -8,8 +8,9 @@ import android.util.Base64;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
-import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
+import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
@@ -378,4 +379,7 @@ public class DBUtil {
         return decodedString;
     }
 
+    public ArrayList<SearchResult> GetSearchResults(Context applicationContext, String query) {
+        return new ArrayList<SearchResult>();
+    }
 }

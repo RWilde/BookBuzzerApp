@@ -10,14 +10,13 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.fyp.n3015509.dao.BuzzNotification;
-import com.fyp.n3015509.dao.EditionTypes;
-import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.enums.EditionTypes;
+import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
-import com.google.common.primitives.Ints;
 
 import org.apache.commons.lang.time.DateUtils;
 

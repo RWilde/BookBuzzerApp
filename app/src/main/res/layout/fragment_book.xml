@@ -4,40 +4,25 @@
     android:layout_height="match_parent"
     tools:context="com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment">
 
-    <!--<GridLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
 
-
-        <!--<LinearLayout-->
-            <!--android:id="@+id/sample_main_layout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="141dp"-->
-            <!--android:layout_column="0"-->
-            <!--android:layout_row="0"-->
-            <!--android:orientation="vertical">-->
-
-            <!--<GridLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent">-->
-
-    <GridLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="382dp"
+            android:layout_height="193dp"
+            android:layout_column="0"
+            android:layout_row="0"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="382dp"
-                android:layout_height="193dp"
-                android:layout_column="0"
-                android:layout_row="0"
-                android:orientation="horizontal"
-                android:id="@+id/linearLayout">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <LinearLayout
+                    android:id="@+id/book_info"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_column="0"
@@ -59,81 +44,86 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_column="0"
+                        android:layout_row="0"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <RelativeLayout
+                        <TextView
+                            android:id="@+id/book_title"
                             android:layout_width="match_parent"
-                            android:layout_height="230dp">
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/textView2"
+                            android:layout_column="0"
+                            android:layout_marginTop="11dp"
+                            android:layout_row="1"
+                            android:layout_weight="1"
+                            android:paddingBottom="10px"
+                            android:paddingLeft="10px"
+                            android:paddingRight="10px"
+                            android:paddingTop="10px" />
 
-                        </RelativeLayout>
+                        <TextView
+                            android:id="@+id/author_name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/textView2"
+                            android:layout_below="@+id/book_title"
+                            android:layout_column="0"
+                            android:layout_row="2"
+                            android:layout_weight="1"
+                            android:paddingBottom="10px"
+                            android:paddingLeft="10px"
+                            android:paddingRight="10px"
+                            android:paddingTop="10px" />
 
+                        <TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_below="@+id/author_name"
+                            android:layout_column="0"
+                            android:layout_marginTop="11dp"
+                            android:layout_row="1"
+                            android:layout_weight="1"
+                            android:paddingBottom="10px"
+                            android:paddingLeft="10px"
+                            android:paddingRight="10px"
+                            android:paddingTop="10px" />
                     </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+            </RelativeLayout>
 
-            <include
-                layout="@layout/table_prices"
-                android:layout_width="wrap_content"
-                android:layout_height="276dp"
-                android:layout_alignEnd="@+id/linearLayout"
-                android:layout_alignParentBottom="true"
-                android:layout_column="1"
-                android:layout_row="1"
-                android:layout_weight="1" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp">
 
-            <TextView
-                android:id="@+id/author_name"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/textView2"
-                android:layout_column="0"
-                android:layout_row="2"
-                android:layout_weight="1"
-                android:paddingBottom="10px"
-                android:paddingLeft="10px"
-                android:paddingRight="10px"
-                android:paddingTop="10px" />
+                <TextView
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_column="0"
+                    android:layout_row="1"
+                    android:layout_weight="1"
+                    android:paddingBottom="10px"
+                    android:paddingLeft="10px"
+                    android:paddingRight="10px"
+                    android:paddingTop="10px"
+                    android:layout_alignParentTop="true" />
+            </RelativeLayout>
 
-            <TextView
-                android:id="@+id/book_title"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_alignStart="@+id/textView2"
-                android:layout_below="@+id/textView2"
-                android:layout_column="0"
-                android:layout_marginTop="11dp"
-                android:layout_row="1"
-                android:layout_weight="1"
-                android:paddingBottom="10px"
-                android:paddingLeft="10px"
-                android:paddingRight="10px"
-                android:paddingTop="10px" />
+        </LinearLayout>
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_below="@+id/author_name"
-                android:layout_column="0"
-                android:layout_marginTop="11dp"
-                android:layout_row="1"
-                android:layout_weight="1"
-                android:paddingBottom="10px"
-                android:paddingLeft="10px"
-                android:paddingRight="10px"
-                android:paddingTop="10px" />
-
-        </RelativeLayout>
-
-    </GridLayout>
-
-
-    <!--</GridLayout>-->
-
-    <!--</LinearLayout>-->
-    <!--</GridLayout>-->
+        <include
+        layout="@layout/table_prices"
+        android:layout_width="wrap_content"
+        android:layout_height="500dp"
+            android:layout_below="@+id/linearLayout"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="36dp" />
+    </RelativeLayout>
 </FrameLayout>

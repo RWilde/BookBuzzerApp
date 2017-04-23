@@ -2,90 +2,193 @@ package com.fyp.n3015509.APIs;
 
 import android.content.Context;
 
-import com.fyp.n3015509.db.DBUtil;
-import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.Util.XMLUtil;
+import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import javax.net.ssl.HttpsURLConnection;
+
 /**
- * Created by tomha on 24-Mar-17.
+ * Created by tomha on 23-Mar-17.
  */
 
 public class GoodreadsAPI {
-    GoodreadsShelves shelves = new GoodreadsShelves();
-    //GoodreadsShelf shelf = new GoodreadsShelf();
-    GoodreadsAuthor author = new GoodreadsAuthor();
 
-    public static GoodreadsShelf createGoodreadsShelf(int id, String name, int count) {
-        GoodreadsShelf shelf = new GoodreadsShelf();
-        return shelf.createGoodreadsShelf(name, count, id);
+    public static final String GOODREADS_KEY = "8vvXeL81U1l6yxnUT1c9Q";
+    public static final String BASE_URL = "https://www.goodreads.com";
+    private static final String ShelvesURL = BASE_URL + "/shelf/list.xml?key=" + GOODREADS_KEY + "&user_id=";
+    private static final String BookShelvesURL = BASE_URL + "/review/list/";
+
+    private static final String SearchURL = BASE_URL + "/search/index.xml?key=" + GOODREADS_KEY + "&q=";
+    private static final String SearchAuthorURL = BASE_URL + "/api/author_url/";
+    private static final String DownloadBookURL = BASE_URL +"/book/title.xml?key=" + GOODREADS_KEY+"&title=";
+    //https://www.goodreads.com/book/title.xml?author=Arthur+Conan+Doyle&key=8vvXeL81U1l6yxnUT1c9Q&title=Hound+of+the+Baskervilles
+
+    public String getShelvesURL(Context ctx) {
+        String userId = SaveSharedPreference.getGoodreadsId(ctx);
+        return ShelvesURL + userId;
     }
 
-    public GoodreadsAuthor createGoodreadsAuthor(int authorId, String authorName, String authorImageURL, String authorSmallImageURL, String authorLink, double authorAverageRating, int authorRatingsCount, int authorTextReviewsCount) {
-        return author.createGoodreadsAuthor(authorId, authorName, authorImageURL, authorSmallImageURL, authorLink, authorAverageRating, authorRatingsCount, authorTextReviewsCount);
+    public String getAuthorURL(String author) {
+        return SearchAuthorURL + author + "key=" + GOODREADS_KEY;
     }
 
     public ArrayList<GoodreadsShelf> getShelves(Context ctx) {
-        return shelves.getShelves(ctx);
-    }
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        try {
+            URL authURL = new URL(getShelvesURL(ctx));
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
 
-    public ArrayList<JSONObject> RetrieveSelectedShelves(Context ctx, ArrayList<GoodreadsShelf> options) {
-        BookBuzzerAPI util = new BookBuzzerAPI();
-        ArrayList<GoodreadsShelf> shelfList= new ArrayList<>();
-        ArrayList<JSONObject> json = new ArrayList<>();
-        for (GoodreadsShelf shelf : options) {
-            try {
-                JSONObject shelvesJSON = new JSONObject();
-                ArrayList<GoodreadsBook> booklist = shelves.getBookShelf(ctx, shelf);
-                shelf.setBooks(booklist);
-                shelfList.add(shelf);
-                JSONObject apiParam = util.convertToApi(booklist);
-                shelvesJSON.put(shelf.getShelfName(), apiParam);
-                json.add(shelvesJSON);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            int status = conn.getResponseCode();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
             }
+            //close input stream
+            in.close();
+            ArrayList<GoodreadsShelf> shelves = xmlUtil.xmlToGoodreadsShelves(response.toString());
+            //parse response to get user Id
+            return shelves;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        DBUtil.SaveShelf(shelfList, ctx);
-        return json;
-    }
-
-    public ArrayList<GoodreadsBook> getBooks(Context ctx) {
-        //return shelves.getBookShelf(ctx);
         return null;
     }
 
-    public static GoodreadsBook CreateGoodreadsBook(int id,
-                                                    String isbn,
-                                                    String isbn13,
-                                                    int text_reviews_count,
-                                                    String title,
-                                                    String title_without_series,
-                                                    String image_url,
-                                                    String small_image_url,
-                                                    String large_image_url,
-                                                    String link,
-                                                    int num_pages,
-                                                    String format,
-                                                    String edition_information,
-                                                    String publisher,
-                                                    int publication_day,
-                                                    int publication_year,
-                                                    int publication_month,
-                                                    double average_rating,
-                                                    int ratings_count,
-                                                    String description,
-                                                    int yearPublished,
-
-                                                    ArrayList<GoodreadsAuthor> author) {
-        GoodreadsBook book = new GoodreadsBook();
-
-        return book.createGoodreadsBook(id, isbn, isbn13, text_reviews_count, title, title_without_series, image_url, small_image_url, large_image_url, link, num_pages,
-                format, edition_information, publisher, publication_day, publication_year, publication_month, average_rating, ratings_count, description, yearPublished, author);
+    public String createBookShelvesUrl(Context ctx, String shelf, int page) {
+        return BookShelvesURL + SaveSharedPreference.getGoodreadsId(ctx) + ".xml?key=" + GOODREADS_KEY + "&v=2&shelf=" + shelf + "&per_page=200&page=" + page;
     }
+
+    public ArrayList<GoodreadsBook> getBookShelf(Context ctx, GoodreadsShelf shelf) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        ArrayList<GoodreadsBook> books = new ArrayList<GoodreadsBook>();
+
+        try {
+            URL authURL = new URL(createBookShelvesUrl(ctx, shelf.getShelfName(), 1));
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
+
+            int status = conn.getResponseCode();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
+
+            //parse response to get list of books
+            books = xmlUtil.xmlToGoodreadsBooks(response.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return books;
+    }
+
+    public ArrayList<SearchResult> getSearch(Context ctx, String search) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        ArrayList<SearchResult> result = new ArrayList();
+
+        try {
+            URL authURL = new URL(SearchURL + URLEncoder.encode(search, "UTF-8"));
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
+
+            int status = conn.getResponseCode();
+            {
+                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine.toString());
+                }
+                //close input stream
+                in.close();
+                result = xmlUtil.xmlToSearchResult(response.toString());
+            }
+
+            URL authorURL = new URL(getAuthorURL(search));
+            HttpsURLConnection authConn = (HttpsURLConnection) authURL.openConnection();
+            authConn.setRequestMethod("GET");
+            authConn.setReadTimeout(15 * 1000);
+
+            int authstatus = conn.getResponseCode();
+            {
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(authConn.getInputStream()));
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine.toString());
+                }
+                //close input stream
+                in.close();
+                ArrayList<SearchResult> temp = xmlUtil.xmlToSearchResult(response.toString());
+
+                if (temp != null) {
+                    for (int i = 0; i < temp.size(); i++) {
+                        result.add(temp.get(i));
+                    }
+                }
+
+            }
+            //parse response to get user Id
+            return result;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public GoodreadsBook DownloadBook(Context ctx, String bookName, String authorName) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        GoodreadsBook book = null;
+        try {
+            URL authURL = new URL(DownloadBookURL + URLEncoder.encode(bookName, "UTF-8") + "&author=" + URLEncoder.encode(authorName, "UTF-8"));
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
+
+            int status = conn.getResponseCode();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
+
+            //parse response to get list of books
+            book = xmlUtil.xmlToGoodreadsBook(response.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return book;    }
 }

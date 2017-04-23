@@ -5,10 +5,9 @@ import android.graphics.Bitmap;
 import android.support.v4.app.FragmentActivity;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
-import com.fyp.n3015509.APIs.GoodreadsAPI;
+import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.bookbuzzerapp.other.ListViewAdapter;
 import com.fyp.n3015509.dao.BookAdapter;
-import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
@@ -67,7 +66,7 @@ public class AppUtil {
         return new ListViewAdapter(activity, adapter , listId, listName);
     }
 
-    public Boolean SaveShelves(Context mContext, GoodreadsAPI util, ArrayList<GoodreadsShelf> options)
+    public Boolean SaveShelves(Context mContext, GoodreadsShelves util, ArrayList<GoodreadsShelf> options)
     {
         ArrayList<JSONObject> result = util.RetrieveSelectedShelves(mContext, options);
         boolean success = false;

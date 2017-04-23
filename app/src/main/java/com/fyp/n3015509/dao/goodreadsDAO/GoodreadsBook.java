@@ -3,7 +3,7 @@ package com.fyp.n3015509.dao.goodreadsDAO;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.fyp.n3015509.APIs.GoodreadsAPI;
+import com.fyp.n3015509.APIs.GoodreadsShelves;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +117,7 @@ public class GoodreadsBook {
 
     String releaseDate;
 
-    GoodreadsAPI util = new GoodreadsAPI();
+    GoodreadsShelves util = new GoodreadsShelves();
 
     public GoodreadsBook createGoodreadsBook(int id,
                                              String isbn,

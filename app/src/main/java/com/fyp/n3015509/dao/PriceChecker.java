@@ -1,5 +1,7 @@
 package com.fyp.n3015509.dao;
 
+import com.fyp.n3015509.dao.enums.EditionTypes;
+
 /**
  * Created by tomha on 18-Apr-17.
  */

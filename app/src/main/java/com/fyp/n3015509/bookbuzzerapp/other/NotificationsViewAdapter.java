@@ -1,7 +1,6 @@
-package com.fyp.n3015509.bookbuzzerapp.fragment;
+package com.fyp.n3015509.bookbuzzerapp.other;
 
 import android.app.ProgressDialog;
-import android.graphics.Bitmap;
 import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,10 +18,12 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
+import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.dao.NotificationTypes;
+import com.fyp.n3015509.dao.enums.NotificationTypes;
 
 import java.util.ArrayList;
 
@@ -30,13 +31,7 @@ import java.util.ArrayList;
  * Created by tomha on 14-Apr-17.
  */
 
-class NotificationsViewAdapter extends BaseSwipeAdapter {
-//    private Bitmap[] mBookImage;
-//    private String[] mBookName;
-//    private Boolean[] mNotified;
-//    private NotificationTypes[] mNotTypes;
-//    private Integer[] mBookIds;
-
+public class NotificationsViewAdapter extends BaseSwipeAdapter {
     ArrayList<BuzzNotification> notifications;
     private FragmentActivity mContext;
 
@@ -46,15 +41,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
     private MarkNotificationAsReadTask mNotificationTask;
     private RemoveNotificationTask mRemoveTask;
-
-//    public NotificationsViewAdapter(FragmentActivity activity, String[] bookNameArray, Boolean[] notifiedArray, NotificationTypes[] notTypesArray, Integer[] bookIdsArray, Bitmap[] bookImageArray) {
-//        this.mContext = activity;
-//        this.mBookIds = bookIdsArray;
-//        this.mBookName = bookNameArray;
-//        this.mNotified = notifiedArray;
-//        this.mNotTypes = notTypesArray;
-//        this.mBookImage = bookImageArray;
-//    }
 
     public NotificationsViewAdapter(FragmentActivity activity, ArrayList<BuzzNotification> notifications) {
         this.mContext = activity;
@@ -100,7 +86,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         return v;
     }
-
 
     @Override
     public void fillValues(int position, View convertView) {
@@ -159,8 +144,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
-
             try {
                 Boolean dbSuccess = DBUtil.RemoveNotification(mContext, mBook);
                 Boolean apiSuccess = BookBuzzerAPI.RemoveNotification(mContext, mBook, mType);
@@ -235,8 +218,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
-
             try {
                 Boolean dbSuccess = DBUtil.MarkNotificationAsRead(mContext, mBook, mType);
                 Boolean apiSuccess = BookBuzzerAPI.MarkNotificationAsRead(mContext, mGoodreadsId, mType);
@@ -263,7 +244,6 @@ class NotificationsViewAdapter extends BaseSwipeAdapter {
                 Runnable mPendingRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        // update the main content by replacing fragments
                         ViewBook(mBook);
                     }
                 };
