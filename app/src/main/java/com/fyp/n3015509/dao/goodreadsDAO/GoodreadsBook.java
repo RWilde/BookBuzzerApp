@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.fyp.n3015509.APIs.GoodreadsShelves;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -177,6 +178,58 @@ public class GoodreadsBook {
         return this;
     }
 
+    public String createGoodreadsBookJSON(int id,
+                                          String isbn,
+                                          String isbn13,
+                                          int text_reviews_count,
+                                          String title,
+                                          String title_without_series,
+                                          String image_url,
+                                          String small_image_url,
+                                          String large_image_url,
+                                          String link,
+                                          int num_pages,
+                                          String format,
+                                          String edition_information,
+                                          String publisher,
+                                          int publication_day,
+                                          int publication_year,
+                                          int publication_month,
+                                          double average_rating,
+                                          int ratings_count,
+                                          String description,
+                                          int yearPublished,
+
+                                          ArrayList<GoodreadsAuthor> author) {
+        this.imgUrl = image_url;
+        this.smallImgUrl = small_image_url;
+        this.lrgImgUrl = large_image_url;
+
+        this.id = id;
+        this.isbn = isbn;
+        this.isbn13 = isbn13;
+        this.textReviewsCount = text_reviews_count;
+        this.title = title;
+        this.titleWithoutSeries = title_without_series;
+        this.link = link;
+        this.numPages = num_pages;
+        this.format = format;
+        this.editionInformation = edition_information;
+        this.publisher = publisher;
+        this.publicationDay = publication_day;
+        this.publicationYear = publication_year;
+        this.publicationMonth = publication_month;
+        this.average_rating = average_rating;
+        this.ratingsCount = ratings_count;
+        this.description = description;
+        this.yearPublished = yearPublished;
+
+        this.author = author;
+
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+
     public int getId() {
         return id;
     }
@@ -250,6 +303,8 @@ public class GoodreadsBook {
         if (image != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
             this.image = bitmap;
+        } else {
+            this.largeImage = null;
         }
     }
 
@@ -278,6 +333,8 @@ public class GoodreadsBook {
         if (image != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
             this.smallImage = bitmap;
+        } else {
+            this.largeImage = null;
         }
     }
 
@@ -306,6 +363,8 @@ public class GoodreadsBook {
         if (image != null) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
             this.largeImage = bitmap;
+        } else {
+            this.largeImage = null;
         }
     }
 

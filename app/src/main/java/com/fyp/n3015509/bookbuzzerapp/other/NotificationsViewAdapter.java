@@ -1,6 +1,7 @@
 package com.fyp.n3015509.bookbuzzerapp.other;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
 
     private MarkNotificationAsReadTask mNotificationTask;
     private RemoveNotificationTask mRemoveTask;
+    private PriceChecker priceTask;
 
     public NotificationsViewAdapter(FragmentActivity activity, ArrayList<BuzzNotification> notifications) {
         this.mContext = activity;
@@ -70,6 +72,11 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String isbn = DBUtil.getIsbnByGoodreadsId(mContext, notifications.get(position).getGoodreadsId());
+
+                priceTask = new PriceChecker(mContext, isbn);
+                priceTask.execute((Void) null);
+
                 mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType(), notifications.get(position).getGoodreadsId());
                 mNotificationTask.execute((Void) null);
 
@@ -270,6 +277,29 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
             fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
             fragmentTransaction.replace(R.id.frame, fragment);
             fragmentTransaction.commit();
+        }
+    }
+
+    private class PriceChecker extends AsyncTask<Void, Void, Boolean> {
+        private final Context mContext;
+        private final String mIsbn;
+
+        PriceChecker(Context context, String isbn) {
+            this.mContext = context;
+            this.mIsbn = isbn;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            BookBuzzerAPI util = new BookBuzzerAPI();
+            util.RunPriceChecker(mContext, mIsbn);
+            return true;
+        }
+
+
+        protected void onPostExecute() {
+            //showProgress(false);
+
         }
     }
 }

@@ -382,4 +382,24 @@ public class DBUtil {
     public ArrayList<SearchResult> GetSearchResults(Context applicationContext, String query) {
         return new ArrayList<SearchResult>();
     }
+
+    public static String getIsbnByGoodreadsId(Context ctx, int goodreadsId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.getIsbnFromId(goodreadsId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    public static Boolean CreateBookAndList(Context mContext, GoodreadsBook mBook, String s) {
+        return true;
+    }
+
+    public static Boolean AddBookToList(Context mContext, GoodreadsBook mBook, String listName) {
+        return true;
+    }
 }

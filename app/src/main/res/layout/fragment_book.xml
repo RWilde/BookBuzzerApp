@@ -1,129 +1,337 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment">
+    android:id="@+id/root"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true">
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:id="@+id/image_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/book_cover"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:paddingTop="5dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="382dp"
-            android:layout_height="193dp"
-            android:layout_column="0"
-            android:layout_row="0"
-            android:orientation="vertical">
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:paddingBottom="8dp"
+            android:paddingLeft="8dp"
+            android:orientation="horizontal">
 
             <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2">
 
-                <LinearLayout
-                    android:id="@+id/book_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_column="0"
-                    android:layout_row="0"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                <!-- Read -->
 
-                    <ImageView
-                        android:id="@+id/book_cover"
-                        android:layout_width="match_parent"
-                        android:layout_height="193dp"
-                        android:layout_weight="1"
-                        android:paddingBottom="10px"
-                        android:paddingLeft="10px"
-                        android:paddingRight="10px"
-                        android:paddingTop="10px"
-                        android:text="hi" />
+                <ImageButton
+                    android:id="@+id/save"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_gravity="top|right"
+                    android:src="@drawable/download"
+                    android:background="@drawable/white"
+                    android:scaleType="fitXY"
+                    android:visibility="visible" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_column="0"
-                        android:layout_row="0"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/book_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignStart="@+id/textView2"
-                            android:layout_column="0"
-                            android:layout_marginTop="11dp"
-                            android:layout_row="1"
-                            android:layout_weight="1"
-                            android:paddingBottom="10px"
-                            android:paddingLeft="10px"
-                            android:paddingRight="10px"
-                            android:paddingTop="10px" />
-
-                        <TextView
-                            android:id="@+id/author_name"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignStart="@+id/textView2"
-                            android:layout_below="@+id/book_title"
-                            android:layout_column="0"
-                            android:layout_row="2"
-                            android:layout_weight="1"
-                            android:paddingBottom="10px"
-                            android:paddingLeft="10px"
-                            android:paddingRight="10px"
-                            android:paddingTop="10px" />
-
-                        <TextView
-                            android:id="@+id/textView2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_below="@+id/author_name"
-                            android:layout_column="0"
-                            android:layout_marginTop="11dp"
-                            android:layout_row="1"
-                            android:layout_weight="1"
-                            android:paddingBottom="10px"
-                            android:paddingLeft="10px"
-                            android:paddingRight="10px"
-                            android:paddingTop="10px" />
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp">
+                <!-- Title -->
 
                 <TextView
-                    android:id="@+id/description"
-                    android:layout_width="match_parent"
+                    android:id="@+id/title"
+                    style="@style/bookDetailsHeaderStyle"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_column="0"
-                    android:layout_row="1"
-                    android:layout_weight="1"
-                    android:paddingBottom="10px"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:paddingTop="10px"
-                    android:layout_alignParentTop="true" />
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignWithParentIfMissing="true"
+                    android:layout_toLeftOf="@+id/save"
+                    android:textStyle="italic"
+                    tools:ignore="HardcodedText" />
+
+                <!-- Author -->
+
+                <TextView
+                    android:id="@+id/author"
+                    style="@style/bookDetailsTextStyle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    tools:ignore="HardcodedText"
+                    android:layout_below="@+id/title"
+                    android:layout_alignParentStart="true" />
+
+                <LinearLayout
+                    android:id="@+id/rating_wrapper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/author">
+
+                    <RatingBar
+                        android:id="@+id/rating"
+                        style="?android:attr/ratingBarStyleIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:numStars="5"
+                        android:paddingBottom="8dp" />
+                </LinearLayout>
+
+                <!-- ISBN -->
+
+                <LinearLayout
+                    android:id="@+id/row_isbn"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rating_wrapper"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/isbn_label"
+                        style="@style/bookDetailsTitlesStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="6dp"
+                        android:text="Isbn" />
+
+                    <TextView
+                        android:id="@+id/isbn"
+                        style="@style/bookDetailsMinorDetailStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+
+                <!-- Pages & Format -->
+
+                <LinearLayout
+                    android:id="@+id/row_format"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/row_isbn"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/pages"
+                        style="@style/bookDetailsMinorDetailStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="6dp"
+                        android:text="573 pages"
+                        tools:ignore="HardcodedText" />
+
+                    <TextView
+                        android:id="@+id/format"
+                        style="@style/bookDetailsMinorDetailStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
             </RelativeLayout>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/header_div"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider" />
+
+        <!-- Series -->
+
+        <TextView
+            android:id="@+id/lbl_series"
+            style="@style/bookDetailsTitlesStyle"
+            android:text="Series" />
+
+        <TextView
+            android:id="@+id/series"
+            style="@style/bookDetailsTextStyle"
+            android:singleLine="false"
+            tools:ignore="HardcodedText" />
+
+        <!-- Publishing -->
+
+        <TextView
+            android:id="@+id/lbl_publishing"
+            style="@style/bookDetailsTitlesStyle"
+            android:text="Published" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/publishing_details"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
-        <include
-        layout="@layout/table_prices"
-        android:layout_width="wrap_content"
-        android:layout_height="500dp"
-            android:layout_below="@+id/linearLayout"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="36dp" />
-    </RelativeLayout>
-</FrameLayout>
+        <!-- Shelves -->
+
+        <TextView
+            android:id="@+id/lbl_bookshelves"
+            style="@style/bookDetailsTitlesStyle"
+            android:text="BookShelf" />
+
+        <TextView
+            android:id="@+id/bookshelf"
+            style="@style/bookDetailsTextStyle"
+            android:text="The best books, Wanted"
+            tools:ignore="HardcodedText" />
+
+        <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/tableLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="1">
+
+            <!-- 2 columns -->
+            <TableRow
+                android:id="@+id/tableRow1"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:padding="5dip">
+
+                <TextView
+                    android:text="Prices from amazon"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            </TableRow>
+
+            <!-- edittext span 2 column -->
+            <TableRow
+                android:id="@+id/tableRow2"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:padding="5dip">
+
+                <TextView
+                    android:layout_width="300dp"
+                    android:layout_span="2"
+                    android:text="Kindle " />
+
+                <TextView
+                    android:id="@+id/kindle_price"
+                    android:layout_width="300dp"
+                    android:layout_column="1"
+                    android:text="£ " />
+            </TableRow>
+
+            <!-- just draw a red line -->
+            <!--<View-->
+            <!--android:layout_height="2dip"-->
+            <!--android:background="#FF0000" />-->
+
+            <!-- 3 columns -->
+            <TableRow
+                android:id="@+id/tableRow3"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:padding="5dip">
+
+                <TextView
+                    android:layout_span="2"
+                    android:text="Paperback " />
+
+                <TextView
+                    android:id="@+id/paper_price"
+                    android:layout_column="1"
+                    android:text="£ " />
+            </TableRow>
+
+            <!-- display this button in 3rd column via layout_column(zero based) -->
+            <TableRow
+                android:id="@+id/tableRow4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dip">
+
+                <TextView
+                    android:layout_width="300dp"
+                    android:layout_span="2"
+                    android:text="Hardcover " />
+
+                <TextView
+                    android:id="@+id/hard_price"
+                    android:layout_column="1"
+                    android:text="£ " />
+            </TableRow>
+
+            <!-- display this button in 2nd column via layout_column(zero based) -->
+            <RelativeLayout
+                android:id="@+id/tableRow5"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:padding="5dip"
+                android:layout_weight="0.09">
+
+                <Button
+                    android:id="@+id/button5"
+                    android:layout_width="160dp"
+                    android:layout_height="50dp"
+                    android:layout_column="1"
+                    android:text="Buy it now on amazon" />
+            </RelativeLayout>
+
+        </TableLayout>
+
+        <TextView
+            android:id="@+id/my_comments"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="description"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="2dp"
+            android:paddingTop="2dp" />
+
+        <!-- Notes -->
+
+        <TextView
+            android:id="@+id/description"
+            style="@style/bookDetailsTextStyle"
+            android:text="The best book of all times"
+            tools:ignore="HardcodedText" />
+
+        <!-- Description -->
+
+        <View
+            android:id="@+id/description_divider"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="2dp"
+            android:paddingTop="2dp" />
+    </LinearLayout>
+
+</ScrollView>

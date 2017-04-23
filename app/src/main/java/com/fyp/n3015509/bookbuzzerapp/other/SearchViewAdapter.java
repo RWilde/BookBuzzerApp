@@ -1,14 +1,10 @@
 package com.fyp.n3015509.bookbuzzerapp.other;
 
-import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.icu.util.Calendar;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,23 +19,16 @@ import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
-import com.fyp.n3015509.bookbuzzerapp.activity.SearchActvity;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
-import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
-import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.dao.enums.SearchResultType;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.db.DBUtil;
-import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import static com.fyp.n3015509.bookbuzzerapp.R.id.position;
-import static com.fyp.n3015509.bookbuzzerapp.R.menu.notifications;
 
 /**
  * Created by tomha on 22-Apr-17.
@@ -206,6 +195,8 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         private ProgressDialog progress;
         private Context frag;
         private Handler mHandler;
+        String bookJson;
+        GoodreadsBook book;
 
         public DownloadBookTask(Context frag, String mBook, String mAuthor) {
             this.mBook = mBook;
@@ -217,39 +208,34 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         protected void onPreExecute() {
             super.onPreExecute();
             progress = new ProgressDialog(mContext);
-            progress.setMessage("Watching book...");
+            progress.setMessage("Opening book...");
             progress.show();
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                GoodreadsBook book = goodreadsAPI.DownloadBook(mContext, mBook, mAuthor);
+                book = goodreadsAPI.DownloadBook(mContext, mBook, mAuthor);
                 BookBuzzerAPI api = new BookBuzzerAPI();
                 ArrayList<PriceChecker> p = api.RunPriceChecker(mContext, book.getIsbn());
 
-                for(PriceChecker price : p)
-                {
-                    switch(price.getType())
-                    {
-                        case KINDLE_EDITION:
-                            book.setKindlePrice(price.getPrice());
-                            break;
-                        case HARDBACK:
-                            book.setHardcoverPrice(price.getPrice());
-                            break;
-                        case PAPERBACK:
-                            book.setPaperbackPrice(price.getPrice());
-                            break;
+                if (p != null) {
+                    for (PriceChecker price : p) {
+                        switch (price.getType()) {
+                            case KINDLE_EDITION:
+                                book.setKindlePrice(price.getPrice());
+                                break;
+                            case HARDBACK:
+                                book.setHardcoverPrice(price.getPrice());
+                                break;
+                            case PAPERBACK:
+                                book.setPaperbackPrice(price.getPrice());
+                                break;
+                        }
                     }
                 }
 
-                Gson gS = new Gson();
-                String target = gS.toJson(book);
 
-                MainActivity main = new MainActivity();
-                DownloadBookFragment bookFrag = new DownloadBookFragment();
-                main.switchToDownloadBook(bookFrag, target);
                 //open book fragment
 
                 Thread.sleep(2000);
@@ -263,18 +249,24 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            progress.dismiss();
             mHandler = new Handler();
+            progress.dismiss();
 
             if (success) {
-                //finish();
+                Intent i = new Intent(mContext, MainActivity.class);
+                MainActivity.data = book;
+
+                i.putExtra("book", book.getTitle());
+                mContext.startActivity(i);
 
             } else {
                 //book wasnt deleted succesfully
-                Toast.makeText(mContext, "Error with removing notification, please try agasin", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Error opening book, please try again", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
+
 
     private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
 

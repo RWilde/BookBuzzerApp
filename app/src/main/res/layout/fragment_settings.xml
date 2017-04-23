@@ -10,5 +10,6 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         tools:context=".MainActivity" />
+    <!--<a href="https://icons8.com/web-app/5573/Download">Download icon credits</a>-->
 </LinearLayout>
 

@@ -3,6 +3,7 @@ package com.fyp.n3015509.bookbuzzerapp.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.other.SearchSuggestionsProvider;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,6 +55,13 @@ public class SettingsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+
+        //clear history on clear search history button
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(getActivity(),
+                SearchSuggestionsProvider.AUTHORITY, SearchSuggestionsProvider.MODE);
+        suggestions.clearHistory();
+
         return  view;
     }
 

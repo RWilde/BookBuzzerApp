@@ -39,6 +39,7 @@ import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
+import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
@@ -51,6 +52,7 @@ import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -58,6 +60,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static GoodreadsBook data;
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private View navHeader;
@@ -103,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        String s = getIntent().getStringExtra("book");
         mHandler = new Handler();
         mGcmNetworkManager = GcmNetworkManager.getInstance(this);
 
@@ -127,41 +131,67 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        //task.startBookWatchTask();
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        //fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (s != null) {
+            GoodreadsBook book = data;
+            Runnable mPendingRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    // update the main content by replacing fragments
+                    Fragment fragment = new DownloadBookFragment();
 
-        // Navigation view header
-        navHeader = navigationView.getHeaderView(0);
-        txtName = (TextView) navHeader.findViewById(R.id.name);
-        txtWebsite = (TextView) navHeader.findViewById(R.id.website);
-        imgNavHeaderBg = (ImageView) navHeader.findViewById(R.id.img_header_bg);
-        imgProfile = (ImageView) navHeader.findViewById(R.id.img_profile);
+                    Bundle b = new Bundle();
+                    fragment.setArguments(b);
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, "");
+                    fragmentTransaction.commitAllowingStateLoss();
+                }
+            };
 
-        // load toolbar titles from string resources
-        activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
+            // If mPendingRunnable is not null, then add to the message queue
+            if (mPendingRunnable != null) {
+                mHandler.post(mPendingRunnable);
+            }
+        } else {
 
-        // load nav menu header data
-        loadNavHeader();
+            //task.startBookWatchTask();
 
-        // initializing navigation menu
-        setUpNavigationView();
+            drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            navigationView = (NavigationView) findViewById(R.id.nav_view);
+            //fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        if (savedInstanceState == null) {
-            navItemIndex = 0;
-            CURRENT_TAG = TAG_HOME;
-            loadHomeFragment();
+            // Navigation view header
+            navHeader = navigationView.getHeaderView(0);
+            txtName = (TextView) navHeader.findViewById(R.id.name);
+            txtWebsite = (TextView) navHeader.findViewById(R.id.website);
+            imgNavHeaderBg = (ImageView) navHeader.findViewById(R.id.img_header_bg);
+            imgProfile = (ImageView) navHeader.findViewById(R.id.img_profile);
+
+            // load toolbar titles from string resources
+            activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
+
+            // load nav menu header data
+            loadNavHeader();
+
+            // initializing navigation menu
+            setUpNavigationView();
+
+
+            if (savedInstanceState == null) {
+                navItemIndex = 0;
+                CURRENT_TAG = TAG_HOME;
+                loadHomeFragment();
+            }
+
+
+            Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
+            String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
+            if (imported == false && !userId.contentEquals("")) {
+                new UserShelves(getApplicationContext()).execute();
+            }
+
         }
-
-
-        Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
-        String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
-        if (imported == false && !userId.contentEquals("")) {
-            new UserShelves(getApplicationContext()).execute();
-        }
-
     }
 
     /***
@@ -348,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     case R.id.nav_settings:
                         //navItemIndex = 5;
-                       //CURRENT_TAG = TAG_SETTINGS;
+                        //CURRENT_TAG = TAG_SETTINGS;
                         break;
                     // launch new intent instead of loading fragment
 
@@ -418,15 +448,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate( R.menu.search_menu, menu );
+        getMenuInflater().inflate(R.menu.search_menu, menu);
 
         // Add SearchWidget.
-        SearchManager searchManager = (SearchManager) getSystemService( Context.SEARCH_SERVICE );
-        SearchView searchView = (SearchView) menu.findItem( R.id.options_menu_main_search ).getActionView();
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.options_menu_main_search).getActionView();
 
-        searchView.setSearchableInfo( searchManager.getSearchableInfo( getComponentName() ) );
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
 
-        return super.onCreateOptionsMenu( menu );
+        return super.onCreateOptionsMenu(menu);
 
         // show menu only when home fragment is selected
 //        if (navItemIndex == 0) {
@@ -481,8 +512,7 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
 
-    private void populateBookShelves()
-    {
+    private void populateBookShelves() {
         new UserLists(getApplicationContext()).execute();
     }
 
@@ -624,15 +654,12 @@ public class MainActivity extends AppCompatActivity {
                 boolean success = false;
                 progress.dismiss();
 
-                for (JSONObject shelf : result)
-                {
+                for (JSONObject shelf : result) {
                     success = BookBuzzerAPI.SaveShelf(shelf, mContext);
                 }
 
                 return success;
-            }
-            catch(Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return false;

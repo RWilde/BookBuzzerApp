@@ -8,34 +8,49 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.SearchRecentSuggestions;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
+import android.widget.Toolbar;
 
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import android.support.v7.widget.Toolbar;
+
+import com.fyp.n3015509.bookbuzzerapp.other.SearchSuggestionsProvider;
 import com.fyp.n3015509.bookbuzzerapp.other.SearchViewAdapter;
 import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.db.DBUtil;
 
 import java.util.ArrayList;
 
-public class SearchActvity extends ListActivity {
+public class SearchActvity extends AppCompatActivity {
     ArrayList<SearchResult> results = new ArrayList();
     SearchViewAdapter mAdapter;
     private android.support.v7.widget.Toolbar toolbar;
+    public ListView mainListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_actvity);
 
+        toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
+
+            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                    SearchSuggestionsProvider.AUTHORITY, SearchSuggestionsProvider.MODE);
+            suggestions.saveRecentQuery(query, null);
+
             results = getLocalResults(query);
 
             mAdapter = new SearchViewAdapter(this, results);
-            setListAdapter(mAdapter);
+            mainListView = (ListView) findViewById(R.id.search_list);
+            mainListView.setAdapter(mAdapter);
 
             GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext(), mAdapter);
             saveTask.execute((Void) null);

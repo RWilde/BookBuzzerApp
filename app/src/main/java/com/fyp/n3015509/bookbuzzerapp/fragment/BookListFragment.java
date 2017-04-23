@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * interface.
  */
 public class BookListFragment extends ListFragment implements OnItemClickListener {
-View rootView;
+    View rootView;
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
@@ -40,6 +40,7 @@ View rootView;
 
     public BookListFragment() {
     }
+
     public static BookListFragment newInstance(String param1, String param2) {
         BookListFragment fragment = new BookListFragment();
         Bundle args = new Bundle();
@@ -49,74 +50,74 @@ View rootView;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
-        final ListView listv = (ListView) rootView.findViewById(R.id.list);
-
+        View rootView = inflater.inflate(R.layout.fragment_item_list, container, false);
         buzzlist = DBUtil.GetBuzzlist(getActivity());
-        ArrayList<String> buzzlistNames = new ArrayList<String>();
-        String[] values = new String[buzzlist.size()];
+        if (buzzlist != null || !buzzlist.isEmpty()) {
+            final ListView listv = (ListView) rootView.findViewById(R.id.list);
 
-        for(Buzzlist buzz : buzzlist)
-        {
-            buzzlistNames.add(buzz.getName());
+            ArrayList<String> buzzlistNames = new ArrayList<String>();
+            String[] values = new String[buzzlist.size()];
+
+            for (Buzzlist buzz : buzzlist) {
+                buzzlistNames.add(buzz.getName());
+            }
+            values = buzzlistNames.toArray(values);
+
+            listv.setAdapter(new ArraySwipeAdapterSample<String>(getActivity(), R.layout.fragment_item, R.id.position, values));
+
+
+            // listv.getAdapter().setMode(Attributes.Mode.Single);
+            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // ((SwipeLayout)(listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                    Buzzlist buzz = buzzlist.get(position);
+
+                    Fragment fragment = new ListFragment();
+
+                    Bundle args = new Bundle();
+                    args.putInt("listId", buzz.getId());
+                    fragment.setArguments(args);
+
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment);
+                    //fragmentTransaction.addToBackStack(null);
+
+                    // Commit the transaction
+                    fragmentTransaction.commit();
+                }
+            });
+            listv.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.e("ListView", "OnTouch");
+                    return false;
+                }
+            });
+            listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+            listv.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    Log.e("ListView", "onScrollStateChanged");
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+                }
+            });
+
+
+            // listv.setOnItemClickListener(this);
         }
-        values = buzzlistNames.toArray(values);
-
-        listv.setAdapter( new ArraySwipeAdapterSample<String>(getActivity(), R.layout.listview_item, R.id.position, values));
-
-
-       // listv.getAdapter().setMode(Attributes.Mode.Single);
-        listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-               // ((SwipeLayout)(listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-                Buzzlist buzz = buzzlist.get(position);
-
-                Fragment fragment = new ListFragment();
-
-                Bundle args = new Bundle();
-                args.putInt("listId", buzz.getId());
-                fragment.setArguments(args);
-
-                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                fragmentTransaction.replace(R.id.frame, fragment);
-                //fragmentTransaction.addToBackStack(null);
-
-                // Commit the transaction
-                fragmentTransaction.commit();
-            }
-        });
-        listv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.e("ListView", "OnTouch");
-                return false;
-            }
-        });
-        listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        listv.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                Log.e("ListView", "onScrollStateChanged");
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-            }
-        });
-
-
-       // listv.setOnItemClickListener(this);
-
-return rootView;
+        return rootView;
     }
 
 
@@ -144,7 +145,7 @@ return rootView;
         mListener = null;
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Buzzlist buzz = buzzlist.get(position);
 
         Fragment fragment = new ListFragment();
@@ -161,7 +162,7 @@ return rootView;
         // Commit the transaction
         fragmentTransaction.commit();
 
-       // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
     }
 
     public interface OnFragmentInteractionListener {

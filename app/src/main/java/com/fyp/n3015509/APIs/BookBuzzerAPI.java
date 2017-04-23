@@ -38,6 +38,7 @@ public class BookBuzzerAPI {
     private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
+    private static final String NewBookURL = BaseURL + "/buzzlist/newbook";
     private static final String RegisterURL = BaseURL + "/users/signup";
     private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
     private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
@@ -333,7 +334,6 @@ public class BookBuzzerAPI {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
             conn.setRequestProperty("Content-Type", "application/json");
-            //   conn.connect();
 
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             JSONObject json = new JSONObject();
@@ -414,6 +414,82 @@ public class BookBuzzerAPI {
         }
         return sb.toString();
     }
+
+
+    public Boolean CreateBookAndList(Context mContext, GoodreadsBook mBook, String listName) {
+        try {
+            URL authURL = new URL(NewBookURL);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            //conn.connect();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            GoodreadsBook gb = new GoodreadsBook();
+            Gson gson = new Gson();
+
+            JSONObject o = convertToApi(mBook, listName);
+
+            out.write(o.toString());
+            out.close();
+
+            int status = conn.getResponseCode();
+
+            if (status == 200) {
+                return true;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //return null;
+
+        return false;
+    }
+
+    public Boolean AddBookToList(Context mContext, GoodreadsBook mBook, String listName) {
+        try {
+            URL authURL = new URL(NewBookURL);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            //conn.connect();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            Gson gson = new Gson();
+
+            GoodreadsBook gb = new GoodreadsBook();
+
+            gb.createGoodreadsBookJSON(mBook.getId(), mBook.getIsbn(), mBook.getIsbn13(), mBook.getTextReviewsCount(), mBook.getTitle(), mBook.getTitleWithoutSeries(), mBook.getImgUrl(), mBook.getSmallImgUrl(), mBook.getLrgImgUrl(), mBook.getLink(), mBook.getNumPages(), mBook.getFormat(),mBook.getEditionInformation(), mBook.getPublisher(), mBook.getPublicationDay(), mBook.getPublicationYear(), mBook.getPublicationMonth(), mBook.getAverage_rating(), mBook.getRatingsCount(), mBook.getDescription(), mBook.getYearPublished(), mBook.getAuthors());
+
+            String book = gson.toJson(gb);
+            JSONObject o = new JSONObject();
+            o.put("book", book);
+            o.put("list_name", listName);
+
+            out.write(o.toString());
+            out.close();
+
+
+            int status = conn.getResponseCode();
+            if (status == 200) {
+                return true;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 
 

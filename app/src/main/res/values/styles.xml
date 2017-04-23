@@ -22,4 +22,45 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!-- Style for detail titles in read-only book details -->
+    <style name="bookDetailsTitlesStyle">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Style for text details in read-only book details -->
+    <style name="bookDetailsTextStyle">
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+    <style name="fileDetailsTextStyle" parent="bookDetailsTextStyle">
+        <!--  selectable makes clicking not work well -->
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
+    <style name="bookDetailsHeaderStyle">
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+
+    <!-- Style for smaller text header data (typically isbn/pages) in read-only book details -->
+    <style name="bookDetailsMinorDetailStyle">
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    </style>
+
+    <style name="fileDetailsMinorDetailStyle" parent="bookDetailsMinorDetailStyle">
+        <!--  selectable makes clicking not work well -->
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
 </resources>

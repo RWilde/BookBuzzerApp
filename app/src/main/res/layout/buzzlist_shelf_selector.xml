@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/buzzlist"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:padding="5dp"
+        android:text="Choose exisiting BuzzList"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+    <Spinner
+        android:id="@+id/buzzlistSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:padding="5dp"
+        android:layout_toRightOf="@+id/buzzlist"
+        android:text="--Select Buzzlist--"/>
+    <Button
+        android:id="@+id/save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_below="@+id/buzzlist"
+        android:layout_centerHorizontal="true"
+        android:text="Save to Buzzlist" />
+
+    <View
+        android:id="@+id/header_div"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:padding="5dp"
+        android:layout_below="@+id/save"
+        android:background="@drawable/main_menu_header_divider" />
+
+    <TextView
+        android:id="@+id/search"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@+id/header_div"
+        android:padding="5dp"
+        android:text="Create new buzzlist"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/new_buzzlist"
+        android:layout_width="wrap_content"
+        android:padding="5dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/header_div"
+        android:layout_toRightOf="@+id/search"
+        android:hint="Buzzlist name"
+        />
+
+    <Button
+        android:id="@+id/create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_below="@+id/search"
+        android:layout_centerHorizontal="true"
+        android:text="Create" />
+</RelativeLayout>

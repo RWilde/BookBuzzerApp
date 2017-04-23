@@ -73,8 +73,9 @@ public class BookFragment extends Fragment {
         image = (ImageView) view.findViewById(R.id.book_cover);
         image.setImageBitmap(mBook.getImage());
 
-        title = (TextView) view.findViewById(R.id.book_title);
+        title = (TextView) view.findViewById(R.id.title);
         title.setText(mBook.getTitle());
+
         String kindlePrice = "";
         String paperPrice="";
         String hardPrice="";
@@ -100,7 +101,7 @@ public class BookFragment extends Fragment {
 
         TextView hard = (TextView) view.findViewById(R.id.hard_price);
         hard.setText(hardPrice);
-        TextView author = (TextView) view.findViewById(R.id.author_name);
+        TextView author = (TextView) view.findViewById(R.id.author);
         StringBuilder b = new StringBuilder();
         for (GoodreadsAuthor a:mBook.getAuthors() )
         {
@@ -111,8 +112,30 @@ public class BookFragment extends Fragment {
             b.append(a.getName());
         }
         author.setText(b);
-        TextView description = (TextView) view.findViewById(R.id.textView2);
+
+        TextView description = (TextView) view.findViewById(R.id.description);
         description.setText( mBook.getDescription());
+
+        TextView isbn = (TextView) view.findViewById(R.id.isbn);
+        isbn.setText( mBook.getIsbn());
+
+        TextView pages = (TextView) view.findViewById(R.id.pages);
+        pages.setText( mBook.getNumPages() + "pages ");
+
+        TextView edition = (TextView) view.findViewById(R.id.format);
+        edition.setText("("+mBook.getEditionInformation()+")");
+
+        TextView series = (TextView) view.findViewById(R.id.series);
+        String[] seriesString = mBook.getTitle().split("\\(");
+        String[] justSeries = seriesString[1].split("\\,");
+
+        series.setText(justSeries[0]);
+
+        TextView published = (TextView) view.findViewById(R.id.publishing_details);
+        edition.setText(mBook.getPublisher() +", "+ mBook.getReleaseDate());
+
+        TextView shelf = (TextView) view.findViewById(R.id.bookshelf);
+        edition.setText("shelF TODO");
 
         return view;
     }

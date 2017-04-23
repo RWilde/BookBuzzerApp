@@ -1222,5 +1222,26 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return null;
 
     }
+
+    public String getIsbnFromId(int goodreadsId) {
+        String isbn = null;
+        try {
+            String countQuery = "SELECT "+ ISBN +" FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + "=" + goodreadsId + " LIMIT 1;";
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(countQuery, null);
+            GoodreadsBook b = new GoodreadsBook();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        isbn = cursor.getString(0);
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isbn;    }
 }
 
