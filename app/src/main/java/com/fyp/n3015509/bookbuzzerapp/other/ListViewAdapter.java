@@ -78,8 +78,6 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
         swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
-
-
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,7 +151,7 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
         image.setImageBitmap(getItem(position).getBuzzlistImages());
 
         text = (TextView) convertView.findViewById(R.id.book_name);
-        text.setText(getItem(position).getBuzzlistNames() + " " + position);
+        text.setText(getItem(position).getBuzzlistNames());
 
         authorText = (TextView) convertView.findViewById(R.id.book_author);
         authorText.setText(getItem(position).getBuzzlistAuthors());

@@ -8,6 +8,11 @@ import android.graphics.Bitmap;
 
 public class BookAdapter {
     String buzzlistNames;
+    Boolean added;
+    Bitmap buzzlistImages;
+    String buzzlistAuthors;
+    Integer buzzlistIds;
+    String buzzlistIsbns;
 
     public Boolean getAdded() {
         return added;
@@ -16,8 +21,6 @@ public class BookAdapter {
     public void setAdded(Boolean added) {
         this.added = added;
     }
-
-    Boolean added;
 
     public String getBuzzlistNames() {
         return buzzlistNames;
@@ -59,8 +62,5 @@ public class BookAdapter {
         this.buzzlistIsbns = buzzlistIsbns;
     }
 
-    Bitmap buzzlistImages;
-    String buzzlistAuthors;
-    Integer buzzlistIds;
-    String buzzlistIsbns;
+
 }

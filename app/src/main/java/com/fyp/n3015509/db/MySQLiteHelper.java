@@ -346,7 +346,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return 0;
     }
 
-    public long insertBouzzlist(GoodreadsShelf buzz) {
+    public long insertBuzzlist(GoodreadsShelf buzz) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -386,7 +386,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return 0;
     }
 
-    public long insertBouzzlistInterim(long buzzlistID, long bookId) {
+    public long insertBuzzlistInterim(long buzzlistID, long bookId) {
         try {
             SQLiteDatabase db = this.getWritableDatabase();
 
@@ -770,21 +770,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             String notQuery = "";
                             Cursor c1 = db.rawQuery(bookQuery, null);
 
-//                            switch (notification) {
-//                                case AVALIABLE:
-//                                    notQuery = "SELECT " + NOTIFIED + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-//                                    break;
-//                                case PREORDER:
-//                                    notQuery = "SELECT " + PREORDER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-//                                    break;
-//                                case CHEAPER:
-//                                    //notQuery = "SELECT " + CHEAPER + " FROM " + BOOK_WATCH + " WHERE " + BOOK_ID + " = " + bookId + " LIMIT 1";
-//                                    break;
-//
-//                            }
-//                            Cursor c2 = db.rawQuery(notQuery, null);
-//
-//                            int notified = getSingleInt(c2);
                             Bitmap image = null;
                             String bookName = "";
                             int goodreadsId = 0;
@@ -1243,5 +1228,123 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         return isbn;    }
+
+    public Boolean createBuzzlistAndBook(GoodreadsBook mBook, String listName) {
+        long bookId = insertBook(mBook);
+        GoodreadsShelf shelf = new GoodreadsShelf();
+        shelf.setShelfName(listName);
+        long buzzlistId = insertBuzzlist(shelf);
+        long success = insertBuzzlistInterim(buzzlistId, bookId);
+
+        if (success != 0 || success != -1) return true;
+        else return false;
+    }
+
+    public Boolean addBookToBuzzlist(GoodreadsBook mBook, String listName) {
+        int buzzlistId = getBuzzlistIdByName(listName);
+        if (buzzlistId != 0 || buzzlistId != -1) {
+            long bookId = insertBook(mBook);
+            long success = insertBookInterim(buzzlistId, bookId);
+
+            if (success != 0 || success != -1) return true;
+            else return false;
+        }
+        return false;
+    }
+
+    private int getBuzzlistIdByName(String listName) {
+        String columnIdQuery = "SELECT " + COLUMN_ID + " FROM " + TABLE_BUZZLISTS + " WHERE " + BUZZLIST_NAME + "='" + listName + "' LIMIT 1;";
+        int id = 0;
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(columnIdQuery, null);
+            try {
+                if (cursor.moveToFirst()) {
+                    id = cursor.getInt(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return id;
+    }
+
+    public ArrayList<GoodreadsAuthor> getAuthors() {
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            String authorQuery = "SELECT * FROM " + TABLE_AUTHORS;
+            Cursor cursor = db.rawQuery(authorQuery, null);
+            ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        while (cursor.isAfterLast() == false) {
+                            authorList.add(createAuthor(cursor));
+                            cursor.moveToNext();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    cursor.close();
+                }
+            }
+            return authorList;
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public GoodreadsAuthor getAuthorById(int authorId) {
+        try {
+            String countQuery = "SELECT * FROM " + TABLE_AUTHORS + " WHERE " + COLUMN_ID + "=" + authorId + ";";
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(countQuery, null);
+            GoodreadsAuthor b = new GoodreadsAuthor();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        b = createAuthor(cursor);
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+
+            return b;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<GoodreadsBook> getBooksByAuthor(int authorId) {
+        try {
+            String countQuery = "SELECT * FROM " + TABLE_BOOKS + " INNER JOIN " + BOOK_INTERIM + " ON " + TABLE_BOOKS
+                    + "." + COLUMN_ID + " = " + BOOK_INTERIM + "." + BOOK_ID + " WHERE " + BOOK_INTERIM + "." + AUTHOR_ID + "=" + authorId;
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(countQuery, null);
+            ArrayList<GoodreadsBook> book = new ArrayList<>();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        book = CreateGoodreadsBookArrayList(cursor, db);
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+
+            return book;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
 

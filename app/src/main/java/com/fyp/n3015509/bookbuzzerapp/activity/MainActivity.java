@@ -38,6 +38,7 @@ import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.fragment.AuthorListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
@@ -281,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 return bListFragment;
             case 2:
                 // movies fragment
-                ListFragment listFragment = new ListFragment();
+                AuthorListFragment listFragment = new AuthorListFragment();
                 return listFragment;
             case 3:
                 // settings fragment

@@ -12,73 +12,93 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
-import com.fyp.n3015509.bookbuzzerapp.other.ArraySwipeAdapterSample;
-import com.fyp.n3015509.db.dao.Buzzlist;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.db.DBUtil;
 
 import java.util.ArrayList;
 
 /**
- * A fragment representing a list of Items.
- * <p/>
- * interface.
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link AuthorListFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link AuthorListFragment#newInstance} factory method to
+ * create an instance of this fragment.
  */
-public class BookListFragment extends ListFragment implements OnItemClickListener {
-    View rootView;
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
-    private BookListFragment.OnFragmentInteractionListener mListener;
-    ArrayList<Buzzlist> buzzlist = new ArrayList<>();
+public class AuthorListFragment extends ListFragment implements AdapterView.OnItemClickListener {
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
 
-    public BookListFragment() {
+    // TODO: Rename and change types of parameters
+    private String mParam1;
+ArrayList<GoodreadsAuthor> authorList;
+    private OnFragmentInteractionListener mListener;
+
+    public AuthorListFragment() {
+        // Required empty public constructor
     }
 
-    public static BookListFragment newInstance(String param1, String param2) {
-        BookListFragment fragment = new BookListFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment AuthorListFragment.
+     */
+    // TODO: Rename and change types and number of parameters
+    public static AuthorListFragment newInstance(String param1, String param2) {
+        AuthorListFragment fragment = new AuthorListFragment();
+
         return fragment;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
-        buzzlist = DBUtil.GetBuzzlist(getActivity());
-        if (buzzlist != null || !buzzlist.isEmpty()) {
-            final ListView listv = (ListView) rootView.findViewById(R.id.book_list);
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_author, container, false);
+        authorList = DBUtil.GetAuthors(getActivity());
+        if (authorList != null || !authorList.isEmpty()) {
+            final ListView listv = (ListView) rootView.findViewById(R.id.fragment_list);
 
             ArrayList<String> buzzlistNames = new ArrayList<String>();
-            String[] values = new String[buzzlist.size()];
+            String[] values = new String[authorList.size()];
 
-            for (Buzzlist buzz : buzzlist) {
+            for (GoodreadsAuthor buzz : authorList) {
                 buzzlistNames.add(buzz.getName());
             }
             values = buzzlistNames.toArray(values);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1, values);
+            listv.setAdapter(adapter);
 
-          //  listv.setAdapter(new ArraySwipeAdapterSample<String>(getActivity(), R.layout.fragment_item, R.id.position, values));
-listv.setAdapter(adapter);
 
             // listv.getAdapter().setMode(Attributes.Mode.Single);
             listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     // ((SwipeLayout)(listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-                    Buzzlist buzz = buzzlist.get(position);
+                    GoodreadsAuthor buzz = authorList.get(position);
 
-                    Fragment fragment = new ListFragment();
+                    Fragment fragment = new AuthorFragment();
 
                     Bundle args = new Bundle();
-                    args.putInt("listId", buzz.getId());
+                    args.putInt("authorId", buzz.getColumnId());
                     fragment.setArguments(args);
 
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -122,7 +142,6 @@ listv.setAdapter(adapter);
         return rootView;
     }
 
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -133,12 +152,6 @@ listv.setAdapter(adapter);
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
 
     @Override
@@ -147,26 +160,16 @@ listv.setAdapter(adapter);
         mListener = null;
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Buzzlist buzz = buzzlist.get(position);
-
-        Fragment fragment = new ListFragment();
-
-        Bundle args = new Bundle();
-        args.putInt("listId", buzz.getId());
-        fragment.setArguments(args);
-
-        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-        fragmentTransaction.replace(R.id.frame, fragment);
-        //fragmentTransaction.addToBackStack(null);
-
-        // Commit the transaction
-        fragmentTransaction.commit();
-
-        // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
-    }
-
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

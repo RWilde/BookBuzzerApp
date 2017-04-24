@@ -37,7 +37,7 @@ public class DBUtil {
 
             for (GoodreadsShelf shelf : booklist) {
                 ArrayList<GoodreadsBook> books = shelf.getBooks();
-                long shelfId = db.insertBouzzlist(shelf);
+                long shelfId = db.insertBuzzlist(shelf);
                 for (GoodreadsBook book : books) {
                     long id = db.insertBook(book);
                     ArrayList<GoodreadsAuthor> authors = book.getAuthors();
@@ -45,7 +45,7 @@ public class DBUtil {
                         long authorId = db.insertAuthor(author);
                         if (authorId != 0) db.insertBookInterim(id, authorId);
                     }
-                    db.insertBouzzlistInterim(shelfId, id);
+                    db.insertBuzzlistInterim(shelfId, id);
                 }
             }
         } catch (Exception e) {
@@ -395,11 +395,54 @@ public class DBUtil {
 
     }
 
-    public static Boolean CreateBookAndList(Context mContext, GoodreadsBook mBook, String s) {
-        return true;
-    }
+    public static Boolean CreateBookAndList(Context mContext, GoodreadsBook mBook, String listName) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.createBuzzlistAndBook(mBook, listName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;    }
 
     public static Boolean AddBookToList(Context mContext, GoodreadsBook mBook, String listName) {
-        return true;
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.addBookToBuzzlist(mBook, listName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;    }
+
+    public static ArrayList<GoodreadsAuthor> GetAuthors(Context cxt) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(cxt);
+            return db.getAuthors();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;    }
+
+    public static GoodreadsAuthor GetAuthorById(Context context, int authorId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(context);
+            return db.getAuthorById(authorId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static ArrayList<GoodreadsBook> GetAllBookByAuthor(Context context, int authorId) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(context);
+            return db.getBooksByAuthor(authorId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

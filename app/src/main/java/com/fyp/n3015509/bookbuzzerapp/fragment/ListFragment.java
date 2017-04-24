@@ -111,33 +111,11 @@ public class ListFragment extends Fragment {
                     String search = inputSearch.getText().toString();
                     if (search.matches("")){
                     inputSearch.setVisibility(View.GONE);}
-//                        inputSearch.animate()
-//                                .translationY(inputSearch.getHeight())
-//                                .alpha(0.0f)
-//                                .setDuration(300)
-//                                .setListener(new AnimatorListenerAdapter() {
-//                                    @Override
-//                                    public void onAnimationEnd(Animator animation) {
-//                                        super.onAnimationEnd(animation);
-//                                        inputSearch.setVisibility(View.GONE);
-//                                    }
-//                                });
                 }
 
                 @Override
                 public void onScrollDown() {
                     inputSearch.setVisibility(View.VISIBLE);
-//                        inputSearch.animate()
-//                                .translationY(inputSearch.getHeight())
-//                                .alpha(0.0f)
-//                                .setDuration(300)
-//                                .setListener(new AnimatorListenerAdapter() {
-//                                    @Override
-//                                    public void onAnimationEnd(Animator animation) {
-//                                        super.onAnimationEnd(animation);
-//                                        inputSearch.setVisibility(View.VISIBLE);
-//                                    }
-//                                });
                 }
             });
 
