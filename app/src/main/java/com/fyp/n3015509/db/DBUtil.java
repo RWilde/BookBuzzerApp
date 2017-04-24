@@ -445,4 +445,14 @@ public class DBUtil {
         }
         return null;
     }
+
+    public static int GetUnopenedNotifications(Context context) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(context);
+            return db.getUnopenedNotifications();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

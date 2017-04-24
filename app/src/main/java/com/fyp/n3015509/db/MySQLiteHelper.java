@@ -1346,5 +1346,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         }
         return null;
     }
+
+    public int getUnopenedNotifications() {
+        String countQuery = "SELECT * FROM " + NOTIFICATIONS_TABLE + " WHERE " + READ + " = 0";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        return cursor.getCount();
+    }
 }
 

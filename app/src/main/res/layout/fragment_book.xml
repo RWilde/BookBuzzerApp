@@ -218,8 +218,9 @@
                 android:padding="5dip">
 
                 <TextView
+                    style="@style/bookDetailsTitlesStyle"
                     android:text="Prices from amazon"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
+                     />
 
             </TableRow>
 
@@ -233,11 +234,13 @@
                 <TextView
                     android:layout_width="300dp"
                     android:layout_span="2"
+                    style="@style/bookDetailsTextStyle"
                     android:text="Kindle " />
 
                 <TextView
                     android:id="@+id/kindle_price"
                     android:layout_width="300dp"
+                    style="@style/bookDetailsTextStyle"
                     android:layout_column="1"
                     android:text="£ " />
             </TableRow>
@@ -256,11 +259,13 @@
 
                 <TextView
                     android:layout_span="2"
+                    style="@style/bookDetailsTextStyle"
                     android:text="Paperback " />
 
                 <TextView
                     android:id="@+id/paper_price"
                     android:layout_column="1"
+                    style="@style/bookDetailsTextStyle"
                     android:text="£ " />
             </TableRow>
 
@@ -274,27 +279,31 @@
                 <TextView
                     android:layout_width="300dp"
                     android:layout_span="2"
+                    style="@style/bookDetailsTextStyle"
                     android:text="Hardcover " />
 
                 <TextView
                     android:id="@+id/hard_price"
                     android:layout_column="1"
+                    style="@style/bookDetailsTextStyle"
                     android:text="£ " />
             </TableRow>
 
             <!-- display this button in 2nd column via layout_column(zero based) -->
             <RelativeLayout
                 android:id="@+id/tableRow5"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="5dip"
                 android:layout_weight="0.09">
 
                 <Button
-                    android:id="@+id/button5"
-                    android:layout_width="160dp"
-                    android:layout_height="50dp"
+                    android:id="@+id/amazon_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
                     android:layout_column="1"
+                    style="@style/bookDetailsTitlesStyle"
                     android:text="Buy it now on amazon" />
             </RelativeLayout>
 
@@ -305,8 +314,10 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="description"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:padding="5dp"
+            android:text="Description"
+            style="@style/bookDetailsTitlesStyle"
+            />
 
         <View
             android:layout_width="fill_parent"

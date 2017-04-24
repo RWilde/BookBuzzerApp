@@ -1,13 +1,16 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
@@ -76,6 +79,9 @@ public class BookFragment extends Fragment {
         title = (TextView) view.findViewById(R.id.title);
         title.setText(mBook.getTitle());
 
+        RatingBar rating = (RatingBar)view.findViewById(R.id.rating);
+        rating.setRating((float) mBook.getAverage_rating());
+
         String kindlePrice = "";
         String paperPrice="";
         String hardPrice="";
@@ -92,6 +98,17 @@ public class BookFragment extends Fragment {
         else
             hardPrice = "Not available";
 
+
+
+        Button amazon = (Button) view.findViewById(R.id.amazon_button);
+
+        amazon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.amazon.com/dp/" + mBook.getIsbn()));
+                startActivity(browserIntent);
+            }
+        });
 
         TextView kindle = (TextView) view.findViewById(R.id.kindle_price);
         kindle.setText( kindlePrice);

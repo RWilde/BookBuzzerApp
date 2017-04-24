@@ -51,6 +51,7 @@ import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
+import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.gson.Gson;
@@ -214,7 +215,10 @@ public class MainActivity extends AppCompatActivity {
                 .into(imgProfile);
 
         // showing dot next to notifications label
-        navigationView.getMenu().getItem(3).setActionView(R.layout.menu_dot);
+        int notificationCount = DBUtil.GetUnopenedNotifications(getApplicationContext());
+        if (notificationCount > 0) {
+            navigationView.getMenu().getItem(4).setActionView(R.layout.menu_dot);
+        }
     }
 
     /***
@@ -503,14 +507,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    // show or hide the fab
-//    private void toggleFab() {
-//        if (navItemIndex == 0)
-//            fab.show();
-//        else
-//            fab.hide();
-//    }
 
 
     private void populateBookShelves() {

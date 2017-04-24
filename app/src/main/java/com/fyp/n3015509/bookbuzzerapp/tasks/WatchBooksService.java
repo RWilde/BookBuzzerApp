@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.Util.AppUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
@@ -136,6 +137,42 @@ public class WatchBooksService extends GcmTaskService {
         } else {
             return GcmNetworkManager.RESULT_FAILURE;
         }
+        return GcmNetworkManager.RESULT_SUCCESS;
+    }
+
+    public int checkForNewInSeries(Context ctx) {
+        GoodreadsAPI goodreadsAPI = new GoodreadsAPI();
+        DBUtil db = new DBUtil();
+        BookBuzzerAPI api = new BookBuzzerAPI();
+
+        //turn goodreads id to work id
+       // https://www.goodreads.com/book/id_to_work_id/17167166?key=8vvXeL81U1l6yxnUT1c9Q
+        //int work_id = goodreadsAPI.getWorkId
+
+
+        //get series using returned work id
+        //https://www.goodreads.com/work/21581860/series?format=xml&key=8vvXeL81U1l6yxnUT1c9Q
+        //get series id
+
+        //give id to bookbuzzer api which will download dom and find "expected publication"
+
+//        api.SaveNotifications(this, buzzList);
+//        if (results != null) {
+//            if (results.size() > 0) {
+//                String title = "BookBuzzer";
+//                String subject = "Books you are watching are cheaper!";
+//                String body = "";
+//                if (results.size() == 1) {
+//                    body = "There is 1 book you are watching that is cheaper!";
+//                } else {
+//                    body = "There are " + results.size() + " books you are watching that are cheaper!";
+//                }
+//
+//                setNotififcation(title, body, subject);
+//            }
+//        } else {
+//            return GcmNetworkManager.RESULT_FAILURE;
+//        }
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 

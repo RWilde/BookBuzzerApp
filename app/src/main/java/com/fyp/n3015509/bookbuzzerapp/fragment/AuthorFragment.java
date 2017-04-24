@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +88,9 @@ public class AuthorFragment extends ListFragment {
 
         TextView title = (TextView) view.findViewById(R.id.title);
         title.setText(author.getName());
+
+        RatingBar rating = (RatingBar)view.findViewById(R.id.rating);
+        rating.setRating((float) author.getAverage_rating());
 
         final ArrayList<GoodreadsBook> bookList = DBUtil.GetAllBookByAuthor(getContext(), authorId);
         if (bookList != null || !bookList.isEmpty()) {
