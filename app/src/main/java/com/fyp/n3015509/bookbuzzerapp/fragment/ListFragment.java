@@ -86,7 +86,7 @@ public class ListFragment extends Fragment {
             listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                  //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                    //((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
                     ((SwipeLayout) (listv.getChildAt(Integer.parseInt((String)parent.getAdapter().getItem(position)) + 1))).open(true);
 
                 }

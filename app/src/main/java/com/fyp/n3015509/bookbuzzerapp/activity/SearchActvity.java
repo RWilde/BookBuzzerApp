@@ -11,10 +11,21 @@ import android.os.Handler;
 import android.provider.SearchRecentSuggestions;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ContentFrameLayout;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
+import com.daimajia.swipe.SwipeLayout;
+import com.daimajia.swipe.util.Attributes;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
+import com.fyp.n3015509.apppreferences.OnScrollObserver;
 import com.fyp.n3015509.bookbuzzerapp.R;
 
 import com.fyp.n3015509.bookbuzzerapp.other.SearchSuggestionsProvider;
@@ -24,19 +35,21 @@ import com.fyp.n3015509.db.DBUtil;
 
 import java.util.ArrayList;
 
-public class SearchActvity extends AppCompatActivity {
+public class SearchActvity extends MainActivity {
     ArrayList<SearchResult> results = new ArrayList();
     SearchViewAdapter mAdapter;
+    SearchViewAdapter mDownloadAdapter;
+
     private android.support.v7.widget.Toolbar toolbar;
     public ListView mainListView;
+    private ListView downloadListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        MainActivity.navItemIndex = 7;
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_actvity);
-
-        toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        FrameLayout contentFrameLayout = (FrameLayout) findViewById(R.id.frame);
+        getLayoutInflater().inflate(R.layout.activity_search_actvity, contentFrameLayout);
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -47,13 +60,33 @@ public class SearchActvity extends AppCompatActivity {
             suggestions.saveRecentQuery(query, null);
 
             results = getLocalResults(query);
-
-            mAdapter = new SearchViewAdapter(this, results);
             mainListView = (ListView) findViewById(R.id.search_list);
-            mainListView.setAdapter(mAdapter);
+
+            if (results.size() != 0) {
+                mAdapter = new SearchViewAdapter(this, results);
+                mAdapter.setMode(Attributes.Mode.Single);
+                mainListView.setAdapter(mAdapter);
+
+                mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                        ((SwipeLayout) (mainListView.getChildAt(Integer.parseInt((String) parent.getAdapter().getItem(position)) + 1))).open(true);
+                    }
+                });
+            } else {
+                mainListView.setVisibility(View.GONE);
+                TextView text = (TextView) findViewById(R.id.search_list_text);
+                text.setVisibility(View.GONE);
+                View view = (View) findViewById(R.id.search_list_view);
+                view.setVisibility(View.GONE);
+            }
+
 
             GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext(), mAdapter);
             saveTask.execute((Void) null);
+
+
         }
     }
 
@@ -80,9 +113,9 @@ public class SearchActvity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-         //   progress = new ProgressDialog(mContext);
-        //    progress.setMessage("Searching for additional results...");
-        //    progress.show();
+            //   progress = new ProgressDialog(mContext);
+            //    progress.setMessage("Searching for additional results...");
+            //    progress.show();
         }
 
         @Override
@@ -92,27 +125,42 @@ public class SearchActvity extends AppCompatActivity {
             try {
                 GoodreadsAPI api = new GoodreadsAPI();
                 apiResults = api.getSearch(mContext, mSearch);
-
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+                if (apiResults.size() > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
                 return false;
             }
-
-            return true;
         }
 
 
         @Override
         protected void onPostExecute(final Boolean success) {
-         //   progress.dismiss();
+            //   progress.dismiss();
             mHandler = new Handler();
+            mDownloadAdapter = new SearchViewAdapter(mContext, apiResults);
 
             if (success) {
+                downloadListView = (ListView) findViewById(R.id.download_search_list);
+                downloadListView.setAdapter(mDownloadAdapter);
+                downloadListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                        ((SwipeLayout) (mainListView.getChildAt(Integer.parseInt((String) parent.getAdapter().getItem(position)) + 1))).open(true);
+                    }
+                });
                 //finish();
-                mAdapter.upDateEntries(apiResults);
+                //mDownloadAdapter.upDateEntries(apiResults);
 
             } else {
-                //book wasnt deleted succesfully
+                downloadListView.setVisibility(View.GONE);
+                TextView text = (TextView) findViewById(R.id.download_search_list_text);
+                text.setVisibility(View.GONE);
+                View view = (View) findViewById(R.id.download_search_list_view);
+                view.setVisibility(View.GONE);
             }
         }
     }

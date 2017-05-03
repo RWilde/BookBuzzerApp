@@ -76,7 +76,6 @@ public class BookFragment extends Fragment {
         }
         mBook = DBUtil.getBookFromBuzzlist(getActivity(), mBookId);
         setHasOptionsMenu(true);
-
     }
 
     @Override
@@ -91,25 +90,24 @@ public class BookFragment extends Fragment {
         title = (TextView) view.findViewById(R.id.title);
         title.setText(mBook.getTitle());
 
-        RatingBar rating = (RatingBar)view.findViewById(R.id.rating);
+        RatingBar rating = (RatingBar) view.findViewById(R.id.rating);
         rating.setRating((float) mBook.getAverage_rating());
 
         String kindlePrice = "";
-        String paperPrice="";
-        String hardPrice="";
-        if( mBook.getKindlePrice() != 0.0)
-            kindlePrice = "£"+Double.toString(mBook.getKindlePrice());
+        String paperPrice = "";
+        String hardPrice = "";
+        if (mBook.getKindlePrice() != 0.0)
+            kindlePrice = "£" + Double.toString(mBook.getKindlePrice());
         else
             kindlePrice = "Not available";
-        if( mBook.getPaperbackPrice() != 0.0)
-            paperPrice = "£"+Double.toString(mBook.getPaperbackPrice());
+        if (mBook.getPaperbackPrice() != 0.0)
+            paperPrice = "£" + Double.toString(mBook.getPaperbackPrice());
         else
             paperPrice = "Not available";
-        if( mBook.getHardcoverPrice() != 0.0)
-            hardPrice = "£"+Double.toString(mBook.getHardcoverPrice());
+        if (mBook.getHardcoverPrice() != 0.0)
+            hardPrice = "£" + Double.toString(mBook.getHardcoverPrice());
         else
             hardPrice = "Not available";
-
 
 
         Button amazon = (Button) view.findViewById(R.id.amazon_button);
@@ -123,7 +121,7 @@ public class BookFragment extends Fragment {
         });
 
         TextView kindle = (TextView) view.findViewById(R.id.kindle_price);
-        kindle.setText( kindlePrice);
+        kindle.setText(kindlePrice);
 
         TextView paper = (TextView) view.findViewById(R.id.paper_price);
         paper.setText(paperPrice);
@@ -132,10 +130,8 @@ public class BookFragment extends Fragment {
         hard.setText(hardPrice);
         TextView author = (TextView) view.findViewById(R.id.author);
         StringBuilder b = new StringBuilder();
-        for (GoodreadsAuthor a:mBook.getAuthors() )
-        {
-            if (b.length() != 0)
-            {
+        for (GoodreadsAuthor a : mBook.getAuthors()) {
+            if (b.length() != 0) {
                 b.append(", ");
             }
             b.append(a.getName());
@@ -143,28 +139,31 @@ public class BookFragment extends Fragment {
         author.setText(b);
 
         TextView description = (TextView) view.findViewById(R.id.description);
-        description.setText( mBook.getDescription());
+        description.setText(mBook.getDescription());
 
         TextView isbn = (TextView) view.findViewById(R.id.isbn);
-        isbn.setText( mBook.getIsbn());
+        isbn.setText(mBook.getIsbn());
 
         TextView pages = (TextView) view.findViewById(R.id.pages);
-        pages.setText( mBook.getNumPages() + "pages ");
+        pages.setText(mBook.getNumPages() + "pages ");
 
         TextView edition = (TextView) view.findViewById(R.id.format);
-        edition.setText("("+mBook.getEditionInformation()+")");
-
+        edition.setText("(" + mBook.getEditionInformation() + ")");
         TextView series = (TextView) view.findViewById(R.id.series);
-        String[] seriesString = mBook.getTitle().split("\\(");
-        String[] justSeries = seriesString[1].split("\\,");
 
-        series.setText(justSeries[0]);
+        if (!mBook.getTitleWithoutSeries().contentEquals(mBook.getTitle())) {
+
+            String[] seriesString = mBook.getTitle().split("\\(");
+            String[] justSeries = seriesString[1].split("\\,");
+
+            series.setText(justSeries[0]);
+        }else{
+        series.setText("Standalone");}
 
         TextView published = (TextView) view.findViewById(R.id.publishing_details);
-        edition.setText(mBook.getPublisher() +", "+ mBook.getReleaseDate());
+        edition.setText(mBook.getPublisher() + ", " + mBook.getReleaseDate());
 
         TextView shelf = (TextView) view.findViewById(R.id.bookshelf);
-        MainActivity.bookIdFromBookFrag  = mBook.getId();
         return view;
     }
 
@@ -172,19 +171,20 @@ public class BookFragment extends Fragment {
         DBUtil db = new DBUtil();
         boolean watched = db.checkIfWatched(getContext(), mBook.getId());
         try {
-        if (watched == true) {
-            menu.findItem(R.id.unstar_book).setVisible(true);
-        } else {
-            menu.findItem(R.id.star_book).setVisible(true);
-        }
+            if (watched == true) {
+                menu.findItem(R.id.unstar_book).setVisible(true);
+            } else {
+                menu.findItem(R.id.star_book).setVisible(true);
+            }
 
-    menu.findItem(R.id.action_mark_all_read).setVisible(false);
-    menu.findItem(R.id.action_clear_notifications).setVisible(false);
-    menu.findItem(R.id.create_buzzlist).setVisible(false);
-} catch(Exception e)
-{
- e.printStackTrace();
-}
+            menu.findItem(R.id.action_mark_all_read).setVisible(false);
+            menu.findItem(R.id.action_clear_notifications).setVisible(false);
+            menu.findItem(R.id.create_buzzlist).setVisible(false);
+            menu.findItem(R.id.download_book).setVisible(false);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         MainActivity.bookIdFromBookFrag = mBook.getId();
 

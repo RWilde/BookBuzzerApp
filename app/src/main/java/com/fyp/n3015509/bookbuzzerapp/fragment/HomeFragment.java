@@ -97,9 +97,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
-       // buzzlist = DBUtil.GetBuzzlist(getActivity());
-       // book = DBUtil.GetBooks(getActivity());
-       // author = DBUtil.GetAuthors(getActivity());
+        buzzlist = DBUtil.GetBuzzlist(getActivity());
+        book = DBUtil.GetBooks(getActivity());
+        author = DBUtil.GetAuthors(getActivity());
 
         createBuzzlistList(view);
         createAuthorList(view);

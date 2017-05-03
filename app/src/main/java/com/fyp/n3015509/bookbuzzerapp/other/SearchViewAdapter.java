@@ -182,9 +182,9 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         {
             for(int i = 0; i < apiResults.size(); i++)
             {
-                result.add(apiResults.get(i));
+               // result.add(apiResults.get(i));
             }
-            notifyDataSetChanged();
+           // notifyDataSetChanged();
         }
     }
 

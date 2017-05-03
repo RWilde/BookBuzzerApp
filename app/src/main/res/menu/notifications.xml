@@ -24,4 +24,10 @@
         android:title="Stop watching book"
         android:visible="false"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/download_book"
+        android:orderInCategory="100"
+        android:title="Download book"
+        android:visible="false"
+        app:showAsAction="never" />
 </menu>

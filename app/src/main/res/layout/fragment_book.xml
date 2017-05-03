@@ -44,17 +44,17 @@
 
                 <!-- Read -->
 
-                <ImageButton
-                    android:id="@+id/save"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_gravity="top|right"
-                    android:src="@drawable/download"
-                    android:background="@drawable/white"
-                    android:scaleType="fitXY"
-                    android:visibility="visible" />
+                <!--<ImageButton-->
+                    <!--android:id="@+id/save"-->
+                    <!--android:layout_width="40dp"-->
+                    <!--android:layout_height="40dp"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:layout_alignParentTop="true"-->
+                    <!--android:layout_gravity="top|right"-->
+                    <!--android:src="@drawable/download"-->
+                    <!--android:background="@drawable/white"-->
+                    <!--android:scaleType="fitXY"-->
+                    <!--android:visibility="visible" />-->
 
                 <!-- Title -->
 

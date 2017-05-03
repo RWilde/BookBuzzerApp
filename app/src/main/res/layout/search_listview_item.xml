@@ -27,7 +27,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@drawable/item_selector"
+        android:background="@color/backgroundColor"
         android:padding="10dp">
         >
         <RelativeLayout
@@ -37,21 +37,24 @@
 
             <TextView
                 android:id="@+id/book_name"
+                style="@style/bookDetailsTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
+                android:background="@color/backgroundColor"
                 android:text="A List item title"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textColor="@color/dark_gray" />
 
             <TextView
                 android:id="@+id/book_author"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
+                android:background="@color/backgroundColor"
                 android:layout_below="@+id/book_name"
+                style="@style/bookDetailsTextStyle"
                 android:layout_marginTop="5dp"
                 android:maxLines="4"
                 android:text="The List item description"
-                android:textSize="14sp" />
+                 />
 
         </RelativeLayout>
     </LinearLayout>

@@ -180,18 +180,20 @@ public class MainActivity extends AppCompatActivity {
             // initializing navigation menu
             setUpNavigationView();
 
-            if (savedInstanceState == null) {
-                navItemIndex = 0;
-                CURRENT_TAG = TAG_HOME;
-                loadHomeFragment();
-            }
+            if (navItemIndex != 7) {
+                if (savedInstanceState == null) {
+                    navItemIndex = 0;
+                    CURRENT_TAG = TAG_HOME;
+                    loadHomeFragment();
+                }
 
-            Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
-            String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
-            if (imported == false && !userId.contentEquals("")) {
-                new UserShelves(getApplicationContext()).execute();
-            }
+                Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
+                String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
+                if (imported == false && !userId.contentEquals("")) {
+                    new UserShelves(getApplicationContext()).execute();
+                }
 
+            }
         }
     }
 
@@ -274,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Fragment getHomeFragment() {
+        FrameLayout contentFrameLayout = (FrameLayout) findViewById(R.id.frame);
+        contentFrameLayout.removeAllViews();
         switch (navItemIndex) {
             case 0:
                 // home
@@ -346,7 +350,6 @@ public class MainActivity extends AppCompatActivity {
             // This method will trigger on item Click of navigation menu
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
-
                 //Check to see which item was being clicked and perform appropriate action
                 switch (menuItem.getItemId()) {
                     //Replacing the main content with ContentFragment Which is our Inbox View;
@@ -461,15 +464,6 @@ public class MainActivity extends AppCompatActivity {
             getMenuInflater().inflate(R.menu.create_buzzlist, menu);
         }
 
-        if(navItemIndex == 2)
-        {
-
-        }
-
-        if(navItemIndex == 7 )
-        {
-        }
-
         // when fragment is notifications, load the menu created for notifications
         if (navItemIndex == 4) {
             getMenuInflater().inflate(R.menu.notifications, menu);
@@ -494,7 +488,6 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
             new UserLogout(getApplicationContext()).execute();
@@ -511,6 +504,10 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.unstar_book) {
             new StopWatchBookTask(getApplicationContext()).execute();
         }
+
+//        if (id == R.id.download_book) {
+//            new DownloadBookTask(getApplicationContext()).execute();
+//        }
 
         // user is in notifications fragment
         // and selected 'Mark all as Read'
@@ -608,6 +605,78 @@ public class MainActivity extends AppCompatActivity {
         ShelfImportFrag alertDialog = ShelfImportFrag.newInstance();
         alertDialog.show(fm, "import");
     }
+
+    private class SaveBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final GoodreadsBook mBook;
+        private final String listName;
+        private final Context mContext;
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+        boolean exist;
+
+        SaveBookTask(GoodreadsBook book, String listName, Context cxt, Boolean listExist) {
+            this.mBook = book;
+            this.listName = listName;
+            this.mContext = cxt;
+            this.exist = listExist;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Adding to watch list...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                if (!exist) {
+                    BookBuzzerAPI api = new BookBuzzerAPI();
+                    Boolean dbSuccess = DBUtil.CreateBookAndList(mContext, mBook, listName);
+                    Boolean apiSuccess = api.CreateBookAndList(mContext, mBook, listName);
+
+//                    if (dbSuccess == false || apiSuccess == false) {
+//                        return false;
+//                    }
+                }
+                else
+                {
+                    BookBuzzerAPI api = new BookBuzzerAPI();
+                    Boolean dbSuccess = DBUtil.AddBookToList(mContext, mBook, listName);
+                    Boolean apiSuccess = api.AddBookToList(mContext, mBook, listName);
+
+//                    if (dbSuccess == false || apiSuccess == false) {
+//                        return false;
+//                    }
+                }
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book downloaded and add to list", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private class StopWatchBookTask extends AsyncTask<Void, Void, Boolean> {
 
         private JSONObject deletedBook = new JSONObject();
@@ -823,6 +892,7 @@ public class MainActivity extends AppCompatActivity {
             {
                 DBUtil.SaveBuzzlist(mContext, name);
                 BookBuzzerAPI.SaveBuzzlist(mContext, name);
+                SaveSharedPreference.setImported(getApplicationContext(), true);
             }catch (Exception e)
             {
                 e.printStackTrace();
@@ -931,6 +1001,24 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
             // showProgress(false);
+
+            Runnable mPendingRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    // update the main content by replacing fragments
+                    Fragment fragment = new HomeFragment();
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+                    fragmentTransaction.commitAllowingStateLoss();
+                }
+            };
+
+            // If mPendingRunnable is not null, then add to the message queue
+            if (mPendingRunnable != null) {
+                mHandler.post(mPendingRunnable);
+            }
 
             if (aBoolean) {
                 SaveSharedPreference.setImported(mContext, true);

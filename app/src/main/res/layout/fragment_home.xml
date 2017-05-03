@@ -38,6 +38,7 @@
             android:id="@+id/buzz_empty"
             style="@style/bookDetailsTextStyle"
             android:layout_width="match_parent"
+            android:paddingBottom="20dp"
             android:layout_height="wrap_content"></TextView>
 
         <View

@@ -201,6 +201,18 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
     }
 
     @Override
+    public int getViewTypeCount() {
+
+        return getCount();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        return position;
+    }
+
+    @Override
     public Filter getFilter() {
 
         Filter filter = new Filter() {

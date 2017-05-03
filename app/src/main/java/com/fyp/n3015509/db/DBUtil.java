@@ -374,9 +374,15 @@ public class DBUtil {
         return decodedString;
     }
 
-    public ArrayList<SearchResult> GetSearchResults(Context applicationContext, String query) {
-        return new ArrayList<SearchResult>();
-    }
+    public ArrayList<SearchResult> GetSearchResults(Context ctx, String query) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.SearchForBookOrAuthor(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;    }
 
     public static String getIsbnByGoodreadsId(Context ctx, int goodreadsId) {
         try {

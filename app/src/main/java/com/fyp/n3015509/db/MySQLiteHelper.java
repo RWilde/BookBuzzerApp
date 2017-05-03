@@ -11,9 +11,11 @@ import android.util.Log;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.dao.enums.EditionTypes;
 import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
+import com.fyp.n3015509.dao.enums.SearchResultType;
 import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
@@ -98,7 +100,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     // Database creation sql statement
     private static final String CREATE_AUTHOR_TABLE = "create table "
-            + TABLE_AUTHORS + "( "
+            + TABLE_AUTHORS + " ( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + AUTHOR_ID + " integer not null UNIQUE,"
             + AUTHOR_NAME + " varchar(255),"
@@ -110,7 +112,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             + AUTHOR_TEXT_REVIEWS_COUNT + " integer);";
 
     private static final String CREATE_BOOK_TABLE = "create table "
-            + TABLE_BOOKS + "( "
+            + TABLE_BOOKS + " ( "
             + COLUMN_ID + " integer primary key autoincrement, "
             + GOODREADS_ID + " integer not null UNIQUE,"
             + ISBN + " varchar(255),"
@@ -670,15 +672,15 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public ArrayList<BuzzNotification> AddToWatchNotifications() {
         ArrayList<BuzzNotification> notification = new ArrayList<>();
-
-        Date currentDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
-        Date preorderDate = DateUtils.addDays(new Date(), 7);
-
         try {
-            currentDate = new SimpleDateFormat("dd/MM/yyyy").parse(currentDate.toString());
-            preorderDate = new SimpleDateFormat("dd/MM/yyyy").parse(preorderDate.toString());
-            String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + currentDate + ";";
-            String preorderQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + preorderDate + ";";
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("dd/MMM/yyyy");
+            String currentDate = df.format(c.getTime());
+            c.add(Calendar.DATE, 7);
+            String preorderDate = df.format(c.getTime());
+
+            String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = '" + currentDate + "';";
+            String preorderQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = '" + preorderDate + "';";
 
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor avaialbleCursor = db.rawQuery(columnIdQuery, null);
@@ -1419,6 +1421,74 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public ArrayList<SearchResult> SearchForBookOrAuthor(String query) {
+        ArrayList<SearchResult> results = new ArrayList<>();
+
+        String authorQuery = "SELECT * FROM "+ TABLE_AUTHORS + " WHERE " + AUTHOR_NAME + " LIKE  '" + query + "'";
+        String bookQuery = "SELECT * FROM "+ TABLE_BOOKS + " WHERE " + TITLE_WITHOUT_SERIES + " LIKE  '" + query + "'";
+
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor c1 = db.rawQuery(authorQuery, null);
+            Cursor c2 = db.rawQuery(bookQuery, null);
+
+            if (c1 != null) {
+                try {
+                    if (c1.moveToFirst()) {
+                        while (c1.isAfterLast() == false) {
+                            SearchResult res = new SearchResult();
+                            res.setGoodreadsId(c1.getInt(1));
+                            res.setType(SearchResultType.LOCAL);
+                            res.setAuthorName(c1.getString(2));
+                            results.add(res);
+                            c1.moveToNext();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }finally {
+                    c1.close();
+                }
+            }
+
+            if (c2 != null) {
+                try {
+                    if (c2.moveToFirst()) {
+                        while (c2.isAfterLast() == false) {
+                            SearchResult res = new SearchResult();
+                            res.setGoodreadsId(c2.getInt(1));
+                            GoodreadsBook b = getBook(c2.getInt(1));
+                            res.setBookName(b.getTitle());
+                            StringBuilder s = new StringBuilder();
+                            for(GoodreadsAuthor a : b.getAuthors())
+                            {
+                                if (s.length() != 0)
+                                {
+                                    s.append(", ");
+                                }
+                                s.append(a.getName());
+                            }
+                            res.setAuthorName(s.toString());
+                            res.setType(SearchResultType.LOCAL);
+                            results.add(res);
+                            c2.moveToNext();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }finally {
+                    c2.close();
+                }
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return results;
     }
 }
 

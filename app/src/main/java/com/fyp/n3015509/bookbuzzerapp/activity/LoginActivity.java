@@ -199,9 +199,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void attemptSignInGoodreads() {
-        if (mGoodreadsAuthTask != null) {
-            return;
-        }
+//        if (mGoodreadsAuthTask != null) {
+//            return;
+//        }
 
 
         // Show a progress spinner, and kick off a background task to

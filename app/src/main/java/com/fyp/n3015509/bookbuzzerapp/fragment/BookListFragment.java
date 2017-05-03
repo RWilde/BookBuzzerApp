@@ -83,7 +83,7 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
                     Fragment fragment = new ListFragment();
 
                     Bundle args = new Bundle();
-                    args.putString("book", new Gson().toJson(buzz));
+                    args.putInt("listId", buzz.getId());
                     fragment.setArguments(args);
 
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();

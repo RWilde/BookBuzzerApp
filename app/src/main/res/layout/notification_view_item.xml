@@ -34,6 +34,7 @@
         <TextView
             android:id="@+id/position"
             android:layout_width="wrap_content"
+            android:singleLine="true"
             android:layout_height="wrap_content" />
 
         <ImageView
@@ -49,12 +50,14 @@
             <TextView
                 android:id="@+id/notification"
                 android:layout_width="match_parent"
+                android:maxLines="1"
                 android:layout_height="match_parent"
                 android:tag="Hover" />
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="match_parent"
+                android:maxLines="1"
                 android:layout_height="match_parent"
                 android:tag="Hover" />
 
