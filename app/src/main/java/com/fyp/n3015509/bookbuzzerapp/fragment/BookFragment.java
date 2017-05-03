@@ -1,22 +1,32 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+
+import org.json.JSONObject;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -65,6 +75,7 @@ public class BookFragment extends Fragment {
             mBookId = getArguments().getInt(ARG_PARAM1);
         }
         mBook = DBUtil.getBookFromBuzzlist(getActivity(), mBookId);
+        setHasOptionsMenu(true);
 
     }
 
@@ -73,6 +84,7 @@ public class BookFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_book, container, false);
+
         image = (ImageView) view.findViewById(R.id.book_cover);
         image.setImageBitmap(mBook.getImage());
 
@@ -152,9 +164,32 @@ public class BookFragment extends Fragment {
         edition.setText(mBook.getPublisher() +", "+ mBook.getReleaseDate());
 
         TextView shelf = (TextView) view.findViewById(R.id.bookshelf);
-        edition.setText("shelF TODO");
-
+        MainActivity.bookIdFromBookFrag  = mBook.getId();
         return view;
+    }
+
+    public void onPrepareOptionsMenu(Menu menu) {
+        DBUtil db = new DBUtil();
+        boolean watched = db.checkIfWatched(getContext(), mBook.getId());
+        try {
+        if (watched == true) {
+            menu.findItem(R.id.unstar_book).setVisible(true);
+        } else {
+            menu.findItem(R.id.star_book).setVisible(true);
+        }
+
+    menu.findItem(R.id.action_mark_all_read).setVisible(false);
+    menu.findItem(R.id.action_clear_notifications).setVisible(false);
+    menu.findItem(R.id.create_buzzlist).setVisible(false);
+} catch(Exception e)
+{
+ e.printStackTrace();
+}
+
+        MainActivity.bookIdFromBookFrag = mBook.getId();
+
+        super.onPrepareOptionsMenu(menu);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -188,5 +223,61 @@ public class BookFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+        Context mContext;
+
+        WatchBookTask(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Adding to watch list...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                Boolean dbSuccess = DBUtil.WatchBook(mContext, mBook.getId());
+                String listName = DBUtil.findListForBook(mContext, mBook.getId());
+                Boolean apiSuccess = api.WatchBook(mContext, mBook.getId(), listName);
+
+                if (dbSuccess == false || apiSuccess == false) {
+                    return false;
+                }
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book watched", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

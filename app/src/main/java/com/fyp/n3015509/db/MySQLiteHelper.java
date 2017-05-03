@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.enums.EditionTypes;
 import com.fyp.n3015509.dao.enums.NotificationTypes;
@@ -21,6 +22,7 @@ import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import org.apache.commons.lang.time.DateUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -669,12 +671,15 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public ArrayList<BuzzNotification> AddToWatchNotifications() {
         ArrayList<BuzzNotification> notification = new ArrayList<>();
 
-        java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
+        Date currentDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
         Date preorderDate = DateUtils.addDays(new Date(), 7);
-        String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + currentDate + ";";
-        String preorderQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + preorderDate + ";";
 
         try {
+            currentDate = new SimpleDateFormat("dd/MM/yyyy").parse(currentDate.toString());
+            preorderDate = new SimpleDateFormat("dd/MM/yyyy").parse(preorderDate.toString());
+            String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + currentDate + ";";
+            String preorderQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + RELEASE_DATE + " = " + preorderDate + ";";
+
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor avaialbleCursor = db.rawQuery(columnIdQuery, null);
             Cursor preorderCursor = db.rawQuery(preorderQuery, null);
@@ -988,11 +993,12 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                                     tablePrice = hardbackPrice;
                                     break;
                             }
-                            if (price < tablePrice || tablePrice == 0.0) {
+                            String whereClause = COLUMN_ID + "=" + b.getColumnId();
+                            db.update(TABLE_BOOKS, val, whereClause, null);
+
+                            if (price < tablePrice || (tablePrice == 0.0 && price >= 0)) {
                                 priceChecker.setName(b.getTitle());
                                 cheaperOptions.add(priceChecker);
-                                String whereClause = COLUMN_ID + "=" + b.getColumnId();
-                                db.update(TABLE_BOOKS, val, whereClause, null);
                             }
                         }
                     }
@@ -1026,7 +1032,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
                     if (p.getPrice() == 0 && lowestPrice == 0.0)
                         lowestPrice = p.getPrice();
-                    else if (p.getPrice() < lowestPrice && lowestPrice == 0.0)
+                    else if (p.getPrice() < lowestPrice && lowestPrice != 0.0)
                         lowestPrice = p.getPrice();
                 }
                 SQLiteDatabase db = this.getReadableDatabase();
@@ -1211,7 +1217,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public String getIsbnFromId(int goodreadsId) {
         String isbn = null;
         try {
-            String countQuery = "SELECT "+ ISBN +" FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + "=" + goodreadsId + " LIMIT 1;";
+            String countQuery = "SELECT " + ISBN + " FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + "=" + goodreadsId + " LIMIT 1;";
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(countQuery, null);
             GoodreadsBook b = new GoodreadsBook();
@@ -1227,7 +1233,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return isbn;    }
+        return isbn;
+    }
 
     public Boolean createBuzzlistAndBook(GoodreadsBook mBook, String listName) {
         long bookId = insertBook(mBook);
@@ -1294,7 +1301,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             }
             return authorList;
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -1352,6 +1359,66 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         return cursor.getCount();
+    }
+
+    public Boolean CreateEmptyBuzz(String name) {
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            ContentValues values = new ContentValues();
+            values.put(BUZZLIST_NAME, name);
+
+            long todo_id = db.insert(TABLE_BUZZLISTS, null, values);
+            if (todo_id != -1) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean CheckBuzzlist(String name) {
+        try {
+            String countQuery = "SELECT " + COLUMN_ID + " FROM " + TABLE_BUZZLISTS + " WHERE " + BUZZLIST_NAME + "='" + name + "';";
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(countQuery, null);
+            int columnId = 0;
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        columnId = cursor.getInt(0);
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+
+            if (columnId != 0) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean ModifyBuzzlist(String name, String newName) {
+        try {
+            SQLiteDatabase db = this.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put(BUZZLIST_NAME, newName);
+            String where = BUZZLIST_NAME + "='" + name + "'";
+            // insert row
+            long todo_id = db.update(TABLE_BUZZLISTS, values, where, null);
+
+            //long todo_id = db.up(TABLE_BUZZLISTS, null, values);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
 

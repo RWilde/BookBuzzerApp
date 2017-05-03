@@ -25,9 +25,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,7 +44,6 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.AuthorListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
-import com.fyp.n3015509.bookbuzzerapp.fragment.ListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
@@ -54,7 +55,6 @@ import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
 import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.PeriodicTask;
-import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
+    public static int bookIdFromBookFrag = 0;
 
     // tags used to attach the fragments
     private static final String TAG_HOME = "home";
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         PeriodicTask task = new PeriodicTask.Builder()
                 .setService(WatchBooksService.class)
                 .setTag(TASK_TAG_PERIODIC)
-                .setPeriod(periodSecs)
+                .setPeriod(30L)
                 .setFlex(flexSecs)
                 .build();
 
@@ -179,13 +180,11 @@ public class MainActivity extends AppCompatActivity {
             // initializing navigation menu
             setUpNavigationView();
 
-
             if (savedInstanceState == null) {
                 navItemIndex = 0;
                 CURRENT_TAG = TAG_HOME;
                 loadHomeFragment();
             }
-
 
             Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
             String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
@@ -377,9 +376,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_logout:
                         // launch new intent instead of loading fragment
-                        SaveSharedPreference.clearToken(getApplicationContext());
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        drawer.closeDrawers();
+                        new UserLogout(getApplicationContext()).execute();
                         return true;
                     case R.id.nav_settings:
                         //navItemIndex = 5;
@@ -454,6 +451,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search_menu, menu);
+        // show menu only when home fragment is selected
+        if (navItemIndex == 0) {
+            getMenuInflater().inflate(R.menu.main, menu);
+        }
+
+        if(navItemIndex == 1)
+        {
+            getMenuInflater().inflate(R.menu.create_buzzlist, menu);
+        }
+
+        if(navItemIndex == 2)
+        {
+
+        }
+
+        if(navItemIndex == 7 )
+        {
+        }
+
+        // when fragment is notifications, load the menu created for notifications
+        if (navItemIndex == 4) {
+            getMenuInflater().inflate(R.menu.notifications, menu);
+        }
 
         // Add SearchWidget.
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -464,20 +484,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onCreateOptionsMenu(menu);
 
-        // show menu only when home fragment is selected
-//        if (navItemIndex == 0) {
-//            getMenuInflater().inflate(R.menu.main, menu);
-//        }
-//
-//        if(navItemIndex == 2)
-//        {
-//
-//        }
-//
-//        // when fragment is notifications, load the menu created for notifications
-//        if (navItemIndex == 4) {
-//            getMenuInflater().inflate(R.menu.notifications, menu);
-//        }
+
         //return true;
     }
 
@@ -490,7 +497,19 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
-            Toast.makeText(getApplicationContext(), "Logout user!", Toast.LENGTH_LONG).show();
+            new UserLogout(getApplicationContext()).execute();
+        }
+
+        if (id == R.id.create_buzzlist) {
+            buildNewBuzzlistDialog();
+        }
+
+        if (id == R.id.star_book) {
+            new WatchBookTask(getApplicationContext()).execute();
+        }
+
+        if (id == R.id.unstar_book) {
+            new StopWatchBookTask(getApplicationContext()).execute();
         }
 
         // user is in notifications fragment
@@ -508,6 +527,77 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void buildNewBuzzlistDialog()
+    {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final EditText input = new EditText(getApplicationContext());
+
+        input.setSingleLine();
+        FrameLayout container = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        params.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        input.setTextColor(getResources().getColor(R.color.white));
+        input.setLayoutParams(params);
+        container.addView(input);
+        alert.setTitle("Enter the name of your new buzzlist");
+
+        alert.setView(container);
+
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // what ever you want to do with No option.
+            }
+        });
+        final AlertDialog dialog = alert.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Boolean wantToCloseDialog = false;
+                //Do stuff, possibly set wantToCloseDialog to true then...
+                String value = input.getText().toString();
+                boolean exist = DBUtil.CheckBuzzlistName(getApplicationContext(), value);
+                if (!exist){
+                    new MainActivity.BuzzlistCreate(getApplicationContext(), value).execute();
+                    wantToCloseDialog = true;
+                    Runnable mPendingRunnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            // update the main content by replacing fragments
+                            Fragment fragment = new BookListFragment();
+                            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                            fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                                    android.R.anim.fade_out);
+                            fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+                            fragmentTransaction.commitAllowingStateLoss();
+                        }
+                    };
+
+                    // If mPendingRunnable is not null, then add to the message queue
+                    if (mPendingRunnable != null) {
+                        mHandler.post(mPendingRunnable);
+                    }
+                }
+                else
+                {
+                    input.setError("Oops! It looks like you've already used this name, please try another one.");
+                    input.requestFocus();
+                }
+
+                if(wantToCloseDialog)
+                    dialog.dismiss();
+            }
+        });
+    }
 
     private void populateBookShelves() {
         new UserLists(getApplicationContext()).execute();
@@ -517,6 +607,114 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fm = getSupportFragmentManager();
         ShelfImportFrag alertDialog = ShelfImportFrag.newInstance();
         alertDialog.show(fm, "import");
+    }
+    private class StopWatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+        Context mContext;
+
+        StopWatchBookTask(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Adding to watch list...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                Boolean dbSuccess = DBUtil.RemoveFromWatched(mContext, bookIdFromBookFrag);
+               // String listName = DBUtil.findListForBook(mContext, bookIdFromBookFrag);
+                Boolean apiSuccess = api.RemoveFromWatched(mContext, bookIdFromBookFrag);
+
+//                if (dbSuccess == false || apiSuccess == false) {
+//                    return false;
+//                }
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book watched", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+        Context mContext;
+
+        WatchBookTask(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+//            progress = new ProgressDialog(mContext);
+//            progress.setMessage("Adding to watch list...");
+//            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                Boolean dbSuccess = DBUtil.WatchBook(mContext, bookIdFromBookFrag);
+                String listName = DBUtil.findListForBook(mContext, bookIdFromBookFrag);
+                Boolean apiSuccess = api.WatchBook(mContext, bookIdFromBookFrag, listName);
+
+                if (dbSuccess == false || apiSuccess == false) {
+                    return false;
+                }
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            //progress.dismiss();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book watched", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
@@ -606,6 +804,73 @@ public class MainActivity extends AppCompatActivity {
 
             AlertDialog alert = builder.create();
             alert.show();
+        }
+    }
+
+    private class BuzzlistCreate extends AsyncTask<Void, Void, Boolean> {
+        private final String name;
+        GoodreadsShelves util = new GoodreadsShelves();
+        private final Context mContext;
+
+        BuzzlistCreate(Context context, String buzzName) {
+            this.mContext = context;
+            this.name = buzzName;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try
+            {
+                DBUtil.SaveBuzzlist(mContext, name);
+                BookBuzzerAPI.SaveBuzzlist(mContext, name);
+            }catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        private ProgressDialog pdia;
+
+        protected void onPostExecute(final Boolean success) {
+            //showProgress(false);
+
+        }
+    }
+
+    private class UserLogout extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
+        GoodreadsShelves util = new GoodreadsShelves();
+        private final Context mContext;
+
+        UserLogout(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        protected ArrayList<GoodreadsShelf> doInBackground(Void... params) {
+            ArrayList<GoodreadsShelf> shelves = util.getShelves(getApplicationContext());
+            return shelves;
+        }
+
+        private ProgressDialog pdia;
+
+        protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
+            //showProgress(false);
+
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Logout")
+                    .setMessage("Are you sure you wish to logout?")
+                    .setNegativeButton(android.R.string.cancel, null) // dismisses by default
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override public void onClick(DialogInterface dialog, int which) {
+                            SaveSharedPreference.clearToken(getApplicationContext());
+                            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                            drawer.closeDrawers();
+                        }
+                    })
+                    .create()
+                    .show();
         }
     }
 

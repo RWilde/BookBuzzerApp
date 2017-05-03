@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.NotificationsFragment;
 import com.fyp.n3015509.dao.BuzzNotification;
@@ -231,6 +232,7 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
                 if (dbSuccess == false || apiSuccess == false) {
                     return false;
                 }
+                MainActivity.bookIdFromBookFrag = 7;
 
                 Thread.sleep(2000);
             } catch (InterruptedException e) {

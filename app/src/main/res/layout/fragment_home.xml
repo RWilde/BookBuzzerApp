@@ -1,23 +1,106 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
-    <Button android:id="@+id/scan_button"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:padding="10dp"
-        android:background="#ff333333"
-        android:textColor="#ffcccccc"
-        android:text="Scan your own book"
-        />
+        android:orientation="vertical">
+        <!-- TODO: Update blank fragment layout -->
 
-</FrameLayout>
+        <Button
+            android:id="@+id/scan_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="#ff333333"
+            android:padding="10dp"
+            android:text="Scan your own book"
+            android:textColor="#ffcccccc" />
+
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="Buzzlists" />
+
+        <ListView
+            android:id="@+id/buzz_list"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></ListView>
+
+        <TextView
+            android:id="@+id/buzz_empty"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="2dp" />
+
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="Books" />
+
+        <ListView
+            android:id="@+id/book_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></ListView>
+
+        <TextView
+            android:id="@+id/book_empty"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            ></TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="2dp" />
+
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="Authors" />
+
+        <ListView
+            android:id="@+id/author_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></ListView>
+
+        <TextView
+            android:id="@+id/author_empty"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            ></TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="20dp" />
+    </LinearLayout>
+</LinearLayout>

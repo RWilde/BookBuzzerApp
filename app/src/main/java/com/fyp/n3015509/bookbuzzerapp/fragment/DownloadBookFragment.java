@@ -382,9 +382,9 @@ public class DownloadBookFragment extends Fragment {
                     Boolean dbSuccess = DBUtil.CreateBookAndList(mContext, mBook, listName);
                     Boolean apiSuccess = api.CreateBookAndList(mContext, mBook, listName);
 
-                    if (dbSuccess == false || apiSuccess == false) {
-                        return false;
-                    }
+//                    if (dbSuccess == false || apiSuccess == false) {
+//                        return false;
+//                    }
                 }
                 else
                 {
@@ -392,9 +392,9 @@ public class DownloadBookFragment extends Fragment {
                     Boolean dbSuccess = DBUtil.AddBookToList(mContext, mBook, listName);
                     Boolean apiSuccess = api.AddBookToList(mContext, mBook, listName);
 
-                    if (dbSuccess == false || apiSuccess == false) {
-                        return false;
-                    }
+//                    if (dbSuccess == false || apiSuccess == false) {
+//                        return false;
+//                    }
                 }
                 Thread.sleep(2000);
             } catch (InterruptedException e) {

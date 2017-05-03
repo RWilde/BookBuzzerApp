@@ -8,10 +8,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
@@ -20,7 +25,10 @@ import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.bookbuzzerapp.other.SearchViewAdapter;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.SearchResult;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
+import com.fyp.n3015509.db.DBUtil;
+import com.fyp.n3015509.db.dao.Buzzlist;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -39,6 +47,9 @@ import java.util.ArrayList;
  */
 public class HomeFragment extends Fragment {
     private Button scanBtn;
+    ArrayList<Buzzlist> buzzlist = new ArrayList<>();
+    ArrayList<GoodreadsBook> book = new ArrayList<>();
+    ArrayList<GoodreadsAuthor> author = new ArrayList<>();
 
     private OnFragmentInteractionListener mListener;
 
@@ -86,7 +97,150 @@ public class HomeFragment extends Fragment {
             }
         });
 
+       // buzzlist = DBUtil.GetBuzzlist(getActivity());
+       // book = DBUtil.GetBooks(getActivity());
+       // author = DBUtil.GetAuthors(getActivity());
+
+        createBuzzlistList(view);
+        createAuthorList(view);
+        createBookList(view);
+
         return view;
+    }
+
+    private void createBookList(View view) {
+        final ListView listv = (ListView) view.findViewById(R.id.book_list);
+        if (book != null && book.size() > 0) {
+            ArrayList<String> buzzlistNames = new ArrayList<String>();
+            String[] values = new String[book.size()];
+            int count = 0;
+            for (GoodreadsBook buzz : book) {
+                if (count < 4) {
+                buzzlistNames.add(buzz.getTitle());
+                count++;
+                }
+            }
+            values = buzzlistNames.toArray(values);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+
+            listv.setAdapter(adapter);
+            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    GoodreadsBook buzz = book.get(position);
+
+                    Fragment fragment = new ListFragment();
+
+                    Bundle args = new Bundle();
+                    args.putInt("listId", buzz.getId());
+                    fragment.setArguments(args);
+
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment);
+                    //fragmentTransaction.addToBackStack(null);
+
+                    // Commit the transaction
+                    fragmentTransaction.commit();
+                }
+            });
+        }
+        else
+        {
+            listv.setVisibility(View.GONE);
+            TextView text = (TextView) view.findViewById(R.id.book_empty);
+            text.setText("Opps! Looks like you don't have any watched books. Why don't you add one?");
+        }
+    }
+
+    private void createBuzzlistList(View view) {
+        if (buzzlist != null && buzzlist.size() > 0) {
+            final ListView listv = (ListView) view.findViewById(R.id.buzz_list);
+
+            ArrayList<String> buzzlistNames = new ArrayList<String>();
+            String[] values = new String[buzzlist.size()];
+            int count = 0;
+            for (Buzzlist buzz : buzzlist) {
+                if (count < 4) {
+                    buzzlistNames.add(buzz.getName());
+                    count++;
+                }
+            }
+            values = buzzlistNames.toArray(values);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+
+            listv.setAdapter(adapter);
+            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Buzzlist buzz = buzzlist.get(position);
+
+                    Fragment fragment = new ListFragment();
+
+                    Bundle args = new Bundle();
+                    args.putInt("listId", buzz.getId());
+                    fragment.setArguments(args);
+
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment);
+                    //fragmentTransaction.addToBackStack(null);
+
+                    // Commit the transaction
+                    fragmentTransaction.commit();
+                }
+            });
+        }
+        else
+        {
+            TextView text = (TextView) view.findViewById(R.id.buzz_empty);
+            text.setText("Opps! Looks like you don't have buzzlists. Why don't you create one?");
+        }
+    }
+
+    private void createAuthorList(View view) {
+        if (author != null && author.size() > 0) {
+            final ListView listv = (ListView) view.findViewById(R.id.author_list);
+
+            ArrayList<String> buzzlistNames = new ArrayList<String>();
+            String[] values = new String[author.size()];
+            int count = 0;
+            for (GoodreadsAuthor buzz : author) {
+                if (count < 4 && buzz.getName() != null) {
+                buzzlistNames.add(buzz.getName());
+                count++;
+                 }
+            }
+            values = buzzlistNames.toArray(values);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+
+            listv.setAdapter(adapter);
+            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    GoodreadsAuthor buzz = author.get(position);
+
+                    Fragment fragment = new ListFragment();
+
+                    Bundle args = new Bundle();
+                    args.putInt("authorId", buzz.getColumnId());
+                    fragment.setArguments(args);
+
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment);
+                    //fragmentTransaction.addToBackStack(null);
+
+                    // Commit the transaction
+                    fragmentTransaction.commit();
+                }
+            });
+        }
+        else
+        {
+            TextView text = (TextView) view.findViewById(R.id.author_empty);
+            text.setText("Opps! Looks like you don't haven't found any authors yet. Why don't you search for one, using the search button at the top of the screen.");
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {

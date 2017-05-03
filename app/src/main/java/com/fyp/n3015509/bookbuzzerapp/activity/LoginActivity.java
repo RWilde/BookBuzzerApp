@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -205,7 +206,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
-        mGoodreadsAuthTask = new UserGoodreadsLoginTask();
+        mGoodreadsAuthTask = new UserGoodreadsLoginTask(getApplicationContext());
         mGoodreadsAuthTask.execute((Void) null);
 
 //        }
@@ -535,9 +536,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private JSONObject login = new JSONObject();
         private ProgressDialog progress;
         private GoodreadsLogin gLogin = new GoodreadsLogin();
+        Context mContext;
 
-        UserGoodreadsLoginTask() {
-
+        UserGoodreadsLoginTask(Context context) {
+            this.mContext = context;
         }
 
         @Override
@@ -560,8 +562,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
                     try {
                         JSONObject lists = LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
-                        progress.dismiss();
                         DBUtil.InsertFromAPI(lists, getApplicationContext());
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -584,6 +586,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             progress.dismiss();
             if (success) {
                 SaveSharedPreference.setPrefGoodreadsAuth(getApplicationContext(), true);
+                Intent mainIntent = new Intent(mContext, MainActivity.class);
+                startActivity(mainIntent);
                 Toast.makeText(getApplicationContext(), "Application synced", Toast.LENGTH_SHORT).show();
                 finish();
             } else {

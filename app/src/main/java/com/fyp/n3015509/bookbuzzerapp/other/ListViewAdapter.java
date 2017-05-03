@@ -96,6 +96,8 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
                 if (setStar(v, position) == true) {
                     //removeFromWatchList
                     DBUtil.RemoveFromWatched(mContext, getItem(position).getBuzzlistIds());
+                    String listName = DBUtil.findListForBook(mContext, getItem(position).getBuzzlistIds());
+                    BookBuzzerAPI.RemoveFromWatched(mContext, getItem(position).getBuzzlistIds());
                     setNotWatched(v);
                     Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
                 } else {
@@ -214,8 +216,6 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
                     ArrayList<BookAdapter> filterResultsData = new ArrayList<BookAdapter>();
                     try {
                         for (BookAdapter data : bookList) {
-                            // && data.getBuzzlistIsbns() != null && data.getBuzzlistAuthors() != null
-                            //|| data.getBuzzlistIsbns().toLowerCase().contains(charSequence) || (data.getBuzzlistAuthors().toLowerCase().contains(charSequence))
                             if (data.getBuzzlistNames() != null) {
                                 if (data.getBuzzlistNames().toLowerCase().startsWith(s)) {
                                     data.setAdded(true);

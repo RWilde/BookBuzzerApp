@@ -37,7 +37,9 @@ import java.util.HashMap;
 public class BookBuzzerAPI {
     private static final String IP = "192.168.0.4";
     private static final String BaseURL = "http://" + IP + ":8081/api";
+    private static final String BuzzlistURL = BaseURL + "/buzzlist/";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
+    private static final String CreateBuzzlistURL = BaseURL + "/buzzlist/emptybuzz";
     private static final String NewBookURL = BaseURL + "/buzzlist/newbook";
     private static final String RegisterURL = BaseURL + "/users/signup";
     private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
@@ -491,6 +493,80 @@ public class BookBuzzerAPI {
     }
 
 
+    public static void SaveBuzzlist(Context mContext, String name) {
+        try {
+            URL authURL = new URL(CreateBuzzlistURL);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
 
+            //conn.connect();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            Gson gson = new Gson();
+            JSONObject o = new JSONObject();
+            o.put("name", name);
 
+            out.write(o.toString());
+            out.close();
+
+            int status = conn.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ModifyBuzzlist(Context mContext, String name, String newName) {
+        try {
+            URL authURL = new URL(BuzzlistURL);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            //conn.connect();
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            Gson gson = new Gson();
+            JSONObject o = new JSONObject();
+            o.put("name", name);
+            o.put("newName", newName);
+
+            out.write(o.toString());
+            out.close();
+
+            int status = conn.getResponseCode();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean RemoveFromWatched(Context mContext, Integer goodreadsIdgoodreadsId) {
+        try {
+            URL authURL = new URL(BuzzlistURL + goodreadsIdgoodreadsId);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            int status = conn.getResponseCode();
+
+            if (status == 200)
+            {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

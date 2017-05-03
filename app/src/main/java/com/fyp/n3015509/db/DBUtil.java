@@ -30,11 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DBUtil {
 
-    public static int SaveShelf(ArrayList<GoodreadsShelf> booklist, Context ctx) {
+    public static void SaveShelf(ArrayList<GoodreadsShelf> booklist, Context ctx) {
         ArrayList<GoodreadsBook> dbBooks = new ArrayList<>();
         try {
             MySQLiteHelper db = new MySQLiteHelper(ctx);
-
             for (GoodreadsShelf shelf : booklist) {
                 ArrayList<GoodreadsBook> books = shelf.getBooks();
                 long shelfId = db.insertBuzzlist(shelf);
@@ -51,10 +50,6 @@ public class DBUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // int count = db.getBooksCount();
-        int count = 0;
-        return count;
     }
 
     public static ArrayList<Buzzlist> GetBuzzlist(Context ctx) {
@@ -454,5 +449,49 @@ public class DBUtil {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public static ArrayList<GoodreadsBook> GetBooks(FragmentActivity activity) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(activity);
+            return db.getWatchedBooks();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Boolean SaveBuzzlist(Context mContext, String name) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.CreateEmptyBuzz(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean CheckBuzzlistName(Context mContext, String name) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.CheckBuzzlist(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean ModifyBuzzlist(Context mContext, String name, String newName) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.ModifyBuzzlist(name, newName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String findListForBook(Context mContext, int mBook) {
+        return null;
     }
 }

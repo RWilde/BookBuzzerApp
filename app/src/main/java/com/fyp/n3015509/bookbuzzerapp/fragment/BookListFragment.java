@@ -1,7 +1,11 @@
 package com.fyp.n3015509.bookbuzzerapp.fragment;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -15,13 +19,18 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.APIs.GoodreadsShelves;
+import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ArraySwipeAdapterSample;
 import com.fyp.n3015509.db.dao.Buzzlist;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
@@ -63,22 +72,18 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
                 buzzlistNames.add(buzz.getName());
             }
             values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1, values);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            listv.setAdapter(adapter);
 
-          //  listv.setAdapter(new ArraySwipeAdapterSample<String>(getActivity(), R.layout.fragment_item, R.id.position, values));
-listv.setAdapter(adapter);
-
-            // listv.getAdapter().setMode(Attributes.Mode.Single);
             listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    // ((SwipeLayout)(listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
                     Buzzlist buzz = buzzlist.get(position);
 
                     Fragment fragment = new ListFragment();
 
                     Bundle args = new Bundle();
-                    args.putInt("listId", buzz.getId());
+                    args.putString("book", new Gson().toJson(buzz));
                     fragment.setArguments(args);
 
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
@@ -97,10 +102,11 @@ listv.setAdapter(adapter);
                     return false;
                 }
             });
+            final String[] finalValues = values;
             listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
+                    buildChangeBuzzlistDialog(finalValues[position]);
                     return true;
                 }
             });
@@ -122,6 +128,67 @@ listv.setAdapter(adapter);
         return rootView;
     }
 
+    public void buildChangeBuzzlistDialog(final String originalName) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this.getActivity());
+        final EditText input = new EditText(getContext());
+        input.setText(originalName);
+
+        input.setSingleLine();
+        FrameLayout container = new FrameLayout(this.getActivity());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        params.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        input.setTextColor(getResources().getColor(R.color.white));
+        input.setLayoutParams(params);
+        container.addView(input);
+        alert.setTitle("Enter the name of your new buzzlist");
+
+        alert.setView(container);
+
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // what ever you want to do with No option.
+            }
+        });
+        final AlertDialog dialog = alert.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean wantToCloseDialog = false;
+                //Do stuff, possibly set wantToCloseDialog to true then...
+                String newName = input.getText().toString();
+                boolean exist = DBUtil.CheckBuzzlistName(getContext(), newName);
+                if (originalName.contentEquals(input.getText().toString())) {
+                    input.setError("Oops! It looks like you've entered the same name, please press cancel if you don't want to change anything.");
+                    input.requestFocus();
+                } else if (!exist) {
+                    new BuzzlistModify(getContext(), originalName, newName ).execute();
+                    wantToCloseDialog = true;
+
+                    // update the main content by replacing fragments
+                    Fragment fragment = new BookListFragment();
+                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, "Buzzlist");
+                    fragmentTransaction.commitAllowingStateLoss();
+                } else {
+                    input.setError("Oops! It looks like you've already used this name, please try another one.");
+                    input.requestFocus();
+                }
+
+                if (wantToCloseDialog)
+                    dialog.dismiss();
+            }
+        });
+    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -133,12 +200,6 @@ listv.setAdapter(adapter);
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
 
     @Override
@@ -163,12 +224,72 @@ listv.setAdapter(adapter);
 
         // Commit the transaction
         fragmentTransaction.commit();
-
-        // Toast.makeText(getActivity(), "Item: " + buzz.getName(), Toast.LENGTH_SHORT).show();
     }
 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private class BuzzlistCreate extends AsyncTask<Void, Void, Boolean> {
+        private final String name;
+        GoodreadsShelves util = new GoodreadsShelves();
+        private final Context mContext;
+
+        BuzzlistCreate(Context context, String buzzName) {
+            this.mContext = context;
+            this.name = buzzName;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                DBUtil.SaveBuzzlist(mContext, name);
+                BookBuzzerAPI.SaveBuzzlist(mContext, name);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        private ProgressDialog pdia;
+
+        protected void onPostExecute(final Boolean success) {
+            //showProgress(false);
+
+        }
+    }
+
+    private class BuzzlistModify extends AsyncTask<Void, Void, Boolean> {
+        private final String name;
+        private final String newName;
+        GoodreadsShelves util = new GoodreadsShelves();
+        private final Context mContext;
+
+        BuzzlistModify(Context context, String buzzName, String newName) {
+            this.mContext = context;
+            this.name = buzzName;
+            this.newName = newName;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                DBUtil.ModifyBuzzlist(mContext, name, newName);
+                BookBuzzerAPI.ModifyBuzzlist(mContext, name, newName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        private ProgressDialog pdia;
+
+        protected void onPostExecute(final Boolean success) {
+            //showProgress(false);
+
+        }
     }
 }

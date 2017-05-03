@@ -46,7 +46,7 @@ public class WatchBooksService extends GcmTaskService {
 //        } else if (MainActivity.TASK_TAG_PERIODIC.equals(tag)) {
         try {
             result = checkForNewBooks();
-            checkForPrices(this);
+            checkForPrices();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,13 +112,13 @@ public class WatchBooksService extends GcmTaskService {
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 
-    public int checkForPrices(Context ctx) {
+    public int checkForPrices() {
         AppUtil app = new AppUtil();
         DBUtil db = new DBUtil();
         BookBuzzerAPI api = new BookBuzzerAPI();
 
-        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = app.GetLatestPrices(ctx);
-        ArrayList<BuzzNotification> buzzList = db.CreatePriceCheckerNotifications(ctx, results);
+        ConcurrentHashMap<String, ArrayList<PriceChecker>> results = app.GetLatestPrices(getApplicationContext());
+        ArrayList<BuzzNotification> buzzList = db.CreatePriceCheckerNotifications(getApplicationContext(), results);
 
         api.SaveNotifications(this, buzzList);
         if (results != null) {
