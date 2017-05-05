@@ -17,14 +17,19 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Connection;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -35,7 +40,7 @@ import java.util.HashMap;
  */
 
 public class BookBuzzerAPI {
-    private static final String IP = "192.168.0.4";
+    private static final String IP = "192.168.0.5";
     private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String BuzzlistURL = BaseURL + "/buzzlist/";
     private static final String NewBuzzlistURL = BaseURL + "/buzzlist/shelfimport";
@@ -45,6 +50,9 @@ public class BookBuzzerAPI {
     private static final String FacebookLoginURL = BaseURL + "/users/signupfacebook";
     private static final String GoodreadsLoginURL = BaseURL + "/users/signupgoodreads";
     private static final String DeleteBookURL = BaseURL + "/buzzlist/book/";
+    private static final String GoodreadsSync = BaseURL + "/users/sync";
+    private static final String GoodreadsUpdateId = BaseURL + "/users/updategoodreadsId";
+    private static final String UpdateName= BaseURL + "/users/updatename";;
 
     private static final String WatchBookURL = BaseURL + "/watch/book/";
     private static final String NotificationURL = BaseURL + "/notification/";
@@ -240,7 +248,6 @@ public class BookBuzzerAPI {
             out.write(json);
             out.close();
 
-            int status = conn.getResponseCode();
             int response = conn.getResponseCode();
             if (response == 200) {
                 return true;
@@ -568,5 +575,96 @@ public class BookBuzzerAPI {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public Boolean ChangeUserName(Context mContext, String mName) {
+        try {
+            URL authURL = new URL(UpdateName);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            JSONObject o = new JSONObject();
+
+            o.put("name", mName);
+            out.write(o.toString());
+
+            out.close();
+            int status = conn.getResponseCode();
+
+            if (status == 200)
+            {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static Boolean AddGoodreadsAccount(Context mContext, JSONObject login) {
+        try {
+            URL authURL = new URL(GoodreadsUpdateId);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            out.write(login.toString());
+            out.close();
+            int status = conn.getResponseCode();
+
+            if (status == 200)
+            {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public JSONObject Sync(Context mContext) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            URL authURL = new URL(GoodreadsSync);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            int status = conn.getResponseCode();
+
+            if (status == 200) {
+                // read the response
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String result = convertStreamToString(in);
+                jsonObject = new JSONObject(result);
+
+                in.close();
+                conn.disconnect();
+            }
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+
     }
 }

@@ -95,9 +95,7 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
 
                 if (setStar(v, position) == true) {
                     //removeFromWatchList
-                    DBUtil.RemoveFromWatched(mContext, getItem(position).getBuzzlistIds());
-                    String listName = DBUtil.findListForBook(mContext, getItem(position).getBuzzlistIds());
-                    BookBuzzerAPI.RemoveFromWatched(mContext, getItem(position).getBuzzlistIds());
+                    new UnWatchBookTask(ListViewAdapter.this.activity, getItem(position).getBuzzlistIds());
                     setNotWatched(v);
                     Toast.makeText(mContext, "Removed from watch list", Toast.LENGTH_SHORT).show();
                 } else {
@@ -399,6 +397,54 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
         }
     }
 
+    private class UnWatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final int mBook;
+        private final Context mContext;
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+
+        UnWatchBookTask(Context cxt, int book) {
+            mBook = book;
+            mContext = cxt;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Adding to watch list...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                DBUtil.RemoveFromWatched(mContext,mBook);
+                String listName = DBUtil.findListForBook(mContext, mBook);
+                BookBuzzerAPI.RemoveFromWatched(mContext, mBook);
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+
+            if (success) {
+                Toast.makeText(mContext, "Book unwatched", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private class PriceChecker extends AsyncTask<Void, Void, Boolean> {
         private final Context mContext;
         private final String mIsbn;
@@ -418,7 +464,6 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
 
         protected void onPostExecute() {
             //showProgress(false);
-
         }
     }
 }

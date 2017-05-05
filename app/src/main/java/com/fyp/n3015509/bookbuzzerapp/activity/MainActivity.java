@@ -10,6 +10,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,6 +51,7 @@ import com.fyp.n3015509.bookbuzzerapp.fragment.SettingsFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.ShelfImportFrag;
 import com.fyp.n3015509.bookbuzzerapp.fragment.WatchListFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.CircleTransform;
+import com.fyp.n3015509.bookbuzzerapp.tasks.SyncService;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
 import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
@@ -113,13 +116,23 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
         mGcmNetworkManager = GcmNetworkManager.getInstance(this);
 
+        int syncSecs = SaveSharedPreference.getPrefSyncFreq(getApplicationContext());
+        syncSecs = syncSecs * 86400;
         PeriodicTask task = new PeriodicTask.Builder()
                 .setService(WatchBooksService.class)
                 .setTag(TASK_TAG_PERIODIC)
-                .setPeriod(30L)
+                .setPeriod(86400L)
                 .setFlex(flexSecs)
                 .build();
 
+        if (syncSecs != 0) {
+            PeriodicTask APISync = new PeriodicTask.Builder()
+                    .setService(SyncService.class)
+                    .setTag(TASK_TAG_PERIODIC)
+                    .setPeriod(syncSecs)
+                    .setFlex(flexSecs)
+                    .build();
+        }
         mGcmNetworkManager.schedule(task);
 
         mReceiver = new BroadcastReceiver() {
@@ -187,14 +200,46 @@ public class MainActivity extends AppCompatActivity {
                     loadHomeFragment();
                 }
 
-                Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
-                String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
-                if (imported == false && !userId.contentEquals("")) {
-                    new UserShelves(getApplicationContext()).execute();
+                Boolean connection = haveNetworkConnection();
+                if (connection == false) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("You're not connected to the internet, so any changes made will not be saved")
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // FIRE ZE MISSILES!
+                                }
+                            });
+                    // Create the AlertDialog object and return it
+                    AlertDialog dialog = builder.create();
+
+                    dialog.show();
+                }else {
+                    Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
+                    String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
+                    if (imported == false && !userId.contentEquals("")) {
+                        new UserShelves(getApplicationContext()).execute();
+                    }
                 }
 
             }
         }
+    }
+
+    private boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
     }
 
     /***
@@ -374,16 +419,16 @@ public class MainActivity extends AppCompatActivity {
                         CURRENT_TAG = TAG_NOTIFICATIONS;
                         break;
                     case R.id.nav_suggestions:
-                        navItemIndex = 5;
-                        CURRENT_TAG = TAG_SUGGESTIONS;
+                        //navItemIndex = 5;
+                       // CURRENT_TAG = TAG_SUGGESTIONS;
                         break;
                     case R.id.nav_logout:
                         // launch new intent instead of loading fragment
                         new UserLogout(getApplicationContext()).execute();
                         return true;
                     case R.id.nav_settings:
-                        //navItemIndex = 5;
-                        //CURRENT_TAG = TAG_SETTINGS;
+                        navItemIndex = 5;
+                        CURRENT_TAG = TAG_SETTINGS;
                         break;
                     // launch new intent instead of loading fragment
 
@@ -459,8 +504,7 @@ public class MainActivity extends AppCompatActivity {
             getMenuInflater().inflate(R.menu.main, menu);
         }
 
-        if(navItemIndex == 1)
-        {
+        if (navItemIndex == 1) {
             getMenuInflater().inflate(R.menu.create_buzzlist, menu);
         }
 
@@ -524,14 +568,13 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void buildNewBuzzlistDialog()
-    {
+    public void buildNewBuzzlistDialog() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         final EditText input = new EditText(getApplicationContext());
 
         input.setSingleLine();
         FrameLayout container = new FrameLayout(this);
-        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
         params.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
         input.setTextColor(getResources().getColor(R.color.white));
@@ -554,16 +597,14 @@ public class MainActivity extends AppCompatActivity {
         });
         final AlertDialog dialog = alert.create();
         dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
-        {
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 Boolean wantToCloseDialog = false;
                 //Do stuff, possibly set wantToCloseDialog to true then...
                 String value = input.getText().toString();
                 boolean exist = DBUtil.CheckBuzzlistName(getApplicationContext(), value);
-                if (!exist){
+                if (!exist) {
                     new MainActivity.BuzzlistCreate(getApplicationContext(), value).execute();
                     wantToCloseDialog = true;
                     Runnable mPendingRunnable = new Runnable() {
@@ -583,14 +624,12 @@ public class MainActivity extends AppCompatActivity {
                     if (mPendingRunnable != null) {
                         mHandler.post(mPendingRunnable);
                     }
-                }
-                else
-                {
+                } else {
                     input.setError("Oops! It looks like you've already used this name, please try another one.");
                     input.requestFocus();
                 }
 
-                if(wantToCloseDialog)
+                if (wantToCloseDialog)
                     dialog.dismiss();
             }
         });
@@ -644,9 +683,7 @@ public class MainActivity extends AppCompatActivity {
 //                    if (dbSuccess == false || apiSuccess == false) {
 //                        return false;
 //                    }
-                }
-                else
-                {
+                } else {
                     BookBuzzerAPI api = new BookBuzzerAPI();
                     Boolean dbSuccess = DBUtil.AddBookToList(mContext, mBook, listName);
                     Boolean apiSuccess = api.AddBookToList(mContext, mBook, listName);
@@ -703,7 +740,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 BookBuzzerAPI api = new BookBuzzerAPI();
                 Boolean dbSuccess = DBUtil.RemoveFromWatched(mContext, bookIdFromBookFrag);
-               // String listName = DBUtil.findListForBook(mContext, bookIdFromBookFrag);
+                // String listName = DBUtil.findListForBook(mContext, bookIdFromBookFrag);
                 Boolean apiSuccess = api.RemoveFromWatched(mContext, bookIdFromBookFrag);
 
 //                if (dbSuccess == false || apiSuccess == false) {
@@ -786,93 +823,101 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class UserShelves extends AsyncTask<Void, Void, ArrayList<GoodreadsShelf>> {
+    private class UserShelves extends AsyncTask<Void, Void, Boolean>{
         GoodreadsShelves util = new GoodreadsShelves();
         private final Context mContext;
-
+        ArrayList<GoodreadsShelf> shelves = new ArrayList<>();
         UserShelves(Context context) {
             this.mContext = context;
         }
 
         @Override
-        protected ArrayList<GoodreadsShelf> doInBackground(Void... params) {
-            ArrayList<GoodreadsShelf> shelves = util.getShelves(getApplicationContext());
-            return shelves;
+        protected Boolean doInBackground(Void... params) {
+            shelves = util.getShelves(getApplicationContext());
+            if (shelves != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private ProgressDialog pdia;
 
-        protected void onPostExecute(final ArrayList<GoodreadsShelf> shelves) {
+        protected void onPostExecute(final Boolean success) {
             //showProgress(false);
-            final ArrayList<String> listOfShelves = new ArrayList<String>();
+            final ArrayList<String> listOfShelves = new ArrayList<>();
             final ArrayList mSelectedItems = new ArrayList();  // Where we track the selected items
-
-            // Set the dialog title
-            for (GoodreadsShelf shelf : shelves) {
-                if (shelf.getBookNum() != 0) {
-                    String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
-                    listOfShelves.add(shelfInfo);
+            if (success) {
+                // Set the dialog title
+                for (GoodreadsShelf shelf : shelves) {
+                    if (shelf.getBookNum() != 0) {
+                        String shelfInfo = shelf.getShelfName() + " (" + shelf.getBookNum() + " books)";
+                        listOfShelves.add(shelfInfo);
+                    }
                 }
-            }
-            final boolean[] itemChecked = new boolean[listOfShelves.size()];
+                final boolean[] itemChecked = new boolean[listOfShelves.size()];
 
-            CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
-            itemChecked.equals(true);
+                CharSequence[] cs = listOfShelves.toArray(new CharSequence[listOfShelves.size()]);
+                itemChecked.equals(true);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            // Set the dialog title
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                // Set the dialog title
 
-            builder.setTitle("Select shelves to import")
-                    // Specify the list array, the items to be selected by default (null for none),
-                    // and the listener through which to receive callbacks when items are selected
-                    .setMultiChoiceItems(cs, itemChecked,
-                            new DialogInterface.OnMultiChoiceClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which,
-                                                    boolean isChecked) {
-                                    if (isChecked) {
-                                        // If the user checked the item, add it to the selected items
-                                        // itemChecked[which] = isChecked;
-                                        //String item = listOfShelves.get(which);
-                                        mSelectedItems.add(listOfShelves.get(which));
-                                    } else if (mSelectedItems.contains(listOfShelves.get(which))) {
-                                        // Else, if the item is already in the array, remove it
-                                        mSelectedItems.remove(listOfShelves.get(which));
+                builder.setTitle("Select shelves to import")
+                        // Specify the list array, the items to be selected by default (null for none),
+                        // and the listener through which to receive callbacks when items are selected
+                        .setMultiChoiceItems(cs, itemChecked,
+                                new DialogInterface.OnMultiChoiceClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which,
+                                                        boolean isChecked) {
+                                        if (isChecked) {
+                                            // If the user checked the item, add it to the selected items
+                                            // itemChecked[which] = isChecked;
+                                            //String item = listOfShelves.get(which);
+                                            mSelectedItems.add(listOfShelves.get(which));
+                                        } else if (mSelectedItems.contains(listOfShelves.get(which))) {
+                                            // Else, if the item is already in the array, remove it
+                                            mSelectedItems.remove(listOfShelves.get(which));
+                                        }
+                                    }
+                                })
+                        // Set the action buttons
+                        .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User clicked OK, so save the mSelectedItems results somewhere
+                                // or return them to the component that opened the dialog
+                                ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
+                                for (Object shelfName : mSelectedItems) {
+                                    String selected = shelfName.toString();
+                                    String[] parts = selected.split("\\(");
+                                    String shelfPart = parts[0];
+                                    shelfPart = shelfPart.replaceAll(" $", "");
+                                    for (GoodreadsShelf shelf : shelves) {
+                                        if (shelfPart.toString().contentEquals(shelf.getShelfName())) {
+                                            options.add(shelf);
+                                        }
                                     }
                                 }
-                            })
-                    // Set the action buttons
-                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            // User clicked OK, so save the mSelectedItems results somewhere
-                            // or return them to the component that opened the dialog
-                            ArrayList<GoodreadsShelf> options = new ArrayList<GoodreadsShelf>();
-                            for (Object shelfName : mSelectedItems) {
-                                String selected = shelfName.toString();
-                                String[] parts = selected.split("\\(");
-                                String shelfPart = parts[0];
-                                shelfPart = shelfPart.replaceAll(" $", "");
-                                for (GoodreadsShelf shelf : shelves) {
-                                    if (shelfPart.toString().contentEquals(shelf.getShelfName())) {
-                                        options.add(shelf);
-                                    }
-                                }
+
+                                UserGoodreadsShelves mGoodreadsShelfTask = new UserGoodreadsShelves(getApplicationContext(), options);
+                                mGoodreadsShelfTask.execute((Void) null);
                             }
+                        })
+                        .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
 
-                            UserGoodreadsShelves mGoodreadsShelfTask = new UserGoodreadsShelves(getApplicationContext(), options);
-                            mGoodreadsShelfTask.execute((Void) null);
-                        }
-                    })
-                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
+                            }
+                        });
 
-                        }
-                    });
-
-            AlertDialog alert = builder.create();
-            alert.show();
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
         }
     }
 
@@ -888,13 +933,11 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            try
-            {
+            try {
                 DBUtil.SaveBuzzlist(mContext, name);
                 BookBuzzerAPI.SaveBuzzlist(mContext, name);
                 SaveSharedPreference.setImported(getApplicationContext(), true);
-            }catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
@@ -933,7 +976,9 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("Are you sure you wish to logout?")
                     .setNegativeButton(android.R.string.cancel, null) // dismisses by default
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override public void onClick(DialogInterface dialog, int which) {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            DBUtil.deleteDatabase(getApplicationContext());
                             SaveSharedPreference.clearToken(getApplicationContext());
                             startActivity(new Intent(MainActivity.this, LoginActivity.class));
                             drawer.closeDrawers();

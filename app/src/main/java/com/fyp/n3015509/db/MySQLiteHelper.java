@@ -1490,5 +1490,70 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
         return results;
     }
+
+    public boolean addBooksToWatchList(ArrayList<Integer> watch) {
+        for (int bookId : watch) {
+            boolean success = false;
+            int bookColumnId = 0;
+            String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + "=" + bookId + " LIMIT 1;";
+
+            try {
+                SQLiteDatabase db = this.getReadableDatabase();
+                Cursor cursor = db.rawQuery(columnIdQuery, null);
+                if (cursor != null) {
+                    try {
+                        if (cursor.moveToFirst()) {
+                            bookColumnId = cursor.getInt(0);
+
+                            if (bookColumnId != 0) {
+                                ContentValues insertValues = new ContentValues();
+                                insertValues.put(BOOK_ID, bookColumnId);
+                                insertValues.put(NOTIFIED, 0);
+                                insertValues.put(PREORDER, 0);
+                                long result = db.insert(BOOK_WATCH, null, insertValues);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        cursor.close();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+    public boolean addNotifications(ArrayList<BuzzNotification> notificationList) {
+        for (BuzzNotification b : notificationList) {
+            String columnIdQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + GOODREADS_ID + " = '" + b.getGoodreadsId() + "';";
+
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(columnIdQuery, null);
+
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        ContentValues notification = new ContentValues();
+                        notification.put(BOOK_ID, cursor.getInt(0));
+                        notification.put(NOTIFICATION_TYPE, b.getType().toString());
+                        notification.put(MESSAGE, b.getMessage());
+                        if (b.getRead() == true) {
+                            notification.put(READ, 1);
+                        } else {
+                            notification.put(READ, 0);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    cursor.close();
+                }
+            }
+        }
+        return true;
+    }
 }
 

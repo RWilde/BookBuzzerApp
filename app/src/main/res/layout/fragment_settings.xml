@@ -2,14 +2,206 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textUserSettings"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
-        tools:context=".MainActivity" />
-    <!--<a href="https://icons8.com/web-app/5573/Download">Download icon credits</a>-->
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical">
+
+        <!-- TODO: Update blank fragment layout -->
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:text="Account"></TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/buzz_empty"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:paddingBottom="20dp"
+                android:text="Change Name"></TextView>
+
+            <EditText
+                android:id="@+id/nameInput"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight=".6"
+                android:animateLayoutChanges="true"
+                android:hint="Enter your new name"
+                android:inputType="textVisiblePassword"
+                android:paddingTop="10dp" />
+
+            <Button
+                android:id="@+id/okName"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="30dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="5dp"
+                android:layout_weight=".1"
+                android:background="@drawable/cus_button"
+                android:padding="3dp"
+                android:text="Ok"
+                android:textColor="#ffcccccc" />
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/sync"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"
+            android:text="Sync Frequency (Days)"></TextView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <SeekBar
+                android:id="@+id/seekBar1"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_weight=".8"
+                android:progress="1"
+                android:max="7" />
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="0dip"
+                android:layout_weight=".2"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/seekBar1"
+                />
+
+        </LinearLayout>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/main_menu_header_divider" />
+
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:padding="5dp"
+            android:text="Goodreads" />
+
+        <LinearLayout
+            android:id="@+id/authGoodreadsSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/authText"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="50dp"
+                android:layout_centerHorizontal="true"
+                android:layout_weight=".6"
+                android:padding="5dp"
+                android:text="Connect with Goodreads" />
+
+            <Button
+                android:id="@+id/authorise"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="30dp"
+                android:layout_weight=".4"
+                android:background="@drawable/cus_button"
+                android:padding="10dp"
+                android:text="Connect"
+                android:textColor="#ffcccccc" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="50dp"
+                android:layout_centerHorizontal="true"
+                android:layout_weight=".6"
+                android:padding="5dp"
+                android:text="Reimport Goodreads Shelves" />
+
+            <Button
+                android:id="@+id/reimport"
+                style="@style/bookDetailsTextStyle"
+                android:layout_width="0dip"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginRight="30dp"
+                android:layout_weight=".4"
+                android:background="@drawable/cus_button"
+                android:padding="10dp"
+                android:text="Import"
+                android:textColor="#ffcccccc" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/book_empty"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"></TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="2dp" />
+
+        <TextView
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/author_empty"
+            style="@style/bookDetailsTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp"></TextView>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="20dp" />
+    </LinearLayout>
 </LinearLayout>
 

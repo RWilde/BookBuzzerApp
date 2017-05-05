@@ -1,6 +1,7 @@
 package com.fyp.n3015509.bookbuzzerapp.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,7 @@ public class SignupActivity extends AppCompatActivity {
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String name = mName.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -96,7 +98,7 @@ public class SignupActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             // showProgress(true);
-            mRegisterTask = new UserRegisterTask(email, password);
+            mRegisterTask = new UserRegisterTask(email, password, name);
             mRegisterTask.execute((Void) null);
         }
     }
@@ -115,12 +117,15 @@ public class SignupActivity extends AppCompatActivity {
 
         private final String mEmail;
         private final String mPassword;
+        private final String mName;
+
         private JSONObject login = new JSONObject();
         private ProgressDialog progress;
 
-        UserRegisterTask(String email, String password) {
+        UserRegisterTask(String email, String password, String name) {
             mEmail = email;
             mPassword = password;
+            mName = name;
         }
 
         @Override
@@ -137,8 +142,9 @@ public class SignupActivity extends AppCompatActivity {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                login.put("name", mEmail);
+                login.put("email", mEmail);
                 login.put("password", mPassword);
+                login.put("name", mName);
 
                 String token = LoginAPI.RegisterNewUser(getApplicationContext(), login);
                 if (token != null) {
@@ -163,9 +169,11 @@ public class SignupActivity extends AppCompatActivity {
             progress.dismiss();
 
             if (success) {
-                finish();
+                Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(i);
+                setContentView(R.layout.activity_main);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.setError("There seems to have been an issues, please try again");
                 mPasswordView.requestFocus();
             }
         }

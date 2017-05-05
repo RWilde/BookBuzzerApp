@@ -22,7 +22,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -142,8 +141,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
                             @Override
                             public void onCompleted(JSONObject object, GraphResponse response) {
-                                Log.v("LoginActivity", response.toString());
-
                                 // Application code
                                 try {
                                     String email = object.getString("email");
@@ -417,7 +414,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                login.put("name", mEmail);
+                login.put("email", mEmail);
                 login.put("password", mPassword);
 
                 String token = com.fyp.n3015509.APIs.LoginAPI.RegisterNewUser(getApplicationContext(), login);
@@ -487,14 +484,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
 
             try {
-                login.put("name", mEmail);
+                login.put("email", mEmail);
                 login.put("password", mPassword);
 
-                String token = com.fyp.n3015509.APIs.LoginAPI.SignIn(getApplicationContext(), login);
-                if (token != null) {
-                    return true;
-                }
-
+                JSONObject lists = com.fyp.n3015509.APIs.LoginAPI.SignIn(getApplicationContext(), login);
+                DBUtil.InsertFromAPI(lists, getApplicationContext());
                 Thread.sleep(2000);
             } catch (JSONException e) {
                 return false;
@@ -502,7 +496,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
 
-            return false;
+            return true;
         }
 
 
@@ -563,11 +557,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     try {
                         JSONObject lists = LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
                         DBUtil.InsertFromAPI(lists, getApplicationContext());
-
+                        return true;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    return true;
                 }
 
                 Thread.sleep(2000);
@@ -576,7 +569,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return true;
+            return false;
         }
 
 

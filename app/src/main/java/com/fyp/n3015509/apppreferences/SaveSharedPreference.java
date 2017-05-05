@@ -21,7 +21,6 @@ public class SaveSharedPreference {
     static final String PREF_USERNAME = "username";
 
     static final String PREF_SYNC_FREQ = "sync";
-    static final String PREF_LAST_SYNC = "last_sync";
 
     static final String PREF_GOODREADS_AUTH = "goodreads_auth";
     static final String PREF_FACEBOOK_AUTH = "facebook_auth";
@@ -31,19 +30,9 @@ public class SaveSharedPreference {
         return getSharedPreferences(cxt).getInt(PREF_SYNC_FREQ, 0);
     }
 
-    public static String getPrefLastSync(Context cxt) {
-        return getSharedPreferences(cxt).getString(PREF_LAST_SYNC, "");
-    }
-
     public static void setPrefSyncFreq(Context cxt, int freq) {
         SharedPreferences.Editor editor = getSharedPreferences(cxt).edit();
         editor.putInt(PREF_SYNC_FREQ, freq);
-        editor.apply();
-    }
-
-    public static void setPrefLastSync(Context cxt, String sync) {
-        SharedPreferences.Editor editor = getSharedPreferences(cxt).edit();
-        editor.putString(PREF_LAST_SYNC, sync);
         editor.apply();
     }
 

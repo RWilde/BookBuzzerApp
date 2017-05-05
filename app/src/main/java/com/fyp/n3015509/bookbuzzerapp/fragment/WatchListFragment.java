@@ -76,8 +76,10 @@ public class WatchListFragment extends Fragment {
         AppUtil app = new AppUtil();
         booklist = DBUtil.getWatchedBooks(getActivity());
         mAdapter = app.setAdapter(booklist, 0, "", getActivity());
-        PriceChecker checkerTask = new PriceChecker(getContext());
-        checkerTask.execute((Void) null);
+
+//        PriceChecker checkerTask = new PriceChecker(getContext());
+//        checkerTask.execute((Void) null);
+
         listv.setAdapter(mAdapter);
         mAdapter.setMode(Attributes.Mode.Single);
         listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {

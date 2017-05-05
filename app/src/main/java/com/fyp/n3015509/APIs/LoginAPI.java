@@ -44,7 +44,7 @@ import java.util.HashMap;
  */
 
 public class LoginAPI {
-    private static final String IP = "192.168.0.4";
+    private static final String IP = "192.168.0.5";
     private static final String BaseURL = "http://" + IP + ":8081/api";
     private static final String loginURL = BaseURL + "/users/authenticate";
     private static final String RegisterURL = BaseURL + "/users/signup";
@@ -62,7 +62,8 @@ public class LoginAPI {
         SaveSharedPreference.clearToken(cxt);
     }
 
-    public static String SignIn(Context cxt, JSONObject login) {
+    public static JSONObject SignIn(Context cxt, JSONObject login) {
+        JSONObject jsonObject = new JSONObject();
         try {
             URL authURL = new URL(loginURL);
             HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
@@ -78,22 +79,28 @@ public class LoginAPI {
 
             int status = conn.getResponseCode();
 
-            String json_response = "";
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-            BufferedReader br = new BufferedReader(in);
-            String text = "";
-            JSONObject jsonObj = null;
-
-            while ((text = br.readLine()) != null) {
-                json_response += text;
-                jsonObj = new JSONObject(json_response);
-            }
+//            String json_response = "";
+//            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+//            BufferedReader br = new BufferedReader(in);
+//            String text = "";
+//            JSONObject jsonObj = null;
+//
+//            while ((text = br.readLine()) != null) {
+//                json_response += text;
+//                jsonObj = new JSONObject(json_response);
+//            }
 
             if (status == 200) {
-                String token = jsonObj.getString("token");
-                SaveSharedPreference.setToken(cxt, token);
-                return token;
+                // read the response
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String result = convertStreamToString(in);
+                jsonObject = new JSONObject(result);
 
+                in.close();
+                conn.disconnect();
+
+                String token = jsonObject.getString("token");
+                SaveSharedPreference.setToken(cxt, token);
             }
 
         } catch (IOException e) {
@@ -101,7 +108,7 @@ public class LoginAPI {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return null;
+        return jsonObject;
     }
 
     public static void verifyStoragePermissions(LoginActivity activity) {
@@ -134,8 +141,8 @@ public class LoginAPI {
             int status = conn.getResponseCode();
 
             if (status == 200) {
-                String token = SignIn(cxt, login);
-                return token;
+                JSONObject jsonObject = SignIn(cxt, login);
+                return jsonObject.getString("token");
 
             }
         } catch (ProtocolException e) {
@@ -143,6 +150,8 @@ public class LoginAPI {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
@@ -216,15 +225,9 @@ public class LoginAPI {
                 String result = convertStreamToString(in);
                 jsonObject = new JSONObject(result);
 
-                // JSONObject listJSON = new JSONObject(jsonObject.getString("list"));
-                //JSONObject bookJSON = new JSONObject(jsonObject.getString("books"));
-                //JSONObject authorJSON = new JSONObject(jsonObject.getString("authors"));
-
                 in.close();
                 conn.disconnect();
 
-
-                Log.d("response", Integer.toString(status));
                 String token = jsonObject.getString("token");
                 SaveSharedPreference.setToken(cxt, token);
             }

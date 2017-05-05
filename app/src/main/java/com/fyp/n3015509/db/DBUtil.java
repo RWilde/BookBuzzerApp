@@ -1,5 +1,6 @@
 package com.fyp.n3015509.db;
 
+import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -226,48 +227,111 @@ public class DBUtil {
             String listString = object.getString("list");
             String bookString = object.getString("books");
             String authorString = object.getString("authors");
+            String notificationString = object.getString("notifications");
+            String watchString = object.getString("watched");
 
             JSONArray lists = new JSONArray(listString);
             JSONArray books = new JSONArray(bookString);
             JSONArray authors = new JSONArray(authorString);
+            JSONArray notifications = new JSONArray(notificationString);
+            JSONArray watched = new JSONArray(watchString);
 
             HashMap<Integer, GoodreadsAuthor> authorList = new HashMap();
             HashMap<Integer, GoodreadsBook> bookList = new HashMap();
             ArrayList<GoodreadsShelf> buzzList = new ArrayList<>();
-            int length = authors.length();
-            for (int m = 0; m < authors.length(); m++) {
-                GoodreadsAuthor author = CreateGoodreadsAuthor(authors.getJSONObject(m));
-                authorList.put(author.getId(), author);
+            ArrayList<BuzzNotification> notificationList = new ArrayList<>();
+            ArrayList<Integer> watch = new ArrayList<>();
+
+            if (authors.length() > 0) {
+
+                int length = authors.length();
+                for (int m = 0; m < authors.length(); m++) {
+                    GoodreadsAuthor author = CreateGoodreadsAuthor(authors.getJSONObject(m));
+                    authorList.put(author.getId(), author);
+                }
             }
 
-            for (int n = 0; n < books.length(); n++) {
-                GoodreadsBook book = CreateGoodreadsBook(books.getJSONObject(n));
-                JSONArray authorIds = books.getJSONObject(n).getJSONArray("author");
-                ArrayList<GoodreadsAuthor> bAuthors = new ArrayList();
-                for (int m = 0; m < authorIds.length(); m++) {
-                    bAuthors.add(authorList.get(authorIds.get(m)));
+            if (books.length() > 0) {
+
+                for (int n = 0; n < books.length(); n++) {
+                    GoodreadsBook book = CreateGoodreadsBook(books.getJSONObject(n));
+                    JSONArray authorIds = books.getJSONObject(n).getJSONArray("author");
+                    ArrayList<GoodreadsAuthor> bAuthors = new ArrayList();
+                    for (int m = 0; m < authorIds.length(); m++) {
+                        bAuthors.add(authorList.get(authorIds.get(m)));
+                    }
+                    book.setAuthors(bAuthors);
+                    bookList.put(book.getId(), book);
                 }
-                book.setAuthors(bAuthors);
-                bookList.put(book.getId(), book);
             }
 
-            for (int i = 0; i < lists.length(); i++) {
-                GoodreadsShelf buzz = new GoodreadsShelf();
-                buzz.setShelfName(lists.getJSONObject(i).getString("list_name"));
-                JSONArray bookIds = lists.getJSONObject(i).getJSONArray("book_list");
-                ArrayList<GoodreadsBook> gBooks = new ArrayList();
-                for (int m = 0; m < bookIds.length(); m++) {
-                    gBooks.add(bookList.get(bookIds.get(m)));
+            if (lists.length() > 0) {
+                for (int i = 0; i < lists.length(); i++) {
+                    GoodreadsShelf buzz = new GoodreadsShelf();
+                    buzz.setShelfName(lists.getJSONObject(i).getString("list_name"));
+                    JSONArray bookIds = lists.getJSONObject(i).getJSONArray("book_list");
+                    ArrayList<GoodreadsBook> gBooks = new ArrayList();
+                    for (int m = 0; m < bookIds.length(); m++) {
+                        gBooks.add(bookList.get(bookIds.get(m)));
+                    }
+                    buzz.setBooks(gBooks);
+                    buzzList.add(buzz);
                 }
-                buzz.setBooks(gBooks);
-                buzzList.add(buzz);
+            }
+
+            if (notifications.length() > 0) {
+                for (int o = 0; o < notifications.length(); o++) {
+                    JSONObject j = notifications.getJSONObject(o);
+                    String list = j.getString("book_list");
+                    JSONArray notList = new JSONArray(list);
+                    for (int q = 0; q < notList.length(); q++) {
+                        BuzzNotification b = new BuzzNotification();
+                        b.setGoodreadsId(notList.getJSONObject(q).getInt("book_id"));
+                        b.setRead(notList.getJSONObject(q).getBoolean("read"));
+                        b.setMessage(notList.getJSONObject(q).getString("message"));
+                        b.setType(NotificationTypes.valueOf(notList.getJSONObject(q).getString("type")));
+                        notificationList.add(b);
+                    }
+                }
+            }
+
+            if (watched.length() > 0) {
+                for (int p = 0; p < watched.length(); p++) {
+                    JSONObject j = watched.getJSONObject(p);
+                    String list = j.getString("book_list");
+                    JSONArray watchList = new JSONArray(list);
+                    for (int q = 0; q < watchList.length(); q++) {
+                        watch.add(Integer.parseInt(watchList.get(q).toString()));
+                    }
+                }
             }
 
             DBUtil.SaveShelf(buzzList, cxt);
-
+            DBUtil.WatchBooks(cxt, watch);
+            DBUtil.InsertNotifications(cxt, notificationList);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static boolean InsertNotifications(Context cxt, ArrayList<BuzzNotification> notificationList) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(cxt);
+            return db.addNotifications(notificationList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static boolean WatchBooks(Context cxt, ArrayList<Integer> watch) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(cxt);
+            return db.addBooksToWatchList(watch);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private static GoodreadsAuthor CreateGoodreadsAuthor(JSONObject o) {
@@ -499,5 +563,15 @@ public class DBUtil {
 
     public static String findListForBook(Context mContext, int mBook) {
         return null;
+    }
+
+    public static void deleteDatabase(Context applicationContext) {
+        try
+        {
+            applicationContext.deleteDatabase("bookbuzzer.db");
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

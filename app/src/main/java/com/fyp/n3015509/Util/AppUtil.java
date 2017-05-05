@@ -84,12 +84,12 @@ public class AppUtil {
         BookBuzzerAPI bb = new BookBuzzerAPI();
         DBUtil db = new DBUtil();
         ConcurrentHashMap<String, ArrayList<PriceChecker>> results = new ConcurrentHashMap<>();
-
+        ArrayList<PriceChecker> p = new ArrayList<>();
 
         String[] isbns = db.GetISBNFromWatch(ctx);
         if (isbns != null) {
             for (String isbn : isbns) {
-                ArrayList<PriceChecker> p = bb.RunPriceChecker(ctx, isbn);
+                 p = bb.RunPriceChecker(ctx, isbn);
                 results.put(isbn, p);
             }
         }
