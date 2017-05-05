@@ -15,10 +15,10 @@
         android:layout_height="80dp">
 
         <ImageView
-            android:id="@+id/star2"
-            android:src="@drawable/star"
+            android:id="@+id/trash2"
+            android:src="@drawable/trash"
             android:layout_width="70dp"
-            android:background="#4cd964"
+            android:background="@drawable/red"
             android:paddingLeft="25dp"
             android:paddingRight="25dp"
             android:layout_height="match_parent" />
@@ -30,20 +30,13 @@
         android:layout_height="80dp"
         android:padding="10dp">
 
-        <TextView
-            android:id="@+id/book_name"
-            style="@style/bookDetailsTextStyle"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:background="@color/backgroundColor"
-            android:textColor="@color/dark_gray" />
-        <TextView
-            android:id="@+id/book_author"
-            style="@style/bookDetailsTextStyle"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:background="@color/backgroundColor"
-            android:textColor="@color/dark_gray" />
+            <TextView
+                android:id="@+id/buzzList"
+                android:layout_width="match_parent"
+                android:maxLines="1"
+                android:layout_height="match_parent"
+                android:tag="Hover" />
+
 
 
     </LinearLayout>

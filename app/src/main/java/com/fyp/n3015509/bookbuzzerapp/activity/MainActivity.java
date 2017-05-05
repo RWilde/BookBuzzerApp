@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.fragment.AuthorListFragment;
+import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookListFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
 import com.fyp.n3015509.bookbuzzerapp.fragment.HomeFragment;
@@ -66,6 +68,9 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     public static GoodreadsBook data;
+    public static boolean download = false;
+    public static int bookId = 0;
+    public static String title = "";
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private View navHeader;
@@ -148,8 +153,31 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        if (s != null) {
-            GoodreadsBook book = data;
+        //task.startBookWatchTask();
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        //fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        // Navigation view header
+        navHeader = navigationView.getHeaderView(0);
+        txtName = (TextView) navHeader.findViewById(R.id.name);
+        txtWebsite = (TextView) navHeader.findViewById(R.id.website);
+        imgNavHeaderBg = (ImageView) navHeader.findViewById(R.id.img_header_bg);
+        imgProfile = (ImageView) navHeader.findViewById(R.id.img_profile);
+
+        // load toolbar titles from string resources
+        activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
+
+        // load nav menu header data
+        loadNavHeader();
+        FrameLayout layout = (FrameLayout) findViewById(R.id.frame);
+        layout.removeAllViewsInLayout();
+        // initializing navigation menu
+        setUpNavigationView();
+        if (s != null && download == true) {
+            final GoodreadsBook book = data;
+            CURRENT_TAG = book.getTitleWithoutSeries();
             Runnable mPendingRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -160,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
                     fragment.setArguments(b);
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment, "");
+                    fragmentTransaction.replace(R.id.frame, fragment, book.getTitle());
+                    fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commitAllowingStateLoss();
                 }
             };
@@ -169,61 +198,60 @@ public class MainActivity extends AppCompatActivity {
             if (mPendingRunnable != null) {
                 mHandler.post(mPendingRunnable);
             }
-        } else {
+        } else if (bookId != 0 && download == false) {
+            CURRENT_TAG = title;
+            Runnable mPendingRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    // update the main content by replacing fragments
+                    Fragment fragment = new BookFragment();
 
-            //task.startBookWatchTask();
+                    Bundle b = new Bundle();
+                    b.putInt("bookId", bookId);
 
-            drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            navigationView = (NavigationView) findViewById(R.id.nav_view);
-            //fab = (FloatingActionButton) findViewById(R.id.fab);
-
-            // Navigation view header
-            navHeader = navigationView.getHeaderView(0);
-            txtName = (TextView) navHeader.findViewById(R.id.name);
-            txtWebsite = (TextView) navHeader.findViewById(R.id.website);
-            imgNavHeaderBg = (ImageView) navHeader.findViewById(R.id.img_header_bg);
-            imgProfile = (ImageView) navHeader.findViewById(R.id.img_profile);
-
-            // load toolbar titles from string resources
-            activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
-
-            // load nav menu header data
-            loadNavHeader();
-
-            // initializing navigation menu
-            setUpNavigationView();
-
-            if (navItemIndex != 7) {
-                if (savedInstanceState == null) {
-                    navItemIndex = 0;
-                    CURRENT_TAG = TAG_HOME;
-                    loadHomeFragment();
+                    fragment.setArguments(b);
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, title);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commitAllowingStateLoss();
                 }
+            };
 
-                Boolean connection = haveNetworkConnection();
-                if (connection == false) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage("You're not connected to the internet, so any changes made will not be saved")
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    // FIRE ZE MISSILES!
-                                }
-                            });
-                    // Create the AlertDialog object and return it
-                    AlertDialog dialog = builder.create();
+            // If mPendingRunnable is not null, then add to the message queue
+            if (mPendingRunnable != null) {
+                mHandler.post(mPendingRunnable);
+            }
+        } else if (navItemIndex != 7) {
+            if (savedInstanceState == null) {
+                navItemIndex = 0;
+                CURRENT_TAG = TAG_HOME;
+                loadHomeFragment();
+            }
 
-                    dialog.show();
-                }else {
-                    Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
-                    String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
-                    if (imported == false && !userId.contentEquals("")) {
-                        new UserShelves(getApplicationContext()).execute();
-                    }
+            Boolean connection = haveNetworkConnection();
+            if (connection == false) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("You're not connected to the internet, so any changes made will not be saved")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // FIRE ZE MISSILES!
+                            }
+                        });
+                // Create the AlertDialog object and return it
+                AlertDialog dialog = builder.create();
+
+                dialog.show();
+            } else {
+                Boolean imported = SaveSharedPreference.getImported(getApplicationContext());
+                String userId = SaveSharedPreference.getGoodreadsId(getApplicationContext());
+                if (imported == false && !userId.contentEquals("")) {
+                    new UserShelves(getApplicationContext()).execute();
                 }
-
             }
         }
     }
+
 
     private boolean haveNetworkConnection() {
         boolean haveConnectedWifi = false;
@@ -285,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
 
             // show or hide the fab button
             //toggleFab();
-            return;
+            // return;
         }
 
         // Sometimes, when fragment has huge data, screen seems hanging
@@ -367,19 +395,6 @@ public class MainActivity extends AppCompatActivity {
         fragmentTransaction.commitAllowingStateLoss();
     }
 
-    public void switchToDownloadBook(Fragment mfragment, String book) {
-        Fragment fragment = mfragment;
-        Bundle args = new Bundle();
-        args.putString("book", book);
-
-        fragment.setArguments(args);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
-                android.R.anim.fade_out);
-        fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
-        fragmentTransaction.commitAllowingStateLoss();
-    }
-
     private void setToolbarTitle() {
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
     }
@@ -420,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_suggestions:
                         //navItemIndex = 5;
-                       // CURRENT_TAG = TAG_SUGGESTIONS;
+                        // CURRENT_TAG = TAG_SUGGESTIONS;
                         break;
                     case R.id.nav_logout:
                         // launch new intent instead of loading fragment
@@ -823,10 +838,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class UserShelves extends AsyncTask<Void, Void, Boolean>{
+    private class UserShelves extends AsyncTask<Void, Void, Boolean> {
         GoodreadsShelves util = new GoodreadsShelves();
         private final Context mContext;
         ArrayList<GoodreadsShelf> shelves = new ArrayList<>();
+
         UserShelves(Context context) {
             this.mContext = context;
         }
@@ -834,12 +850,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             shelves = util.getShelves(getApplicationContext());
-            if (shelves != null)
-            {
+            if (shelves != null) {
                 return true;
-            }
-            else
-            {
+            } else {
                 return false;
             }
         }

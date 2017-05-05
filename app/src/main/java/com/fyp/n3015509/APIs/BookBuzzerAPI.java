@@ -53,6 +53,7 @@ public class BookBuzzerAPI {
     private static final String GoodreadsSync = BaseURL + "/users/sync";
     private static final String GoodreadsUpdateId = BaseURL + "/users/updategoodreadsId";
     private static final String UpdateName= BaseURL + "/users/updatename";;
+    private static final String RemoveBuzzlistURL = BaseURL + "/buzzlist/";
 
     private static final String WatchBookURL = BaseURL + "/watch/book/";
     private static final String NotificationURL = BaseURL + "/notification/";
@@ -621,6 +622,7 @@ public class BookBuzzerAPI {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             out.write(login.toString());
             out.close();
+
             int status = conn.getResponseCode();
 
             if (status == 200)
@@ -666,5 +668,27 @@ public class BookBuzzerAPI {
         }
         return jsonObject;
 
+    }
+
+    public static Boolean RemoveBuzzlist(FragmentActivity mContext, String mName) {
+        try {
+            URL authURL = new URL(RemoveBuzzlistURL + URLEncoder.encode(mName, "UTF-8"));
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("DELETE");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            int status = conn.getResponseCode();
+
+            if (status == 200)
+            {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

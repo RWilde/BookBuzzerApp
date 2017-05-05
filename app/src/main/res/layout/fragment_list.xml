@@ -18,4 +18,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></ListView>
 
+    <TextView
+        android:id="@+id/noBooks"
+        style="@style/bookDetailsTitlesStyle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:padding="5dp"
+        android:visibility="gone"
+        android:text="It doesn't look like you've got any watched books, why don't you add one?" />
+
 </LinearLayout>

@@ -45,9 +45,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
-
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -120,8 +117,8 @@ public class SettingsFragment extends Fragment {
         });
 
         Button goodreadsAuth = (Button) view.findViewById(R.id.authorise);
-
-        if (SaveSharedPreference.getGoodreadsId(getContext()) == null)
+        String id = SaveSharedPreference.getGoodreadsId(getContext());
+        if (SaveSharedPreference.getGoodreadsId(getContext()) == null || id.contentEquals(""))
         {
             LinearLayout lay = (LinearLayout) view.findViewById(R.id.authGoodreadsSettings);
             lay.setVisibility(View.VISIBLE);
@@ -225,13 +222,24 @@ public class SettingsFragment extends Fragment {
     private class UserShelves extends AsyncTask<Void, Void, Boolean>{
         GoodreadsShelves util = new GoodreadsShelves();
         private final Context mContext;
+        private ProgressDialog progress;
         ArrayList<GoodreadsShelf> shelves = new ArrayList<>();
+
         UserShelves(Context context) {
             this.mContext = context;
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Fetching...");
+            progress.show();
+        }
+
+        @Override
         protected Boolean doInBackground(Void... params) {
+            progress.dismiss();
             shelves = util.getShelves(getContext());
             if (shelves != null)
             {
@@ -243,7 +251,7 @@ public class SettingsFragment extends Fragment {
             }
         }
 
-        private ProgressDialog pdia;
+
 
         protected void onPostExecute(final Boolean success) {
             //showProgress(false);
@@ -469,9 +477,9 @@ public class SettingsFragment extends Fragment {
                 int goodreads_id = gLogin.GetGoodreadsAuthentication(getActivity());
                 if (goodreads_id != 0) {
                     login.put("goodreads_id", goodreads_id);
-                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
+                    SaveSharedPreference.setGoodreadsId(getContext(), Integer.toString(goodreads_id));
                     try {
-                        BookBuzzerAPI.AddGoodreadsAccount(getApplicationContext(), login);
+                        BookBuzzerAPI.AddGoodreadsAccount(getContext(), login);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -492,12 +500,19 @@ public class SettingsFragment extends Fragment {
         protected void onPostExecute(final Boolean success) {
             progress.dismiss();
             if (success) {
-                SaveSharedPreference.setPrefGoodreadsAuth(getApplicationContext(), true);
-                Toast.makeText(getApplicationContext(), "Goodreads account sync success", Toast.LENGTH_SHORT).show();
+                new UserShelves(getContext()).execute();
+                SaveSharedPreference.setPrefGoodreadsAuth(getContext(), true);
+                Toast.makeText(getContext(), "Goodreads account sync success", Toast.LENGTH_SHORT).show();
+
+                SettingsFragment fragment = new SettingsFragment();
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                fragmentTransaction.replace(R.id.frame, fragment);
+                fragmentTransaction.commit();
+
             } else {
-                Toast.makeText(getApplicationContext(), "Error with connecting to your goodreads account", Toast.LENGTH_SHORT).show();
-                //  mPasswordView.setError(getString(R.string.error_incorrect_password));
-                //  mPasswordView.requestFocus();
+                Toast.makeText(getContext(), "Error with connecting to your goodreads account", Toast.LENGTH_SHORT).show();
+
             }
         }
 

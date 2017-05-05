@@ -62,7 +62,7 @@ public class LoginAPI {
         SaveSharedPreference.clearToken(cxt);
     }
 
-    public static JSONObject SignIn(Context cxt, JSONObject login) {
+    public JSONObject SignIn(Context cxt, JSONObject login) {
         JSONObject jsonObject = new JSONObject();
         try {
             URL authURL = new URL(loginURL);
@@ -72,23 +72,11 @@ public class LoginAPI {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
 
-            //conn.connect();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             out.write(login.toString());
             out.close();
 
             int status = conn.getResponseCode();
-
-//            String json_response = "";
-//            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-//            BufferedReader br = new BufferedReader(in);
-//            String text = "";
-//            JSONObject jsonObj = null;
-//
-//            while ((text = br.readLine()) != null) {
-//                json_response += text;
-//                jsonObj = new JSONObject(json_response);
-//            }
 
             if (status == 200) {
                 // read the response
@@ -101,6 +89,10 @@ public class LoginAPI {
 
                 String token = jsonObject.getString("token");
                 SaveSharedPreference.setToken(cxt, token);
+            }
+            else
+            {
+                return null;
             }
 
         } catch (IOException e) {
@@ -125,7 +117,7 @@ public class LoginAPI {
         }
     }
 
-    public static String RegisterNewUser(Context cxt, JSONObject login) {
+    public String RegisterNewUser(Context cxt, JSONObject login) {
         try {
             URL authURL = new URL(RegisterURL);
             HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
@@ -142,8 +134,11 @@ public class LoginAPI {
 
             if (status == 200) {
                 JSONObject jsonObject = SignIn(cxt, login);
-                return jsonObject.getString("token");
-
+                if (jsonObject != null)
+                {
+                    return jsonObject.getString("token");
+                }
+                else return null;
             }
         } catch (ProtocolException e) {
             e.printStackTrace();

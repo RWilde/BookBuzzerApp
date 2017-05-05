@@ -454,7 +454,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public ArrayList<Buzzlist> getBuzzlists() {
         try {
-            String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS;
+            String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS + " LIMIT 3";
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(countQuery, null);
 
@@ -1291,7 +1291,39 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                 try {
                     if (cursor.moveToFirst()) {
                         while (cursor.isAfterLast() == false) {
+                            GoodreadsAuthor a = new GoodreadsAuthor();
                             authorList.add(createAuthor(cursor));
+                            cursor.moveToNext();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    cursor.close();
+                }
+            }
+            return authorList;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<GoodreadsAuthor> getBasicAuthors() {
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " LIMIT 4";
+            Cursor cursor = db.rawQuery(authorQuery, null);
+            ArrayList<GoodreadsAuthor> authorList = new ArrayList<>();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        while (cursor.isAfterLast() == false) {
+                            GoodreadsAuthor a = new GoodreadsAuthor();
+                            a.setColumnId(cursor.getInt(0));
+                            a.setName(cursor.getString(2));
+                            authorList.add(a);
                             cursor.moveToNext();
                         }
                     }
@@ -1552,6 +1584,16 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     cursor.close();
                 }
             }
+        }
+        return true;
+    }
+
+    public Boolean DeleteBuzzlist(String mName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int id =  db.delete(TABLE_BUZZLISTS, "WHERE " + BUZZLIST_NAME + " = '" + mName + "'", null);
+        if (id != -1)
+        {
+            return false;
         }
         return true;
     }

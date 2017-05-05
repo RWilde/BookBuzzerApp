@@ -19,6 +19,7 @@ import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
+import com.fyp.n3015509.bookbuzzerapp.activity.SearchActvity;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
 import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.SearchResult;
@@ -61,25 +62,49 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
-        swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
+        swipeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //if from api, download and watch
-                if (result.get(position).getType() == SearchResultType.GOODREADSAPI)
-                {
-                    //download book, save to db and watch
-                    DownloadBookTask mDownloadTask = new DownloadBookTask(mContext, result.get(position).getBookName(),result.get(position).getAuthorName());
-                    mDownloadTask.execute((Void) null);
-                }
-                else if(result.get(position).getType() == SearchResultType.LOCAL)
-                {
-                    //open local book
-                    MainActivity main = new MainActivity();
-                    BookFragment book = new BookFragment();
-                    main.switchContent(book, result.get(position).getGoodreadsId());
-                }
+                    if (result.get(position).getType() == SearchResultType.GOODREADSAPI)
+                    {
+                        //download book, save to db and watch
+                        DownloadBookTask mDownloadTask = new DownloadBookTask(mContext, result.get(position).getBookName(),result.get(position).getAuthorName());
+                        mDownloadTask.execute((Void) null);
+                    }
+                    else if(result.get(position).getType() == SearchResultType.LOCAL)
+                    {
+                        //open local book
+                        Intent i = new Intent(mContext, MainActivity.class);
+                        MainActivity.bookId = result.get(position).getGoodreadsId();
+                        MainActivity.download = false;
+                        MainActivity.navItemIndex = 1;
+                        MainActivity.title = result.get(position).getBookName();
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(i);
+
+                    }
             }
         });
+
+//        swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //if from api, download and watch
+//                if (result.get(position).getType() == SearchResultType.GOODREADSAPI)
+//                {
+//                    //download book, save to db and watch
+//                    DownloadBookTask mDownloadTask = new DownloadBookTask(mContext, result.get(position).getBookName(),result.get(position).getAuthorName());
+//                    mDownloadTask.execute((Void) null);
+//                }
+//                else if(result.get(position).getType() == SearchResultType.LOCAL)
+//                {
+//                    //open local book
+//                    MainActivity main = new MainActivity();
+//                    BookFragment book = new BookFragment();
+//                    main.switchContent(book, result.get(position).getGoodreadsId());
+//                }
+//            }
+//        });
 
         swipeLayout.findViewById(R.id.star2).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,9 +232,9 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progress = new ProgressDialog(mContext);
-            progress.setMessage("Opening book...");
-            progress.show();
+//            progress = new ProgressDialog(mContext);
+//            progress.setMessage("Opening book...");
+//            progress.show();
         }
 
         @Override
@@ -234,10 +259,6 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
                         }
                     }
                 }
-
-
-                //open book fragment
-
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 return false;
@@ -250,14 +271,16 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         @Override
         protected void onPostExecute(final Boolean success) {
             mHandler = new Handler();
-            progress.dismiss();
+           // progress.dismiss();
 
             if (success) {
                 Intent i = new Intent(mContext, MainActivity.class);
                 MainActivity.data = book;
-
+                MainActivity.download = true;
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra("book", book.getTitle());
                 mContext.startActivity(i);
+                ;
 
             } else {
                 //book wasnt deleted succesfully
@@ -283,9 +306,9 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progress = new ProgressDialog(mContext);
-            progress.setMessage("Adding to watch list...");
-            progress.show();
+//            progress = new ProgressDialog(mContext);
+//            progress.setMessage("Adding to watch list...");
+//            progress.show();
         }
 
         @Override
@@ -313,7 +336,7 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            progress.dismiss();
+          //  progress.dismiss();
 
             if (success) {
                 //finish();

@@ -24,24 +24,31 @@ import android.widget.Toolbar;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.util.Attributes;
+import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.apppreferences.OnScrollObserver;
 import com.fyp.n3015509.bookbuzzerapp.R;
 
+import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
+import com.fyp.n3015509.bookbuzzerapp.fragment.DownloadBookFragment;
 import com.fyp.n3015509.bookbuzzerapp.other.SearchSuggestionsProvider;
 import com.fyp.n3015509.bookbuzzerapp.other.SearchViewAdapter;
+import com.fyp.n3015509.dao.PriceChecker;
 import com.fyp.n3015509.dao.SearchResult;
+import com.fyp.n3015509.dao.enums.SearchResultType;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.db.DBUtil;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 public class SearchActvity extends MainActivity {
     ArrayList<SearchResult> results = new ArrayList();
-    SearchViewAdapter mAdapter;
-    SearchViewAdapter mDownloadAdapter;
+    Context mContext = null;
 
     private android.support.v7.widget.Toolbar toolbar;
-    public ListView mainListView;
+    //public ListView mainListView;
     private ListView downloadListView;
 
     @Override
@@ -49,7 +56,8 @@ public class SearchActvity extends MainActivity {
         MainActivity.navItemIndex = 7;
         super.onCreate(savedInstanceState);
         FrameLayout contentFrameLayout = (FrameLayout) findViewById(R.id.frame);
-        getLayoutInflater().inflate(R.layout.activity_search_actvity, contentFrameLayout);
+        View v = getLayoutInflater().inflate(R.layout.activity_search_actvity, contentFrameLayout);
+        mContext = getApplicationContext();
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -60,18 +68,16 @@ public class SearchActvity extends MainActivity {
             suggestions.saveRecentQuery(query, null);
 
             results = getLocalResults(query);
-            mainListView = (ListView) findViewById(R.id.search_list);
+            ListView mainListView = (ListView) findViewById(R.id.search_list);
 
             if (results.size() != 0) {
-                mAdapter = new SearchViewAdapter(this, results);
-                mAdapter.setMode(Attributes.Mode.Single);
+                SearchViewAdapter mAdapter = new SearchViewAdapter(getApplicationContext(), results);
                 mainListView.setAdapter(mAdapter);
 
                 mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-                        ((SwipeLayout) (mainListView.getChildAt(Integer.parseInt((String) parent.getAdapter().getItem(position)) + 1))).open(true);
+
                     }
                 });
             } else {
@@ -83,7 +89,7 @@ public class SearchActvity extends MainActivity {
             }
 
 
-            GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext(), mAdapter);
+            GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext());
             saveTask.execute((Void) null);
 
 
@@ -95,19 +101,154 @@ public class SearchActvity extends MainActivity {
         return db.GetSearchResults(getApplicationContext(), query);
     }
 
-    private class GetSearchTask extends AsyncTask<Void, Void, Boolean> {
+    private class DownloadBookTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final SearchViewAdapter mAdapter;
+        private final String mBook;
+        private final String mAuthor;
+        private ProgressDialog progress;
+        private Context frag;
+        private Handler mHandler;
+        String bookJson;
+        GoodreadsBook book;
+        GoodreadsAPI goodreadsAPI = new GoodreadsAPI();
+
+        public DownloadBookTask(Context frag, String mBook, String mAuthor) {
+            this.mBook = mBook;
+            this.mAuthor = mAuthor;
+            this.frag = frag;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Opening book...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                book = goodreadsAPI.DownloadBook(mContext, mBook, mAuthor);
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                ArrayList<PriceChecker> p = api.RunPriceChecker(mContext, book.getIsbn());
+
+                if (p != null) {
+                    for (PriceChecker price : p) {
+                        switch (price.getType()) {
+                            case KINDLE_EDITION:
+                                book.setKindlePrice(price.getPrice());
+                                break;
+                            case HARDBACK:
+                                book.setHardcoverPrice(price.getPrice());
+                                break;
+                            case PAPERBACK:
+                                book.setPaperbackPrice(price.getPrice());
+                                break;
+                        }
+                    }
+                }
+
+
+                //open book fragment
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mHandler = new Handler();
+            progress.dismiss();
+
+            if (success) {
+                Intent i = new Intent(mContext, MainActivity.class);
+                MainActivity.data = book;
+
+                i.putExtra("book", book.getTitle());
+                mContext.startActivity(i);
+
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error opening book, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+
+    private class WatchBookTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final int mBook;
+        private final String listName;
+        private JSONObject deletedBook = new JSONObject();
+        private ProgressDialog progress;
+
+        WatchBookTask(int book, String listId) {
+            mBook = book;
+            listName = listId;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress = new ProgressDialog(mContext);
+            progress.setMessage("Adding to watch list...");
+            progress.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+            //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
+
+            try {
+                BookBuzzerAPI api = new BookBuzzerAPI();
+                Boolean dbSuccess = DBUtil.WatchBook(mContext, mBook);
+                Boolean apiSuccess = api.WatchBook(mContext, mBook, listName);
+
+                if (dbSuccess == false || apiSuccess == false) {
+                    return false;
+                }
+
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            progress.dismiss();
+
+            if (success) {
+                //finish();
+                Toast.makeText(mContext, "Book watched", Toast.LENGTH_SHORT).show();
+            } else {
+                //book wasnt deleted succesfully
+                Toast.makeText(mContext, "Error with adding book to watch list, please try again", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private class GetSearchTask extends AsyncTask<Void, Void, Boolean> {
         private String mSearch;
         private ProgressDialog progress;
         private Context mContext;
         private Handler mHandler;
         ArrayList<SearchResult> apiResults = new ArrayList<>();
 
-        public GetSearchTask(String query, Context applicationContext, SearchViewAdapter adapter) {
+        public GetSearchTask(String query, Context applicationContext) {
             this.mContext = applicationContext;
             this.mSearch = query;
-            this.mAdapter = adapter;
         }
 
         @Override
@@ -121,7 +262,6 @@ public class SearchActvity extends MainActivity {
         @Override
         protected Boolean doInBackground(Void... params) {
             //http://www.techrepublic.com/blog/software-engineer/calling-restful-services-from-your-android-app/
-
             try {
                 GoodreadsAPI api = new GoodreadsAPI();
                 apiResults = api.getSearch(mContext, mSearch);
@@ -140,18 +280,17 @@ public class SearchActvity extends MainActivity {
         protected void onPostExecute(final Boolean success) {
             //   progress.dismiss();
             mHandler = new Handler();
-            mDownloadAdapter = new SearchViewAdapter(mContext, apiResults);
-
+            SearchViewAdapter mDownloadAdapter = new SearchViewAdapter(mContext, apiResults);
             if (success) {
-                downloadListView = (ListView) findViewById(R.id.download_search_list);
+                ListView downloadListView = (ListView) findViewById(R.id.download_search_list);
                 downloadListView.setAdapter(mDownloadAdapter);
                 downloadListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         //  ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-                        ((SwipeLayout) (mainListView.getChildAt(Integer.parseInt((String) parent.getAdapter().getItem(position)) + 1))).open(true);
                     }
                 });
+                mDownloadAdapter.notifyDataSetChanged();
                 //finish();
                 //mDownloadAdapter.upDateEntries(apiResults);
 

@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
@@ -75,44 +77,54 @@ public class WatchListFragment extends Fragment {
 
         AppUtil app = new AppUtil();
         booklist = DBUtil.getWatchedBooks(getActivity());
-        mAdapter = app.setAdapter(booklist, 0, "", getActivity());
+        if (booklist.size() >0 ) {
+            mAdapter = app.setAdapter(booklist, 0, "", getActivity());
 
 //        PriceChecker checkerTask = new PriceChecker(getContext());
 //        checkerTask.execute((Void) null);
 
-        listv.setAdapter(mAdapter);
-        mAdapter.setMode(Attributes.Mode.Single);
-        listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-            }
-        });
-        listv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.e("ListView", "OnTouch");
-                return false;
-            }
-        });
-        listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
-        listv.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                Log.e("ListView", "onScrollStateChanged");
-            }
+            listv.setAdapter(mAdapter);
+            mAdapter.setMode(Attributes.Mode.Single);
+            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    ((SwipeLayout) (listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
+                }
+            });
+            listv.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.e("ListView", "OnTouch");
+                    return false;
+                }
+            });
+            listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getActivity(), "OnItemLongClickListener", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+            });
+            listv.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    Log.e("ListView", "onScrollStateChanged");
+                }
 
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
-            }
-        });
+                }
+            });
+        }
+        else
+        {
+            TextView text = (TextView) rootView.findViewById(R.id.noBooks);
+            text.setVisibility(View.VISIBLE);
+
+            EditText edit = (EditText) rootView.findViewById(R.id.inputSearch);
+            edit.setVisibility(View.GONE);
+        }
         return rootView;
     }
 

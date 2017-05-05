@@ -51,6 +51,10 @@ public class HomeFragment extends Fragment {
     ArrayList<GoodreadsBook> book = new ArrayList<>();
     ArrayList<GoodreadsAuthor> author = new ArrayList<>();
 
+    ArrayAdapter<String> adapter = null;
+    ArrayAdapter<String> buzzAdapter = null;
+    ArrayAdapter<String> authorAdapter = null;
+
     private OnFragmentInteractionListener mListener;
 
     public HomeFragment() {
@@ -96,14 +100,21 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+        DBUtil util = new DBUtil();
 
-        buzzlist = DBUtil.GetBuzzlist(getActivity());
-        book = DBUtil.GetBooks(getActivity());
-        author = DBUtil.GetAuthors(getActivity());
+        buzzlist = util.GetBuzzlist(getActivity());
+        book = util.GetBooks(getActivity());
+        author = util.GetBasicAuthors(getActivity());
 
-        createBuzzlistList(view);
-        createAuthorList(view);
-        createBookList(view);
+        try {
+            createBuzzlistList(view);
+            createAuthorList(view);
+            createBookList(view);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
 
         return view;
     }
@@ -121,29 +132,30 @@ public class HomeFragment extends Fragment {
                 }
             }
             values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            if (adapter != null) {
+                listv.setAdapter(adapter);
+                listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        GoodreadsBook buzz = book.get(position);
 
-            listv.setAdapter(adapter);
-            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    GoodreadsBook buzz = book.get(position);
+                        Fragment fragment = new ListFragment();
 
-                    Fragment fragment = new ListFragment();
+                        Bundle args = new Bundle();
+                        args.putInt("listId", buzz.getId());
+                        fragment.setArguments(args);
 
-                    Bundle args = new Bundle();
-                    args.putInt("listId", buzz.getId());
-                    fragment.setArguments(args);
+                        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                        fragmentTransaction.replace(R.id.frame, fragment);
+                        //fragmentTransaction.addToBackStack(null);
 
-                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment);
-                    //fragmentTransaction.addToBackStack(null);
-
-                    // Commit the transaction
-                    fragmentTransaction.commit();
-                }
-            });
+                        // Commit the transaction
+                        fragmentTransaction.commit();
+                    }
+                });
+            }
         }
         else
         {
@@ -167,29 +179,31 @@ public class HomeFragment extends Fragment {
                 }
             }
             values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            buzzAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
 
-            listv.setAdapter(adapter);
-            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Buzzlist buzz = buzzlist.get(position);
+            if (buzzAdapter != null) {
+                listv.setAdapter(buzzAdapter);
+                listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Buzzlist buzz = buzzlist.get(position);
 
-                    Fragment fragment = new ListFragment();
+                        Fragment fragment = new ListFragment();
 
-                    Bundle args = new Bundle();
-                    args.putInt("listId", buzz.getId());
-                    fragment.setArguments(args);
+                        Bundle args = new Bundle();
+                        args.putInt("listId", buzz.getId());
+                        fragment.setArguments(args);
 
-                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment);
-                    //fragmentTransaction.addToBackStack(null);
+                        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                        fragmentTransaction.replace(R.id.frame, fragment);
+                        //fragmentTransaction.addToBackStack(null);
 
-                    // Commit the transaction
-                    fragmentTransaction.commit();
-                }
-            });
+                        // Commit the transaction
+                        fragmentTransaction.commit();
+                    }
+                });
+            }
         }
         else
         {
@@ -206,35 +220,41 @@ public class HomeFragment extends Fragment {
             String[] values = new String[author.size()];
             int count = 0;
             for (GoodreadsAuthor buzz : author) {
-                if (count < 4 && buzz.getName() != null) {
+                if (count >4)
+                {
+                    break;
+                }
+                else if (buzz.getName() != null) {
                 buzzlistNames.add(buzz.getName());
                 count++;
                  }
             }
             values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            authorAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
 
-            listv.setAdapter(adapter);
-            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    GoodreadsAuthor buzz = author.get(position);
+            if (buzzAdapter != null) {
+                listv.setAdapter(authorAdapter);
+                listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        GoodreadsAuthor buzz = author.get(position);
 
-                    Fragment fragment = new ListFragment();
+                        Fragment fragment = new ListFragment();
 
-                    Bundle args = new Bundle();
-                    args.putInt("authorId", buzz.getColumnId());
-                    fragment.setArguments(args);
+                        Bundle args = new Bundle();
+                        args.putInt("authorId", buzz.getColumnId());
+                        fragment.setArguments(args);
 
-                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment);
-                    //fragmentTransaction.addToBackStack(null);
+                        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                        fragmentTransaction.replace(R.id.frame, fragment);
+                        //fragmentTransaction.addToBackStack(null);
 
-                    // Commit the transaction
-                    fragmentTransaction.commit();
-                }
-            });
+                        // Commit the transaction
+                        fragmentTransaction.commit();
+                    }
+                });
+            }
         }
         else
         {

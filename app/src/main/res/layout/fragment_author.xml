@@ -1,8 +1,18 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fyp.n3015509.bookbuzzerapp.fragment.AuthorListFragment">
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/inputSearch"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search"
+        android:inputType="textVisiblePassword"
+        android:animateLayoutChanges="true"
+        />
 
     <ListView
         android:id="@+id/fragment_list"
@@ -16,4 +26,4 @@
         android:layout_height="wrap_content" >
     </TextView>
 
-</FrameLayout>
+</LinearLayout>

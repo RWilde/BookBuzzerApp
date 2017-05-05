@@ -105,19 +105,19 @@ public class ListFragment extends Fragment {
                     return true;
                 }
             });
-            listv.setOnScrollListener(new OnScrollObserver() {
-                @Override
-                public void onScrollUp() {
-                    String search = inputSearch.getText().toString();
-                    if (search.matches("")){
-                    inputSearch.setVisibility(View.GONE);}
-                }
-
-                @Override
-                public void onScrollDown() {
-                    inputSearch.setVisibility(View.VISIBLE);
-                }
-            });
+//            listv.setOnScrollListener(new OnScrollObserver() {
+//                @Override
+//                public void onScrollUp() {
+//                    String search = inputSearch.getText().toString();
+//                    if (search.matches("")){
+//                    inputSearch.setVisibility(View.GONE);}
+//                }
+//
+//                @Override
+//                public void onScrollDown() {
+//                    inputSearch.setVisibility(View.VISIBLE);
+//                }
+//            });
 
             inputSearch.addTextChangedListener(new TextWatcher() {
 

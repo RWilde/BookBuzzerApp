@@ -417,7 +417,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 login.put("email", mEmail);
                 login.put("password", mPassword);
 
-                String token = com.fyp.n3015509.APIs.LoginAPI.RegisterNewUser(getApplicationContext(), login);
+                LoginAPI api = new LoginAPI();
+                String token = api.RegisterNewUser(getApplicationContext(), login);
                 if (token != null) {
                     return true;
                 }
@@ -486,16 +487,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             try {
                 login.put("email", mEmail);
                 login.put("password", mPassword);
+                LoginAPI api = new LoginAPI();
 
-                JSONObject lists = com.fyp.n3015509.APIs.LoginAPI.SignIn(getApplicationContext(), login);
-                DBUtil.InsertFromAPI(lists, getApplicationContext());
+                JSONObject lists = api.SignIn(getApplicationContext(), login);
+                if (lists != null)
+                {
+                    String goodreadsId = lists.getString("goodreadsId");
+                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), goodreadsId);
+                    DBUtil.InsertFromAPI(lists, getApplicationContext());
+                }
+                else
+                {
+                    return false;
+                }
+
                 Thread.sleep(2000);
             } catch (JSONException e) {
                 return false;
             } catch (InterruptedException e) {
                 return false;
             }
-
             return true;
         }
 
@@ -513,7 +524,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 startActivity(i);
                 setContentView(R.layout.activity_main);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mEmailView.setError("");
+                mPasswordView.setError("Looks like there's been an issue, please check your details");
                 mPasswordView.requestFocus();
             }
         }
@@ -553,7 +565,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 int goodreads_id = gLogin.GetGoodreadsAuthentication(LoginActivity.this);
                 if (goodreads_id != 0) {
                     login.put("goodreads_id", goodreads_id);
-                    SaveSharedPreference.setGoodreadsId(getApplicationContext(), Integer.toString(goodreads_id));
+                    SaveSharedPreference.setGoodreadsId(mContext, Integer.toString(goodreads_id));
                     try {
                         JSONObject lists = LoginAPI.RegisterGoodreadsUser(getApplicationContext(), login);
                         DBUtil.InsertFromAPI(lists, getApplicationContext());

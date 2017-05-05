@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
+import com.fyp.n3015509.bookbuzzerapp.other.BuzzlistViewAdapter;
 import com.fyp.n3015509.db.DBUtil;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.other.ArraySwipeAdapterSample;
@@ -61,38 +64,19 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
-        buzzlist = DBUtil.GetBuzzlist(getActivity());
+        DBUtil util = new DBUtil();
+        buzzlist = util.GetBuzzlist(getActivity());
         if (buzzlist != null || !buzzlist.isEmpty()) {
             final ListView listv = (ListView) rootView.findViewById(R.id.book_list);
-
-            ArrayList<String> buzzlistNames = new ArrayList<String>();
-            String[] values = new String[buzzlist.size()];
-
-            for (Buzzlist buzz : buzzlist) {
-                buzzlistNames.add(buzz.getName());
-            }
-            values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, values);
+            final BuzzlistViewAdapter adapter = new BuzzlistViewAdapter(getActivity(), buzzlist);
             listv.setAdapter(adapter);
+
+            inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
+           // inputSearch.setVisibility(View.GONE);
 
             listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Buzzlist buzz = buzzlist.get(position);
-
-                    Fragment fragment = new ListFragment();
-
-                    Bundle args = new Bundle();
-                    args.putInt("listId", buzz.getId());
-                    fragment.setArguments(args);
-
-                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment);
-                    //fragmentTransaction.addToBackStack(null);
-
-                    // Commit the transaction
-                    fragmentTransaction.commit();
                 }
             });
             listv.setOnTouchListener(new View.OnTouchListener() {
@@ -102,11 +86,10 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
                     return false;
                 }
             });
-            final String[] finalValues = values;
             listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    buildChangeBuzzlistDialog(finalValues[position]);
+                    buildChangeBuzzlistDialog(buzzlist.get(position).getName());
                     return true;
                 }
             });
@@ -122,8 +105,27 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
                 }
             });
 
+            inputSearch.addTextChangedListener(new TextWatcher() {
 
-            // listv.setOnItemClickListener(this);
+                @Override
+                public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                    // When user changed the Text
+                    adapter.getFilter().filter(cs);
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+                                              int arg3) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
         }
         return rootView;
     }

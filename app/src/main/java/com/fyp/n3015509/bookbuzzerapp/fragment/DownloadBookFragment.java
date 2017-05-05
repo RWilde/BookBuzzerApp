@@ -36,7 +36,9 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -164,103 +166,6 @@ public class DownloadBookFragment extends Fragment {
         TextView shelf = (TextView) view.findViewById(R.id.bookshelf);
         edition.setText("shelF TODO");
 
-        ImageButton download = (ImageButton) view.findViewById(R.id.save);
-
-        download.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                ArrayList<Buzzlist> buzz = DBUtil.GetBuzzlist(getContext());
-//                buzzlistNames = new String[buzz.size()];
-//                ArrayList<String> buzzListNameStrings = new ArrayList<>();
-//                for (Buzzlist b : buzz) {
-//                    buzzListNameStrings.add(b.getName());
-//                }
-//
-//                buzzlistNames = buzzListNameStrings.toArray(buzzlistNames);
-//                adapter=new SpinnerAdapter(getContext());
-//
-//                final Dialog dialog = new Dialog(getActivity());
-//                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-//                dialog.setContentView(R.layout.buzzlist_shelf_selector);
-//                dialog.setCancelable(true);
-//
-//                // set the custom dialog components - text, image and button
-//                final Spinner spinner = (Spinner) dialog.findViewById(R.id.buzzlistSpinner);
-//
-//                if (buzz.size() ==0)
-//                {
-//                    TextView text = (TextView) dialog.findViewById(R.id.buzzlist) ;
-//                    View header = (View) dialog.findViewById(R.id.header_div);
-//
-//                    header.setVisibility(View.INVISIBLE);
-//                    text.setVisibility(View.INVISIBLE);
-//                    spinner.setVisibility(View.INVISIBLE);
-//                }
-//
-//                final EditText edittext = (EditText) dialog.findViewById(R.id.new_buzzlist);
-//                Button save = (Button) dialog.findViewById(R.id.save);
-//                Button create = (Button) dialog.findViewById(R.id.create);
-//
-//                spinner.setAdapter((android.widget.SpinnerAdapter) adapter);
-//                final String[] finalBuzzlistNames = buzzlistNames;
-//                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//
-//                    @Override
-//                    public void onItemSelected(AdapterView<?> parent,
-//                                               View view, int position, long id) {
-//                        // TODO Auto-generated method stub
-//                        spinner_item = finalBuzzlistNames[position];
-//
-//                    }
-//
-//                    @Override
-//                    public void onNothingSelected(AdapterView<?> parent) {
-//                        // TODO Auto-generated method stub
-//
-//                    }
-//                });
-//
-//                save.setOnClickListener(new View.OnClickListener() {
-//
-//                    @Override
-//                    public void onClick(View v) {
-//                        // TODO Auto-generated method stub
-//                        if (spinner_item != null)
-//                        {
-//                            SaveBookTask saveTask = new SaveBookTask(mBook, spinner_item, getContext(), true);
-//                            saveTask.execute((Void) null);
-//                            dialog.dismiss();
-//                        }
-//                        else
-//                        {
-//                            //display warning tha tnothing selected
-//                            edittext.setError(getString(R.string.error_invalid_email));
-//                        }
-//                    }
-//                });
-//                create.setOnClickListener(new View.OnClickListener() {
-//
-//                    @Override
-//                    public void onClick(View v) {
-//                        // TODO Auto-generated method stub
-//
-//                        if (edittext.getText() != null)
-//                        {
-//                            SaveBookTask saveTask = new SaveBookTask(mBook, spinner_item, getContext(), false);
-//                            saveTask.execute((Void) null);
-//                            dialog.dismiss();
-//                        }
-//                        else
-//                        {
-//                            //display warning tha tnothing selected
-//                            edittext.setError(getString(R.string.error_invalid_email));
-//                        }
-//                    }
-//                });
-//                dialog.show();
-            }
-        });
-
         return view;
     }
 
@@ -274,7 +179,8 @@ public class DownloadBookFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.download_book) {
-            ArrayList<Buzzlist> buzz = DBUtil.GetBuzzlist(getContext());
+            DBUtil util = new DBUtil();
+            ArrayList<Buzzlist> buzz = util.GetBuzzlist(getContext());
             buzzlistNames = new String[buzz.size()];
             ArrayList<String> buzzListNameStrings = new ArrayList<>();
             for (Buzzlist b : buzz) {
@@ -491,6 +397,11 @@ public class DownloadBookFragment extends Fragment {
             try {
                 if (!exist) {
                     BookBuzzerAPI api = new BookBuzzerAPI();
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat df = new SimpleDateFormat("dd/MMM/yyyy");
+                    String currentDate = df.format(c.getTime());
+
+                    mBook.setReleaseDate(currentDate);
                     Boolean dbSuccess = DBUtil.CreateBookAndList(mContext, mBook, listName);
                     Boolean apiSuccess = api.CreateBookAndList(mContext, mBook, listName);
 

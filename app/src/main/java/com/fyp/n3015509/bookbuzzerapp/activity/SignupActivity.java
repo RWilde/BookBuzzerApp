@@ -146,7 +146,8 @@ public class SignupActivity extends AppCompatActivity {
                 login.put("password", mPassword);
                 login.put("name", mName);
 
-                String token = LoginAPI.RegisterNewUser(getApplicationContext(), login);
+                LoginAPI api = new LoginAPI();
+                String token = api.RegisterNewUser(getApplicationContext(), login);
                 if (token != null) {
                     return true;
                 }

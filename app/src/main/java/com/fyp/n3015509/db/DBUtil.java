@@ -53,7 +53,7 @@ public class DBUtil {
         }
     }
 
-    public static ArrayList<Buzzlist> GetBuzzlist(Context ctx) {
+    public ArrayList<Buzzlist> GetBuzzlist(Context ctx) {
         try {
             MySQLiteHelper db = new MySQLiteHelper(ctx);
             return db.getBuzzlists();
@@ -480,10 +480,20 @@ public class DBUtil {
 
         return null;    }
 
-    public static ArrayList<GoodreadsAuthor> GetAuthors(Context cxt) {
+    public ArrayList<GoodreadsAuthor> GetAuthors(Context cxt) {
         try {
             MySQLiteHelper db = new MySQLiteHelper(cxt);
             return db.getAuthors();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;    }
+
+    public ArrayList<GoodreadsAuthor> GetBasicAuthors(Context cxt) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(cxt);
+            return db.getBasicAuthors();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -521,7 +531,7 @@ public class DBUtil {
         return 0;
     }
 
-    public static ArrayList<GoodreadsBook> GetBooks(FragmentActivity activity) {
+    public ArrayList<GoodreadsBook> GetBooks(FragmentActivity activity) {
         try {
             MySQLiteHelper db = new MySQLiteHelper(activity);
             return db.getWatchedBooks();
@@ -573,5 +583,15 @@ public class DBUtil {
         {
             e.printStackTrace();
         }
+    }
+
+    public static Boolean RemoveBuzzlist(FragmentActivity mContext, String mName) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.DeleteBuzzlist(mName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

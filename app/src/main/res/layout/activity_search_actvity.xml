@@ -5,57 +5,64 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.fyp.n3015509.bookbuzzerapp.activity.SearchActvity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-    <TextView
-        android:id="@+id/search_list_text"
-        style="@style/bookDetailsTitlesStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:padding="5dp"
-        android:text="Books you own" />
-    <View
-        android:id="@+id/search_list_view"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/main_menu_header_divider"
-        android:paddingBottom="20dp"
-        android:paddingTop="2dp" />
-    <ListView
-        android:id="@+id/search_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:drawSelectorOnTop="false" />
-    <TextView
-        android:id="@+id/download_search_list_text"
-        style="@style/bookDetailsTitlesStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:padding="5dp"
-        android:text="More books that match your search" />
-    <View
-        android:id="@+id/download_search_list_view"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/main_menu_header_divider"
-        android:paddingBottom="20dp"
-        android:paddingTop="2dp" />
-    <ListView
-        android:id="@+id/download_search_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/bookDetailsTitlesStyle"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:drawSelectorOnTop="false" />
+
+        <TextView
+            android:id="@+id/search_list_text"
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="Books you own" />
+
+        <View
+            android:id="@+id/search_list_view"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="2dp" />
+
+        <ListView
+            android:id="@+id/search_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:drawSelectorOnTop="false" />
+
+        <TextView
+            android:id="@+id/download_search_list_text"
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="5dp"
+            android:text="More books that match your search" />
+
+        <View
+            android:id="@+id/download_search_list_view"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/main_menu_header_divider"
+            android:paddingBottom="20dp"
+            android:paddingTop="2dp" />
+
+        <ListView
+            android:id="@+id/download_search_list"
+            style="@style/bookDetailsTitlesStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:drawSelectorOnTop="false" />
 
     </LinearLayout>
 </RelativeLayout>

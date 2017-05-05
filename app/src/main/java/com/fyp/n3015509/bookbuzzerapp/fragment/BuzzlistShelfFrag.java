@@ -69,7 +69,8 @@ public class BuzzlistShelfFrag extends Fragment {
         super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.buzzlist_shelf_selector, container, false);
 
-        ArrayList<Buzzlist> buzz   = DBUtil.GetBuzzlist(getContext());
+        DBUtil util = new DBUtil();
+        ArrayList<Buzzlist> buzz   = util.GetBuzzlist(getContext());
         String[] buzzlistNames = new String[buzz.size()];
         ArrayList<String> buzzListNameStrings = new ArrayList<>();
         for(Buzzlist b : buzz)

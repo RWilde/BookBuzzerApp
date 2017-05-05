@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,10 +15,13 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.fyp.n3015509.bookbuzzerapp.R;
+import com.fyp.n3015509.bookbuzzerapp.other.AuthorlistViewAdapter;
+import com.fyp.n3015509.bookbuzzerapp.other.BuzzlistViewAdapter;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.db.DBUtil;
 
@@ -73,18 +78,13 @@ ArrayList<GoodreadsAuthor> authorList;
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_author, container, false);
-        authorList = DBUtil.GetAuthors(getActivity());
+        DBUtil util = new DBUtil();
+
+        authorList = util.GetAuthors(getActivity());
         if (authorList != null || !authorList.isEmpty()) {
             final ListView listv = (ListView) rootView.findViewById(R.id.fragment_list);
-
-            ArrayList<String> buzzlistNames = new ArrayList<String>();
-            String[] values = new String[authorList.size()];
-
-            for (GoodreadsAuthor buzz : authorList) {
-                buzzlistNames.add(buzz.getName());
-            }
-            values = buzzlistNames.toArray(values);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1, values);
+            final AuthorlistViewAdapter adapter = new AuthorlistViewAdapter(getActivity(), authorList);
+            inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
             listv.setAdapter(adapter);
 
 
@@ -93,21 +93,7 @@ ArrayList<GoodreadsAuthor> authorList;
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     // ((SwipeLayout)(listv.getChildAt(position - listv.getFirstVisiblePosition()))).open(true);
-                    GoodreadsAuthor buzz = authorList.get(position);
 
-                    Fragment fragment = new AuthorFragment();
-
-                    Bundle args = new Bundle();
-                    args.putInt("authorId", buzz.getColumnId());
-                    fragment.setArguments(args);
-
-                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment);
-                    //fragmentTransaction.addToBackStack(null);
-
-                    // Commit the transaction
-                    fragmentTransaction.commit();
                 }
             });
             listv.setOnTouchListener(new View.OnTouchListener() {
@@ -136,7 +122,27 @@ ArrayList<GoodreadsAuthor> authorList;
                 }
             });
 
+            inputSearch.addTextChangedListener(new TextWatcher() {
 
+                @Override
+                public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                    // When user changed the Text
+                    adapter.getFilter().filter(cs);
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+                                              int arg3) {
+                    // TODO Auto-generated method stub
+
+                }
+            });
             // listv.setOnItemClickListener(this);
         }
         return rootView;
