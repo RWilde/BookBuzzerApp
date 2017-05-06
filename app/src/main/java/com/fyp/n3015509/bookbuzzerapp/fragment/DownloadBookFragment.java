@@ -197,6 +197,9 @@ public class DownloadBookFragment extends Fragment {
 
             // set the custom dialog components - text, image and button
             final Spinner spinner = (Spinner) dialog.findViewById(R.id.buzzlistSpinner);
+            final EditText edittext = (EditText) dialog.findViewById(R.id.new_buzzlist);
+            Button save = (Button) dialog.findViewById(R.id.save);
+            Button create = (Button) dialog.findViewById(R.id.create);
 
             if (buzz.size() ==0)
             {
@@ -206,11 +209,10 @@ public class DownloadBookFragment extends Fragment {
                 header.setVisibility(View.INVISIBLE);
                 text.setVisibility(View.INVISIBLE);
                 spinner.setVisibility(View.INVISIBLE);
+                save.setVisibility(View.INVISIBLE);
             }
 
-            final EditText edittext = (EditText) dialog.findViewById(R.id.new_buzzlist);
-            Button save = (Button) dialog.findViewById(R.id.save);
-            Button create = (Button) dialog.findViewById(R.id.create);
+
 
             spinner.setAdapter((android.widget.SpinnerAdapter) adapter);
             final String[] finalBuzzlistNames = buzzlistNames;

@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsAPI;
 import com.fyp.n3015509.Util.AppUtil;
+import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.enums.NotificationTypes;
@@ -177,12 +178,14 @@ public class WatchBooksService extends GcmTaskService {
     }
 
     public void setNotififcation(String title, String body, String subject) {
-        NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notify = new Notification.Builder
-                (getApplicationContext()).setContentTitle(title).setContentText(body).
-                setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
+        if (SaveSharedPreference.getAllowNotifications(getApplicationContext())) {
+            NotificationManager notif = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            Notification notify = new Notification.Builder
+                    (getApplicationContext()).setContentTitle(title).setContentText(body).
+                    setContentTitle(subject).setSmallIcon(R.drawable.blue_logo_small).build();
 
-        notify.flags |= Notification.FLAG_AUTO_CANCEL;
-        notif.notify(0, notify);
+            notify.flags |= Notification.FLAG_AUTO_CANCEL;
+            notif.notify(0, notify);
+        }
     }
 }

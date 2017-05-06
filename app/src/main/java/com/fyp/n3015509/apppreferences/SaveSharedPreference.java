@@ -19,12 +19,22 @@ public class SaveSharedPreference {
     static final String PREF_GOODREADS = "goodreads_id";
     static final String PREF_IMPORTED = "imported";
     static final String PREF_USERNAME = "username";
-
+    static final String PREF_NOTIFICATIONS = "notifications";
+    private static final String PREF_LAST_ACTIVE = "last_active";
     static final String PREF_SYNC_FREQ = "sync";
-
     static final String PREF_GOODREADS_AUTH = "goodreads_auth";
     static final String PREF_FACEBOOK_AUTH = "facebook_auth";
 
+
+    public static Boolean getAllowNotifications(Context ctx) {
+        return getSharedPreferences(ctx).getBoolean(PREF_NOTIFICATIONS, false);
+    }
+
+    public static void setAllowNotifications(Context ctx, Boolean allow) {
+        SharedPreferences.Editor editor = getSharedPreferences(ctx).edit();
+        editor.putBoolean(PREF_NOTIFICATIONS, allow);
+        editor.apply();
+    }
 
     public static int getPrefSyncFreq(Context cxt) {
         return getSharedPreferences(cxt).getInt(PREF_SYNC_FREQ, 0);
@@ -56,7 +66,6 @@ public class SaveSharedPreference {
         editor.apply();
     }
 
-    private static final String PREF_LAST_ACTIVE = "last_active";
 
 
     static SharedPreferences getSharedPreferences(Context ctx) {

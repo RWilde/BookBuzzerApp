@@ -81,7 +81,7 @@ ArrayList<GoodreadsAuthor> authorList;
         DBUtil util = new DBUtil();
 
         authorList = util.GetAuthors(getActivity());
-        if (authorList != null || !authorList.isEmpty()) {
+        if (authorList.size() > 0 && !authorList.isEmpty()) {
             final ListView listv = (ListView) rootView.findViewById(R.id.fragment_list);
             final AuthorlistViewAdapter adapter = new AuthorlistViewAdapter(getActivity(), authorList);
             inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);

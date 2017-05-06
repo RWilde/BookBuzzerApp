@@ -22,11 +22,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
 import com.fyp.n3015509.APIs.GoodreadsShelves;
@@ -130,9 +133,32 @@ public class SettingsFragment extends Fragment {
             });
         }
 
+        toggleButton(view);
+
         seekBar(view);
 
         return view;
+    }
+
+    private void toggleButton(View view) {
+        Switch notificationSwitch = (Switch) view.findViewById(R.id.notSwitch);
+        //set the switch to ON
+        notificationSwitch.setChecked(true);
+        //attach a listener to check for changes in state
+        notificationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+                if(isChecked){
+                    SaveSharedPreference.setAllowNotifications(getContext(), true);
+                }else{
+                    SaveSharedPreference.setAllowNotifications(getContext(), false);
+                }
+
+            }
+        });
+
     }
 
     private void seekBar(View view) {

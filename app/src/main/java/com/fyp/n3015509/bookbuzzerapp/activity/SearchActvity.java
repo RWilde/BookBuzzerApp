@@ -71,7 +71,7 @@ public class SearchActvity extends MainActivity {
             ListView mainListView = (ListView) findViewById(R.id.search_list);
 
             if (results.size() != 0) {
-                SearchViewAdapter mAdapter = new SearchViewAdapter(getApplicationContext(), results);
+                SearchViewAdapter mAdapter = new SearchViewAdapter(getApplicationContext(), results, this);
                 mainListView.setAdapter(mAdapter);
 
                 mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -89,7 +89,7 @@ public class SearchActvity extends MainActivity {
             }
 
 
-            GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext());
+            GetSearchTask saveTask = new GetSearchTask(query, getApplicationContext(), this);
             saveTask.execute((Void) null);
 
 
@@ -240,15 +240,17 @@ public class SearchActvity extends MainActivity {
     }
 
     private class GetSearchTask extends AsyncTask<Void, Void, Boolean> {
+        private final SearchActvity act;
         private String mSearch;
         private ProgressDialog progress;
         private Context mContext;
         private Handler mHandler;
         ArrayList<SearchResult> apiResults = new ArrayList<>();
 
-        public GetSearchTask(String query, Context applicationContext) {
+        public GetSearchTask(String query, Context applicationContext, SearchActvity act) {
             this.mContext = applicationContext;
             this.mSearch = query;
+            this.act = act;
         }
 
         @Override
@@ -280,7 +282,7 @@ public class SearchActvity extends MainActivity {
         protected void onPostExecute(final Boolean success) {
             //   progress.dismiss();
             mHandler = new Handler();
-            SearchViewAdapter mDownloadAdapter = new SearchViewAdapter(mContext, apiResults);
+            SearchViewAdapter mDownloadAdapter = new SearchViewAdapter(mContext, apiResults, act);
             if (success) {
                 ListView downloadListView = (ListView) findViewById(R.id.download_search_list);
                 downloadListView.setAdapter(mDownloadAdapter);

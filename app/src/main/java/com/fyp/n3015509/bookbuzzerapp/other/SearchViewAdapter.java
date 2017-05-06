@@ -41,12 +41,14 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
 
     private ImageView image;
     private WatchBookTask watchTask;
+    SearchActvity act;
 
     GoodreadsAPI goodreadsAPI = new GoodreadsAPI();
 
-    public SearchViewAdapter(Context mContext, ArrayList<SearchResult> results) {
+    public SearchViewAdapter(Context mContext, ArrayList<SearchResult> results, SearchActvity act) {
         this.mContext = mContext;
         this.result = results;
+        this.act = act;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
                     if (result.get(position).getType() == SearchResultType.GOODREADSAPI)
                     {
                         //download book, save to db and watch
-                        DownloadBookTask mDownloadTask = new DownloadBookTask(mContext, result.get(position).getBookName(),result.get(position).getAuthorName());
+                        DownloadBookTask mDownloadTask = new DownloadBookTask(mContext, result.get(position).getBookName(),result.get(position).getAuthorName(), act);
                         mDownloadTask.execute((Void) null);
                     }
                     else if(result.get(position).getType() == SearchResultType.LOCAL)
@@ -80,6 +82,7 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
                         MainActivity.navItemIndex = 1;
                         MainActivity.title = result.get(position).getBookName();
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        act.finish();
                         mContext.startActivity(i);
 
                     }
@@ -217,24 +220,26 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
 
         private final String mBook;
         private final String mAuthor;
+        private final SearchActvity act;
         private ProgressDialog progress;
         private Context frag;
         private Handler mHandler;
         String bookJson;
         GoodreadsBook book;
 
-        public DownloadBookTask(Context frag, String mBook, String mAuthor) {
+        public DownloadBookTask(Context frag, String mBook, String mAuthor,  SearchActvity act) {
             this.mBook = mBook;
             this.mAuthor = mAuthor;
             this.frag = frag;
+            this.act = act;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-//            progress = new ProgressDialog(mContext);
-//            progress.setMessage("Opening book...");
-//            progress.show();
+            progress = new ProgressDialog(act);
+            progress.setMessage("Opening book...");
+            progress.show();
         }
 
         @Override
@@ -271,15 +276,17 @@ public class SearchViewAdapter  extends BaseSwipeAdapter {
         @Override
         protected void onPostExecute(final Boolean success) {
             mHandler = new Handler();
-           // progress.dismiss();
+            progress.dismiss();
 
             if (success) {
                 Intent i = new Intent(mContext, MainActivity.class);
                 MainActivity.data = book;
                 MainActivity.download = true;
+                MainActivity.navItemIndex =0;
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 i.putExtra("book", book.getTitle());
                 mContext.startActivity(i);
+                act.finish();
                 ;
 
             } else {

@@ -66,7 +66,7 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
         View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
         DBUtil util = new DBUtil();
         buzzlist = util.GetBuzzlist(getActivity());
-        if (buzzlist != null || !buzzlist.isEmpty()) {
+        if (buzzlist.size() > 0 && !buzzlist.isEmpty()) {
             final ListView listv = (ListView) rootView.findViewById(R.id.book_list);
             final BuzzlistViewAdapter adapter = new BuzzlistViewAdapter(getActivity(), buzzlist);
             listv.setAdapter(adapter);

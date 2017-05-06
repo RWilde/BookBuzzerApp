@@ -223,6 +223,9 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.post(mPendingRunnable);
             }
         } else if (navItemIndex != 7) {
+            data = null;
+            bookId = 0;
+            title = null;
             if (savedInstanceState == null) {
                 navItemIndex = 0;
                 CURRENT_TAG = TAG_HOME;
