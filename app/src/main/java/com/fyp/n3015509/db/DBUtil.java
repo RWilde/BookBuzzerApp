@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Base64;
 
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
+import com.fyp.n3015509.bookbuzzerapp.tasks.WatchBooksService;
 import com.fyp.n3015509.dao.BuzzNotification;
 import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
@@ -16,6 +17,7 @@ import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsShelf;
+import com.google.common.primitives.Ints;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static java.lang.StrictMath.toIntExact;
 
 /**
  * Created by n3015509 on 24/03/2017.
@@ -593,5 +597,43 @@ public class DBUtil {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static ArrayList<Integer> getGoodreadIdsFromWatchList(Context mContext) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.getWatchedWorkIds();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public Boolean SaveExpectedNotifications(WatchBooksService mContext, ArrayList<BuzzNotification> buzzList) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            return db.SaveNotifications(buzzList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static int SaveBook(Context mContext, GoodreadsBook book) {
+        long id = 0;
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(mContext);
+            id = db.insertBook(book);
+            ArrayList<GoodreadsAuthor> authors = book.getAuthors();
+            for (GoodreadsAuthor author : authors) {
+                long authorId = db.insertAuthor(author);
+                if (authorId != 0) db.insertBookInterim(id, authorId);
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return Ints.checkedCast(id);
     }
 }

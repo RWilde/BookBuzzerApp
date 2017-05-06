@@ -5,5 +5,5 @@ package com.fyp.n3015509.dao.enums;
  */
 
 public enum NotificationTypes {
-    PREORDER, AVALIABLE, CHEAPER
+    PREORDER, AVALIABLE, FUTURE, CHEAPER
 }

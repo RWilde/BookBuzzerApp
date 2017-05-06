@@ -12,7 +12,7 @@
         android:tag="Bottom4"
         android:id="@+id/bottom_wrapper_2"
         android:layout_width="wrap_content"
-        android:layout_height="80dp">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/trash2"
@@ -27,14 +27,13 @@
     <LinearLayout
         android:id="@+id/notification_list_view"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:padding="10dp">
 
 
         <TextView
             android:id="@+id/position"
             android:layout_width="wrap_content"
-            android:singleLine="true"
             android:layout_height="wrap_content" />
 
         <ImageView
@@ -50,14 +49,12 @@
             <TextView
                 android:id="@+id/notification"
                 android:layout_width="match_parent"
-                android:maxLines="1"
                 android:layout_height="match_parent"
                 android:tag="Hover" />
 
             <TextView
                 android:id="@+id/date"
                 android:layout_width="match_parent"
-                android:maxLines="1"
                 android:layout_height="match_parent"
                 android:tag="Hover" />
 

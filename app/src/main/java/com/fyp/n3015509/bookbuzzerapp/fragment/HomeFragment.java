@@ -360,7 +360,7 @@ public class HomeFragment extends Fragment {
                 book = goodreadsApi.DownloadBook(mContext, apiResults.get(0).getBookName(), apiResults.get(0).getAuthorName());
                 BookBuzzerAPI bbAPI = new BookBuzzerAPI();
                 ArrayList<PriceChecker> p = bbAPI.RunPriceChecker(mContext, book.getIsbn());
-
+               // p = DBUtil.CheckAgainstDb(mContext, p, isbn);
                 if (p != null) {
                     for (PriceChecker price : p) {
                         switch (price.getType()) {

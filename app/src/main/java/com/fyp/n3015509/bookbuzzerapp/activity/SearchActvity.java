@@ -73,13 +73,6 @@ public class SearchActvity extends MainActivity {
             if (results.size() != 0) {
                 SearchViewAdapter mAdapter = new SearchViewAdapter(getApplicationContext(), results, this);
                 mainListView.setAdapter(mAdapter);
-
-                mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    }
-                });
             } else {
                 mainListView.setVisibility(View.GONE);
                 TextView text = (TextView) findViewById(R.id.search_list_text);

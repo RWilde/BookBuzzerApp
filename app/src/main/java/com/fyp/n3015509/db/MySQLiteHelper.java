@@ -197,19 +197,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             database.execSQL(CREATE_BUZZLIST_INTERIM_TABLE);
             database.execSQL(CREATE_WATCH_TABLE);
             database.execSQL(CREATE_NOTIFICATIONS_TABLE);
-            ContentValues insertValues = new ContentValues();
-            insertValues.put(BOOK_ID, 1);
-            insertValues.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
-            insertValues.put(MESSAGE, "This book is available next week, preorder it now");
-            insertValues.put(READ, 1);
-
-            database.insertOrThrow(NOTIFICATIONS_TABLE, null, insertValues);
-            ContentValues insert = new ContentValues();
-            insert.put(BOOK_ID, 2);
-            insert.put(NOTIFICATION_TYPE, NotificationTypes.AVALIABLE.toString());
-            insert.put(MESSAGE, "This book is available");
-            insert.put(READ, 0);
-            database.insertOrThrow(NOTIFICATIONS_TABLE, null, insert);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -757,7 +744,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<BuzzNotification> getNotifications() {
-        String notificationQuery = "SELECT * FROM " + NOTIFICATIONS_TABLE + " LIMIT 50";
+        String notificationQuery = "SELECT * FROM " + NOTIFICATIONS_TABLE + " ORDER BY " + COLUMN_ID + " DESC LIMIT 50 ";
         ArrayList<BuzzNotification> notifications = new ArrayList<BuzzNotification>();
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -819,16 +806,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             ContentValues bookT = new ContentValues();
             ContentValues cv = new ContentValues();
             cv.put(READ, 1);
-
-            switch (mType) {
-                case AVALIABLE:
-                    bookT.put(NOTIFIED, 1);
-                    break;
-                case PREORDER:
-                    bookT.put(PREORDER, 1);
-                    break;
-            }
-            db.update(BOOK_WATCH, bookT, BOOK_ID + "=" + mBook, null);
             String where = BOOK_ID + "=" + mBook + " and " + NOTIFICATION_TYPE + "= '" + mType.toString() + "'";
             db.update(NOTIFICATIONS_TABLE, cv, where, null);
             success = true;
@@ -1024,7 +1001,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             GoodreadsBook b = getBookByIsbn(key);
             try {
                 StringBuilder formats = new StringBuilder();
-                double lowestPrice = 0;
+                double lowestPrice = -1;
 
                 for (PriceChecker p : value) {
                     if (formats.length() != 0) {
@@ -1032,7 +1009,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                     formats.append(p.getType().toString().toLowerCase());
 
-                    if (p.getPrice() == 0 && lowestPrice == 0.0)
+                    if (lowestPrice == -1) {
+                        lowestPrice = p.getPrice();
+                    } else if (p.getPrice() == 0)
                         lowestPrice = p.getPrice();
                     else if (p.getPrice() < lowestPrice && lowestPrice != 0.0)
                         lowestPrice = p.getPrice();
@@ -1250,15 +1229,19 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     public Boolean addBookToBuzzlist(GoodreadsBook mBook, String listName) {
+        SQLiteDatabase db = this.getReadableDatabase();
         int buzzlistId = getBuzzlistIdByName(listName);
-        if (buzzlistId != 0 || buzzlistId != -1) {
-            long bookId = insertBook(mBook);
-            long success = insertBookInterim(buzzlistId, bookId);
-
-            if (success != 0 || success != -1) return true;
-            else return false;
+        long id = insertBook(mBook);
+        ArrayList<GoodreadsAuthor> authors = mBook.getAuthors();
+        for (GoodreadsAuthor author : authors) {
+            long authorId = insertAuthor(author);
+            if (authorId != 0) insertBookInterim(id, authorId);
         }
-        return false;
+        long success = insertBuzzlistInterim(buzzlistId, id);
+
+        if (success != 0 || success != -1) return true;
+        else return false;
+
     }
 
     private int getBuzzlistIdByName(String listName) {
@@ -1458,8 +1441,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     public ArrayList<SearchResult> SearchForBookOrAuthor(String query) {
         ArrayList<SearchResult> results = new ArrayList<>();
 
-        String authorQuery = "SELECT * FROM "+ TABLE_AUTHORS + " WHERE " + AUTHOR_NAME + " LIKE  '" + query + "'";
-        String bookQuery = "SELECT * FROM "+ TABLE_BOOKS + " WHERE " + TITLE_WITHOUT_SERIES + " LIKE  '" + query + "'";
+        String authorQuery = "SELECT * FROM " + TABLE_AUTHORS + " WHERE " + AUTHOR_NAME + " LIKE  '" + query + "'";
+        String bookQuery = "SELECT * FROM " + TABLE_BOOKS + " WHERE " + TITLE_WITHOUT_SERIES + " LIKE  '" + query + "'";
 
         try {
             SQLiteDatabase db = this.getReadableDatabase();
@@ -1480,7 +1463,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     c1.close();
                 }
             }
@@ -1494,10 +1477,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                             GoodreadsBook b = getBook(c2.getInt(1));
                             res.setBookName(b.getTitle());
                             StringBuilder s = new StringBuilder();
-                            for(GoodreadsAuthor a : b.getAuthors())
-                            {
-                                if (s.length() != 0)
-                                {
+                            for (GoodreadsAuthor a : b.getAuthors()) {
+                                if (s.length() != 0) {
                                     s.append(", ");
                                 }
                                 s.append(a.getName());
@@ -1510,7 +1491,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     c2.close();
                 }
             }
@@ -1590,9 +1571,63 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public Boolean DeleteBuzzlist(String mName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        int id =  db.delete(TABLE_BUZZLISTS, "WHERE " + BUZZLIST_NAME + " = '" + mName + "'", null);
-        if (id != -1)
-        {
+        int id = db.delete(TABLE_BUZZLISTS, "WHERE " + BUZZLIST_NAME + " = '" + mName + "'", null);
+        if (id != -1) {
+            return false;
+        }
+        return true;
+    }
+
+    public ArrayList<Integer> getWatchedWorkIds() {
+        ArrayList<Integer> book = new ArrayList<>();
+        try {
+            String watchQuery = "SELECT " + BOOK_ID + " FROM " + BOOK_WATCH;
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(watchQuery, null);
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        ArrayList<GoodreadsBook> booklist = new ArrayList<>();
+                        while (cursor.isAfterLast() == false) {
+                            String bookQuery = "SELECT " + GOODREADS_ID + " FROM " + TABLE_BOOKS + " WHERE " + COLUMN_ID + "=" + cursor.getInt(0);
+                            Cursor c1 = db.rawQuery(bookQuery, null);
+                            if (c1 != null) {
+                                try {
+                                    if (c1.moveToFirst()) {
+                                        book.add(c1.getInt(0));
+                                    }
+                                } finally {
+                                    c1.close();
+                                }
+                            }
+                            cursor.moveToNext();
+                        }
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return book;
+    }
+
+    public Boolean SaveNotifications(ArrayList<BuzzNotification> buzzList) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        try {
+            for (BuzzNotification b : buzzList) {
+                ContentValues avaliable = new ContentValues();
+                avaliable.put(BOOK_ID, b.getBookId());
+                avaliable.put(NOTIFICATION_TYPE, NotificationTypes.FUTURE.toString());
+                avaliable.put(MESSAGE, b.getMessage());
+                avaliable.put(READ, 0);
+                long id = db.insert(NOTIFICATIONS_TABLE, null, avaliable);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;

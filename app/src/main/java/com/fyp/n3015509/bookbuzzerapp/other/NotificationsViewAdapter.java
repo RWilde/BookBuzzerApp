@@ -64,10 +64,10 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
         if (notifications.get(position).getRead() == true)
-            v.setBackgroundResource(R.drawable.notification_true_selector);
+            v.setBackgroundResource(R.drawable.notification_false_selector);
 
         else {
-            v.setBackgroundResource(R.drawable.notification_false_selector);
+            v.setBackgroundResource(R.drawable.notification_true_selector);
         }
 
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
@@ -78,7 +78,7 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
                 priceTask = new PriceChecker(mContext, isbn);
                 priceTask.execute((Void) null);
 
-                mNotificationTask = new NotificationsViewAdapter.MarkNotificationAsReadTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType(), notifications.get(position).getGoodreadsId());
+                mNotificationTask = new MarkNotificationAsReadTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType(), notifications.get(position).getGoodreadsId());
                 mNotificationTask.execute((Void) null);
 
             }
@@ -87,7 +87,7 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRemoveTask = new NotificationsViewAdapter.RemoveNotificationTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType());
+                mRemoveTask = new RemoveNotificationTask(notifications.get(position).getGoodreadsId(), mContext, notifications.get(position).getType());
                 mRemoveTask.execute((Void) null);
             }
         });
@@ -145,9 +145,9 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            progress = new ProgressDialog(mContext);
-            progress.setMessage("Removing notification...");
-            progress.show();
+//            progress = new ProgressDialog(mContext);
+//            progress.setMessage("Removing notification...");
+//            progress.show();
         }
 
         @Override
@@ -155,9 +155,6 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
             try {
                 Boolean dbSuccess = DBUtil.RemoveNotification(mContext, mBook);
                 Boolean apiSuccess = BookBuzzerAPI.RemoveNotification(mContext, mBook, mType);
-                if (dbSuccess == false || apiSuccess == false) {
-                    return false;
-                }
 
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -170,10 +167,11 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            progress.dismiss();
+         //   progress.dismiss();
             mHandler = new Handler();
 
             if (success) {
+
                 //finish();
                 Runnable mPendingRunnable = new Runnable() {
                     @Override
@@ -294,7 +292,8 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         @Override
         protected Boolean doInBackground(Void... params) {
             BookBuzzerAPI util = new BookBuzzerAPI();
-            util.RunPriceChecker(mContext, mIsbn);
+
+            DBUtil.CheckAgainstDb(mContext, util.RunPriceChecker(mContext, mIsbn), mIsbn);
             return true;
         }
 

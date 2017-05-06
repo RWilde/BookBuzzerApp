@@ -201,7 +201,7 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
     @Override
     public int getViewTypeCount() {
 
-        return getCount();
+        return 1;
     }
 
     @Override
@@ -457,7 +457,7 @@ public class ListViewAdapter extends BaseSwipeAdapter implements Filterable {
         @Override
         protected Boolean doInBackground(Void... params) {
             BookBuzzerAPI util = new BookBuzzerAPI();
-            util.RunPriceChecker(mContext, mIsbn);
+            DBUtil.CheckAgainstDb(mContext, util.RunPriceChecker(mContext, mIsbn), mIsbn);
             return true;
         }
 

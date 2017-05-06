@@ -334,4 +334,66 @@ public class XMLUtil {
         }
         return null;
     }
+
+    public int xmlToWorkId(String response) {
+        int id = 0;
+        try {
+            Document doc = getXMLDocument(response);
+            if (doc != null) {
+                NodeList nodeList = doc.getElementsByTagName("*");
+                ArrayList<SearchResult> search = new ArrayList<>();
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Node node = nodeList.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element el = (Element) nodeList.item(i);
+                        if (el.getNodeName().contains("work-ids")) {
+                            id = getIntFromElement(el.getElementsByTagName("item").item(0).getTextContent());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    public int xmlToSeriesId(String response) {
+        int id = 0;
+        try {
+            Document doc = getXMLDocument(response);
+            if (doc != null) {
+                NodeList nodeList = doc.getElementsByTagName("*");
+                ArrayList<SearchResult> search = new ArrayList<>();
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    Node node = nodeList.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        Element el = (Element) nodeList.item(i);
+                        NodeList valueList = el.getElementsByTagName("series_works");
+                        for (int j = 0; j < valueList.getLength(); ++j) {
+                            Node n = valueList.item(j);
+                            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                                Element e = (Element) valueList.item(j);
+                                id = returnSeries(e);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return id;
+    }
+
+    private int returnSeries(Element el) {
+        NodeList valueList = el.getElementsByTagName("series");
+        ArrayList<GoodreadsAuthor> authors = new ArrayList<GoodreadsAuthor>();
+
+        for (int j = 0; j < valueList.getLength(); ++j) {
+            Element value = (Element) valueList.item(j);
+            return getIntFromElement(value.getElementsByTagName("id").item(0).getTextContent());
+        }
+        return 0;
+    }
 }

@@ -21,6 +21,16 @@ public class BuzzNotification {
     int bookId;
     Boolean notified;
     NotificationTypes type;
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    String authorName;
     String bookName;
     Bitmap image;
     String message;

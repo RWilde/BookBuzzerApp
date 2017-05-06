@@ -72,39 +72,6 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
             listv.setAdapter(adapter);
 
             inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
-           // inputSearch.setVisibility(View.GONE);
-
-            listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                }
-            });
-            listv.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    Log.e("ListView", "OnTouch");
-                    return false;
-                }
-            });
-            listv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    buildChangeBuzzlistDialog(buzzlist.get(position).getName());
-                    return true;
-                }
-            });
-            listv.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    Log.e("ListView", "onScrollStateChanged");
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-                }
-            });
-
             inputSearch.addTextChangedListener(new TextWatcher() {
 
                 @Override
@@ -130,67 +97,7 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
         return rootView;
     }
 
-    public void buildChangeBuzzlistDialog(final String originalName) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this.getActivity());
-        final EditText input = new EditText(getContext());
-        input.setText(originalName);
 
-        input.setSingleLine();
-        FrameLayout container = new FrameLayout(this.getActivity());
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
-        params.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
-        input.setTextColor(getResources().getColor(R.color.white));
-        input.setLayoutParams(params);
-        container.addView(input);
-        alert.setTitle("Enter the name of your new buzzlist");
-
-        alert.setView(container);
-
-        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // what ever you want to do with No option.
-            }
-        });
-        final AlertDialog dialog = alert.create();
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Boolean wantToCloseDialog = false;
-                //Do stuff, possibly set wantToCloseDialog to true then...
-                String newName = input.getText().toString();
-                boolean exist = DBUtil.CheckBuzzlistName(getContext(), newName);
-                if (originalName.contentEquals(input.getText().toString())) {
-                    input.setError("Oops! It looks like you've entered the same name, please press cancel if you don't want to change anything.");
-                    input.requestFocus();
-                } else if (!exist) {
-                    new BuzzlistModify(getContext(), originalName, newName ).execute();
-                    wantToCloseDialog = true;
-
-                    // update the main content by replacing fragments
-                    Fragment fragment = new BookListFragment();
-                    FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
-                            android.R.anim.fade_out);
-                    fragmentTransaction.replace(R.id.frame, fragment, "Buzzlist");
-                    fragmentTransaction.commitAllowingStateLoss();
-                } else {
-                    input.setError("Oops! It looks like you've already used this name, please try another one.");
-                    input.requestFocus();
-                }
-
-                if (wantToCloseDialog)
-                    dialog.dismiss();
-            }
-        });
-    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -248,38 +155,6 @@ public class BookListFragment extends ListFragment implements OnItemClickListene
             try {
                 DBUtil.SaveBuzzlist(mContext, name);
                 BookBuzzerAPI.SaveBuzzlist(mContext, name);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-            return true;
-        }
-
-        private ProgressDialog pdia;
-
-        protected void onPostExecute(final Boolean success) {
-            //showProgress(false);
-
-        }
-    }
-
-    private class BuzzlistModify extends AsyncTask<Void, Void, Boolean> {
-        private final String name;
-        private final String newName;
-        GoodreadsShelves util = new GoodreadsShelves();
-        private final Context mContext;
-
-        BuzzlistModify(Context context, String buzzName, String newName) {
-            this.mContext = context;
-            this.name = buzzName;
-            this.newName = newName;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                DBUtil.ModifyBuzzlist(mContext, name, newName);
-                BookBuzzerAPI.ModifyBuzzlist(mContext, name, newName);
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;

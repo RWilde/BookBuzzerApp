@@ -151,12 +151,15 @@ public class BookFragment extends Fragment {
         edition.setText("(" + mBook.getEditionInformation() + ")");
         TextView series = (TextView) view.findViewById(R.id.series);
 
-        if (!mBook.getTitleWithoutSeries().contentEquals(mBook.getTitle())) {
+        if (mBook.getTitle() != null && mBook.getTitleWithoutSeries() != null) {
+            if (!mBook.getTitleWithoutSeries().contentEquals(mBook.getTitle())) {
 
-            String[] seriesString = mBook.getTitle().split("\\(");
-            String[] justSeries = seriesString[1].split("\\,");
+                String[] seriesString = mBook.getTitle().split("\\(");
+                String[] justSeries = seriesString[1].split("\\,");
 
-            series.setText(justSeries[0]);
+                series.setText(justSeries[0]);
+            }else{
+                series.setText("Standalone");}
         }else{
         series.setText("Standalone");}
 

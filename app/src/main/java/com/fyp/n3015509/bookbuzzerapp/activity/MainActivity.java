@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver;
     public static final String TASK_TAG_PERIODIC = "periodic_task";
     long periodSecs = 86400L; // the task should be executed every 30 seconds
-    long flexSecs = 100L; // the task can run as early as -15 seconds from the scheduled time
+    long flexSecs = 10L; // the task can run as early as -15 seconds from the scheduled time
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,14 +121,20 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
         mGcmNetworkManager = GcmNetworkManager.getInstance(this);
 
+        WatchBooksService service = new WatchBooksService();
+        //service.checkForNewInSeries(getApplicationContext());
+
         int syncSecs = SaveSharedPreference.getPrefSyncFreq(getApplicationContext());
         syncSecs = syncSecs * 86400;
         PeriodicTask task = new PeriodicTask.Builder()
                 .setService(WatchBooksService.class)
                 .setTag(TASK_TAG_PERIODIC)
-                .setPeriod(86400L)
+                .setPeriod(30L)
                 .setFlex(flexSecs)
                 .build();
+        mGcmNetworkManager.schedule(task);
+
+        //                .setPeriod(86400L)
 
         if (syncSecs != 0) {
             PeriodicTask APISync = new PeriodicTask.Builder()
@@ -137,8 +143,9 @@ public class MainActivity extends AppCompatActivity {
                     .setPeriod(syncSecs)
                     .setFlex(flexSecs)
                     .build();
+            mGcmNetworkManager.schedule(APISync);
+
         }
-        mGcmNetworkManager.schedule(task);
 
         mReceiver = new BroadcastReceiver() {
             @Override

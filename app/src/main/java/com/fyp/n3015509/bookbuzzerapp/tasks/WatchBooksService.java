@@ -12,12 +12,19 @@ import com.fyp.n3015509.Util.AppUtil;
 import com.fyp.n3015509.apppreferences.SaveSharedPreference;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.dao.BuzzNotification;
+import com.fyp.n3015509.dao.SearchResult;
 import com.fyp.n3015509.dao.enums.NotificationTypes;
 import com.fyp.n3015509.dao.PriceChecker;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsAuthor;
+import com.fyp.n3015509.dao.goodreadsDAO.GoodreadsBook;
 import com.fyp.n3015509.db.DBUtil;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +55,7 @@ public class WatchBooksService extends GcmTaskService {
         try {
             result = checkForNewBooks();
             checkForPrices();
+            checkForNewInSeries(getApplicationContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,14 +84,10 @@ public class WatchBooksService extends GcmTaskService {
         int availableCount = 0;
         int preorderCount = 0;
 
-        for (BuzzNotification b : notifications)
-        {
-            if (b.getType() == NotificationTypes.AVALIABLE)
-            {
+        for (BuzzNotification b : notifications) {
+            if (b.getType() == NotificationTypes.AVALIABLE) {
                 availableCount++;
-            }
-            else if (b.getType() == NotificationTypes.PREORDER)
-            {
+            } else if (b.getType() == NotificationTypes.PREORDER) {
                 preorderCount++;
             }
         }
@@ -141,39 +145,86 @@ public class WatchBooksService extends GcmTaskService {
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 
-    public int checkForNewInSeries(Context ctx) {
+    public int checkForNewInSeries(Context cxt) {
         GoodreadsAPI goodreadsAPI = new GoodreadsAPI();
         DBUtil db = new DBUtil();
         BookBuzzerAPI api = new BookBuzzerAPI();
 
-        //turn goodreads id to work id
-       // https://www.goodreads.com/book/id_to_work_id/17167166?key=8vvXeL81U1l6yxnUT1c9Q
-        //int work_id = goodreadsAPI.getWorkId
+        ArrayList<Integer> WatchedGoodreadIds = DBUtil.getGoodreadIdsFromWatchList(cxt);
+        ArrayList<BuzzNotification> buzzList = new ArrayList<>();
+
+        for (int i : WatchedGoodreadIds) {
+            //turn goodreads id to work id
+            // https://www.goodreads.com/book/id_to_work_id/17167166?key=8vvXeL81U1l6yxnUT1c9Q
+            int workId = goodreadsAPI.getWorkId(i);
+
+            //get series using returned work id
+            //https://www.goodreads.com/work/21581860/series?format=xml&key=8vvXeL81U1l6yxnUT1c9Q
+            //get series id
+            if (workId != 0) {
+                int seriesId = goodreadsAPI.getSeriesId(workId);
+
+                //give id to bookbuzzer api which will download dom and find "expected publication"
+                JSONObject o = api.GetExpectedPub(cxt, seriesId);
+                String author = "";
+                try {
+                    author = o.getString("author");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (o.length() != 0) {
+                    try {
+                        JSONArray array = o.getJSONArray("books");
+                        for(i = 0; i < array.length(); i++)
+                        {
+                            JSONObject book = array.getJSONObject(i);
+                            String name = book.getString("name");
+                            String pub = book.getString("pub");
+
+                            if (pub.contains("expected publication")) {
+                                GoodreadsBook gBook = null;
+
+                                gBook = goodreadsAPI.DownloadBook(cxt, name, author);
 
 
-        //get series using returned work id
-        //https://www.goodreads.com/work/21581860/series?format=xml&key=8vvXeL81U1l6yxnUT1c9Q
-        //get series id
+                                int colId = DBUtil.SaveBook(cxt, gBook);
+                                BuzzNotification buzz = new BuzzNotification();
+                                buzz.setBookId(colId);
+                                buzz.setAuthorName(author);
+                                buzz.setGoodreadsId(gBook.getId());
+                                buzz.setRead(false);
+                                buzz.setType(NotificationTypes.FUTURE);
+                                int year = Integer.parseInt(pub.replaceAll("[\\D]", ""));
+                                buzz.setMessage("There's a new book avaliable in a series that you've read: " + name + " release: " + year);
 
-        //give id to bookbuzzer api which will download dom and find "expected publication"
+                                buzzList.add(buzz);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        db.SaveExpectedNotifications(this, buzzList);
+        api.SaveNotifications(this, buzzList);
+        if (buzzList != null) {
+            if (buzzList.size() > 0) {
+                String title = "BookBuzzer";
+                String subject = "There are new books you might be interested in!";
+                String body = "";
+                if (buzzList.size() == 1) {
+                    body = "There is 1 new book you might want to look at!";
+                } else {
+                    body = "There are " + buzzList.size() + " new books being released in the future you might like!";
+                }
 
-//        api.SaveNotifications(this, buzzList);
-//        if (results != null) {
-//            if (results.size() > 0) {
-//                String title = "BookBuzzer";
-//                String subject = "Books you are watching are cheaper!";
-//                String body = "";
-//                if (results.size() == 1) {
-//                    body = "There is 1 book you are watching that is cheaper!";
-//                } else {
-//                    body = "There are " + results.size() + " books you are watching that are cheaper!";
-//                }
-//
-//                setNotififcation(title, body, subject);
-//            }
-//        } else {
-//            return GcmNetworkManager.RESULT_FAILURE;
-//        }
+                setNotififcation(title, body, subject);
+            }
+        } else {
+            return GcmNetworkManager.RESULT_FAILURE;
+        }
+
         return GcmNetworkManager.RESULT_SUCCESS;
     }
 

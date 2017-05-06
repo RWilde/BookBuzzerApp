@@ -81,7 +81,6 @@ public class NotificationsFragment extends Fragment {
         mAdapter = new NotificationsViewAdapter(getActivity(), notifications);
 
         listv.setAdapter(mAdapter);
-        mAdapter.setMode(Attributes.Mode.Single);
         listv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

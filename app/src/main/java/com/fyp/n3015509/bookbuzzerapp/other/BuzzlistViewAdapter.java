@@ -1,7 +1,9 @@
 package com.fyp.n3015509.bookbuzzerapp.other;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,8 +14,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +27,7 @@ import android.widget.Toast;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.BaseSwipeAdapter;
 import com.fyp.n3015509.APIs.BookBuzzerAPI;
+import com.fyp.n3015509.APIs.GoodreadsShelves;
 import com.fyp.n3015509.bookbuzzerapp.R;
 import com.fyp.n3015509.bookbuzzerapp.activity.MainActivity;
 import com.fyp.n3015509.bookbuzzerapp.fragment.BookFragment;
@@ -31,6 +38,8 @@ import com.fyp.n3015509.db.dao.Buzzlist;
 import com.fyp.n3015509.db.DBUtil;
 
 import java.util.ArrayList;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Created by tomha on 05-May-17.
@@ -89,6 +98,13 @@ public class BuzzlistViewAdapter  extends BaseSwipeAdapter implements Filterable
             }
         });
 
+        swipeLayout.findViewById(R.id.edit2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                buildChangeBuzzlistDialog(getItem(position).getName());
+            }
+        });
+
         swipeLayout.findViewById(R.id.trash2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,6 +114,68 @@ public class BuzzlistViewAdapter  extends BaseSwipeAdapter implements Filterable
         });
 
         return v;
+    }
+
+    public void buildChangeBuzzlistDialog(final String originalName) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
+        final EditText input = new EditText(mContext);
+        input.setText(originalName);
+
+        input.setSingleLine();
+        FrameLayout container = new FrameLayout(mContext);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = mContext.getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        params.rightMargin = mContext.getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        input.setTextColor(mContext.getResources().getColor(R.color.white));
+        input.setLayoutParams(params);
+        container.addView(input);
+        alert.setTitle("Enter the name of your new buzzlist");
+
+        alert.setView(container);
+
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // what ever you want to do with No option.
+            }
+        });
+        final AlertDialog dialog = alert.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean wantToCloseDialog = false;
+                //Do stuff, possibly set wantToCloseDialog to true then...
+                String newName = input.getText().toString();
+                boolean exist = DBUtil.CheckBuzzlistName(mContext, newName);
+                if (originalName.contentEquals(input.getText().toString())) {
+                    input.setError("Oops! It looks like you've entered the same name, please press cancel if you don't want to change anything.");
+                    input.requestFocus();
+                } else if (!exist) {
+                    new BuzzlistModify(mContext, originalName, newName).execute();
+                    wantToCloseDialog = true;
+
+                    // update the main content by replacing fragments
+                    Fragment fragment = new BookListFragment();
+                    FragmentTransaction fragmentTransaction = mContext.getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                            android.R.anim.fade_out);
+                    fragmentTransaction.replace(R.id.frame, fragment, "Buzzlist");
+                    fragmentTransaction.commitAllowingStateLoss();
+                } else {
+                    input.setError("Oops! It looks like you've already used this name, please try another one.");
+                    input.requestFocus();
+                }
+
+                if (wantToCloseDialog)
+                    dialog.dismiss();
+            }
+        });
     }
 
     @Override
@@ -173,6 +251,37 @@ public class BuzzlistViewAdapter  extends BaseSwipeAdapter implements Filterable
         return filter;
     }
 
+    private class BuzzlistModify extends AsyncTask<Void, Void, Boolean> {
+        private final String name;
+        private final String newName;
+        GoodreadsShelves util = new GoodreadsShelves();
+        private final Context mContext;
+
+        BuzzlistModify(Context context, String buzzName, String newName) {
+            this.mContext = context;
+            this.name = buzzName;
+            this.newName = newName;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                DBUtil.ModifyBuzzlist(mContext, name, newName);
+                BookBuzzerAPI.ModifyBuzzlist(mContext, name, newName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        private ProgressDialog pdia;
+
+        protected void onPostExecute(final Boolean success) {
+            //showProgress(false);
+
+        }
+    }
 
     private class RemoveBuzzlistTask extends AsyncTask<Void, Void, Boolean> {
 

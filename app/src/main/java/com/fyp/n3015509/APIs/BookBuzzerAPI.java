@@ -59,6 +59,7 @@ public class BookBuzzerAPI {
     private static final String NotificationURL = BaseURL + "/notification/";
     private static final String PriceCheckerURL = BaseURL + "/watch/price";
     private static final String TAG = "price checker";
+    private static final String ExpectedPubURL = BaseURL + "/watch/expected/";
 
 
     public static boolean SaveShelf(JSONObject booklist, Context ctx) {
@@ -369,31 +370,37 @@ public class BookBuzzerAPI {
                 if(type.contains("Paperback")) {
                     priceChecker = new PriceChecker();
                     priceChecker.setType(EditionTypes.PAPERBACK);
-                    String price = (String) priceCheck.get("price");
-                    price = price.replace("£", "");
-                    priceChecker.setPrice(Double.parseDouble(price));
-                    priceCheckValues.add(priceChecker);
+                    String price = checkIfNotNull(priceCheck, "price");
+                    if (!price.contentEquals("")) {
+                        price = price.replace("£", "");
+                        priceChecker.setPrice(Double.parseDouble(price));
+                        priceCheckValues.add(priceChecker);
+                    }
                 }
                 else if(type.contains("Hardcover"))
                 {
                     priceChecker = new PriceChecker();
                     priceChecker.setType(EditionTypes.HARDBACK);
-                    String price = (String) priceCheck.get("price");
-                    price = price.replace("£", "");
-                    priceChecker.setPrice(Double.parseDouble(price));
-                    priceCheckValues.add(priceChecker);
+                    String price = checkIfNotNull(priceCheck, "price");
+                    if (!price.contentEquals("")) {
+                        price = price.replace("£", "");
+                        priceChecker.setPrice(Double.parseDouble(price));
+                        priceCheckValues.add(priceChecker);
+                    }
                 }
                 else if (type.contains("Kindle Edition"))
                 {
                     priceChecker = new PriceChecker();
                     priceChecker.setType(EditionTypes.KINDLE_EDITION);
-                    String price = (String) priceCheck.get("price");
-                    price = price.replace("£", "");
-                    priceChecker.setPrice(Double.parseDouble(price));
-                    priceCheckValues.add(priceChecker);
+                    String price = checkIfNotNull(priceCheck, "price");
+                    if (!price.contentEquals("")) {
+                        price = price.replace("£", "");
+                        priceChecker.setPrice(Double.parseDouble(price));
+                        priceCheckValues.add(priceChecker);
+                    }
                 }
             }
-            return DBUtil.CheckAgainstDb(mContext, priceCheckValues, isbn);
+            return priceCheckValues;
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -402,6 +409,18 @@ public class BookBuzzerAPI {
         }
         return null;
     }
+
+    private String checkIfNotNull(JSONObject priceCheck, String price) {
+        if (priceCheck.has(price) && !priceCheck.isNull(price)) {
+            try {
+                return priceCheck.getString(price);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
 
     private static String convertStreamToString(InputStream is) {
 
@@ -690,5 +709,35 @@ public class BookBuzzerAPI {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public JSONObject GetExpectedPub(Context mContext, int seriesId) {
+        JSONObject o = new JSONObject();
+        try {
+            URL authURL = new URL(ExpectedPubURL + seriesId);
+            HttpURLConnection conn = (HttpURLConnection) authURL.openConnection();
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SaveSharedPreference.getToken(mContext));
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            int status = conn.getResponseCode();
+
+            if (status == 200)
+            {
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                String result = convertStreamToString(in);
+                o = new JSONObject(result);
+
+                in.close();
+                conn.disconnect();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return o;
     }
 }

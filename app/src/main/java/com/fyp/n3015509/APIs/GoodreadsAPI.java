@@ -31,6 +31,8 @@ public class GoodreadsAPI {
     private static final String SearchURL = BASE_URL + "/search/index.xml?key=" + GOODREADS_KEY + "&q=";
     private static final String SearchAuthorURL = BASE_URL + "/api/author_url/";
     private static final String DownloadBookURL = BASE_URL +"/book/title.xml?key=" + GOODREADS_KEY+"&title=";
+    private static final String IdToWorkIdURL = BASE_URL + "/book/id_to_work_id/";
+    private static final String SeriesIdURL = BASE_URL + "/work/";
     //https://www.goodreads.com/book/title.xml?author=Arthur+Conan+Doyle&key=8vvXeL81U1l6yxnUT1c9Q&title=Hound+of+the+Baskervilles
 
     public String getShelvesURL(Context ctx) {
@@ -190,5 +192,69 @@ public class GoodreadsAPI {
             e.printStackTrace();
         }
 
-        return book;    }
+        return book;
+    }
+
+    public int getWorkId(int i) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        GoodreadsBook book = null;
+        try {
+            URL authURL = new URL(IdToWorkIdURL + i + "?key=" + GOODREADS_KEY);
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
+
+            int status = conn.getResponseCode();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
+
+            //parse response to get list of books
+            return xmlUtil.xmlToWorkId(response.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public int getSeriesId(int workId) {
+        StringBuffer response = new StringBuffer();
+        XMLUtil xmlUtil = new XMLUtil();
+        GoodreadsBook book = null;
+        try {
+            URL authURL = new URL(SeriesIdURL + workId + "/series?format=xml&key=" + GOODREADS_KEY);
+            HttpsURLConnection conn = (HttpsURLConnection) authURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(15 * 1000);
+
+            int status = conn.getResponseCode();
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine.toString());
+            }
+            //close input stream
+            in.close();
+
+            //parse response to get list of books
+            return xmlUtil.xmlToSeriesId(response.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }

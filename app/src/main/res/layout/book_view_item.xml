@@ -15,6 +15,15 @@
         android:layout_height="80dp">
 
         <ImageView
+            android:id="@+id/edit2"
+            android:src="@drawable/edit2"
+            android:layout_width="70dp"
+            android:background="#f7e79c"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:layout_height="match_parent" />
+
+        <ImageView
             android:id="@+id/trash2"
             android:src="@drawable/trash"
             android:layout_width="70dp"
