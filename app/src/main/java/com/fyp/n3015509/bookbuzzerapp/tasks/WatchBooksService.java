@@ -77,9 +77,12 @@ public class WatchBooksService extends GcmTaskService {
 
     private int checkForNewBooks() {
         DBUtil db = new DBUtil();
+        BookBuzzerAPI api = new BookBuzzerAPI();
+
         String available = "";
         String preorder = "";
         ArrayList<BuzzNotification> notifications = db.CreateWatchNotifications(this);
+        api.SaveNotifications(getApplicationContext(), notifications);
 
         int availableCount = 0;
         int preorderCount = 0;
@@ -125,7 +128,7 @@ public class WatchBooksService extends GcmTaskService {
         ConcurrentHashMap<String, ArrayList<PriceChecker>> results = app.GetLatestPrices(getApplicationContext());
         ArrayList<BuzzNotification> buzzList = db.CreatePriceCheckerNotifications(getApplicationContext(), results);
 
-        api.SaveNotifications(this, buzzList);
+        api.SaveNotifications(getApplicationContext(), buzzList);
         if (results != null) {
             if (results.size() > 0) {
                 String title = "BookBuzzer";
@@ -207,7 +210,7 @@ public class WatchBooksService extends GcmTaskService {
             }
         }
         db.SaveExpectedNotifications(this, buzzList);
-        api.SaveNotifications(this, buzzList);
+        api.SaveNotifications(getApplicationContext(), buzzList);
         if (buzzList != null) {
             if (buzzList.size() > 0) {
                 String title = "BookBuzzer";

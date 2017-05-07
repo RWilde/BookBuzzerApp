@@ -67,6 +67,16 @@ public class DBUtil {
         return null;
     }
 
+    public ArrayList<Buzzlist> GetHomeBuzzlist(Context ctx) {
+        try {
+            MySQLiteHelper db = new MySQLiteHelper(ctx);
+            return db.getHomeBuzzlists();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static ArrayList<GoodreadsBook> getBooksFromBuzzlist(FragmentActivity ctx, int listId) {
         try {

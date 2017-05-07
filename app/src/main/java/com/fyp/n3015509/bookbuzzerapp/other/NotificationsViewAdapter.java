@@ -63,12 +63,12 @@ public class NotificationsViewAdapter extends BaseSwipeAdapter {
         swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
         swipeLayout.addDrag(SwipeLayout.DragEdge.Right, swipeLayout.findViewById(R.id.bottom_wrapper_2));
 
-        if (notifications.get(position).getRead() == true)
-            v.setBackgroundResource(R.drawable.notification_false_selector);
-
-        else {
-            v.setBackgroundResource(R.drawable.notification_true_selector);
-        }
+//        if (notifications.get(position).getRead() == true)
+           v.setBackgroundResource(R.drawable.notification_false_selector);
+//
+//        else {
+        //    v.setBackgroundResource(R.drawable.notification_true_selector);
+   //     }
 
         swipeLayout.getSurfaceView().setOnClickListener(new View.OnClickListener() {
             @Override

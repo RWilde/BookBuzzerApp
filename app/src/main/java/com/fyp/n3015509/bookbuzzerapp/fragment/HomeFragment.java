@@ -102,7 +102,7 @@ public class HomeFragment extends Fragment {
         });
         DBUtil util = new DBUtil();
 
-        buzzlist = util.GetBuzzlist(getActivity());
+        buzzlist = util.GetHomeBuzzlist(getActivity());
         book = util.GetBooks(getActivity());
         author = util.GetBasicAuthors(getActivity());
 

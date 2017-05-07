@@ -260,7 +260,7 @@ public class DownloadBookFragment extends Fragment {
 
                     if (edittext.getText() != null)
                     {
-                        SaveBookTask saveTask = new SaveBookTask(mBook, spinner_item, getContext(), false);
+                        SaveBookTask saveTask = new SaveBookTask(mBook, edittext.getText().toString(), getContext(), false);
                         saveTask.execute((Void) null);
                         dialog.dismiss();
                     }
@@ -399,11 +399,7 @@ public class DownloadBookFragment extends Fragment {
             try {
                 if (!exist) {
                     BookBuzzerAPI api = new BookBuzzerAPI();
-                    Calendar c = Calendar.getInstance();
-                    SimpleDateFormat df = new SimpleDateFormat("dd/MMM/yyyy");
-                    String currentDate = df.format(c.getTime());
 
-                    mBook.setReleaseDate(currentDate);
                     Boolean dbSuccess = DBUtil.CreateBookAndList(mContext, mBook, listName);
                     Boolean apiSuccess = api.CreateBookAndList(mContext, mBook, listName);
 

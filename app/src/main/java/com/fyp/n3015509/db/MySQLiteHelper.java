@@ -441,6 +441,36 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     public ArrayList<Buzzlist> getBuzzlists() {
         try {
+            String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS + " ";
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.rawQuery(countQuery, null);
+
+            ArrayList<Buzzlist> list = new ArrayList<>();
+            if (cursor != null) {
+                try {
+                    if (cursor.moveToFirst()) {
+                        while (cursor.isAfterLast() == false) {
+
+                            Buzzlist newList = new Buzzlist();
+                            newList.setId(cursor.getInt(0));
+                            newList.setName(cursor.getString(1));
+                            list.add(newList);
+                            cursor.moveToNext();
+                        }
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<Buzzlist> getHomeBuzzlists() {
+        try {
             String countQuery = "SELECT * FROM " + TABLE_BUZZLISTS + " LIMIT 3";
             SQLiteDatabase db = this.getReadableDatabase();
             Cursor cursor = db.rawQuery(countQuery, null);
@@ -999,6 +1029,19 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             String key = entry.getKey();
             ArrayList<PriceChecker> value = entry.getValue();
             GoodreadsBook b = getBookByIsbn(key);
+            ArrayList<PriceChecker> cheaperOptions = CheckDBForPreviousPrices(value, key);
+            double cheapest = -1;
+
+            for (PriceChecker c : cheaperOptions)
+            {
+                if (cheapest == -1) {
+                    cheapest = c.getPrice();
+                } else if (c.getPrice() == 0)
+                    cheapest = c.getPrice();
+                else if (c.getPrice() < cheapest && cheapest != 0.0)
+                    cheapest = c.getPrice();
+            }
+
             try {
                 StringBuilder formats = new StringBuilder();
                 double lowestPrice = -1;
@@ -1016,21 +1059,23 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     else if (p.getPrice() < lowestPrice && lowestPrice != 0.0)
                         lowestPrice = p.getPrice();
                 }
-                SQLiteDatabase db = this.getReadableDatabase();
-                String message = b.getTitle() + " is cheaper today from £" + lowestPrice + " in the following formats: " + formats;
+                if (lowestPrice != -1 && lowestPrice < cheapest) {
+                    SQLiteDatabase db = this.getReadableDatabase();
+                    String message = b.getTitle() + " is cheaper today from £" + lowestPrice + " in the following formats: " + formats;
 
-                ContentValues avaliable = new ContentValues();
-                BuzzNotification buzz = new BuzzNotification();
-                buzz.setType(NotificationTypes.CHEAPER);
-                buzz.setBookId(b.getId());
-                buzz.setMessage(message);
+                    ContentValues avaliable = new ContentValues();
+                    BuzzNotification buzz = new BuzzNotification();
+                    buzz.setType(NotificationTypes.CHEAPER);
+                    buzz.setBookId(b.getId());
+                    buzz.setMessage(message);
 
-                avaliable.put(BOOK_ID, b.getColumnId());
-                avaliable.put(NOTIFICATION_TYPE, NotificationTypes.CHEAPER.toString());
-                avaliable.put(MESSAGE, message);
-                avaliable.put(READ, 0);
-                long id = db.insert(NOTIFICATIONS_TABLE, null, avaliable);
-                buzzNotifications.add(buzz);
+                    avaliable.put(BOOK_ID, b.getColumnId());
+                    avaliable.put(NOTIFICATION_TYPE, NotificationTypes.CHEAPER.toString());
+                    avaliable.put(MESSAGE, message);
+                    avaliable.put(READ, 0);
+                    long id = db.insert(NOTIFICATIONS_TABLE, null, avaliable);
+                    buzzNotifications.add(buzz);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
