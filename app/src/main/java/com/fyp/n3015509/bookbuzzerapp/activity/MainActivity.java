@@ -129,12 +129,10 @@ public class MainActivity extends AppCompatActivity {
         PeriodicTask task = new PeriodicTask.Builder()
                 .setService(WatchBooksService.class)
                 .setTag(TASK_TAG_PERIODIC)
-                .setPeriod(30L)
+                .setPeriod(86400L)
                 .setFlex(flexSecs)
                 .build();
         mGcmNetworkManager.schedule(task);
-
-        //                .setPeriod(86400L)
 
         if (syncSecs != 0) {
             PeriodicTask APISync = new PeriodicTask.Builder()
